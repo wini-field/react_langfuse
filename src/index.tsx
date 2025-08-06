@@ -4,8 +4,6 @@ import './index.css'
 import App from './App.tsx'
 
 
-const viewPort = document.getElementById('root');
-if (viewPort) {
-    const root = createRoot(viewPort);
-    root.render(<App />);
-}
+const viewPort = document.getElementById('root')!;
+const root = createRoot(viewPort);
+root.render(<App />);

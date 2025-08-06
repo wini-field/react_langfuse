@@ -1,19 +1,18 @@
 import React from 'react';
-import Header from './Header'
-import { Outlet } from 'react-router-dom';
+import { Link } from 'react-router-dom'
 
 const Sidebar: React.FC = () => {
     return (
-        <div style = { { display: 'flex' } }>
-            <Sidebar />
-            <div style ={ { flex: 1} }>
-                <Header />
-                <main style = { { padding: '20px' } }>
-                    { /* 페이지 내용 여기에 */ }
-                    <Outlet />
-                </main>
-            </div>
-        </div>
+        <aside style = { {width: '200px', borderRight: '1px solid #ccc', height: '100vh', padding: '20px' } }>
+            <h2>Menu</h2>
+            <nav>
+                <ul>
+                    <li><Link to="/">Main</Link></li>
+                    <li><Link to="/settings">Settings</Link></li>
+                    <li><Link to="/evaluation">Evaluation</Link></li>
+                </ul>
+            </nav>
+        </aside>
     );
 };
 

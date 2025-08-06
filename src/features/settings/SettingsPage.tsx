@@ -13,7 +13,9 @@ const SettingsPage: React.FC = () => {
             case 'General':
                 return <div>General Settings Content</div>; // <GeneralSettings />
             case 'API Keys':
-                return <div>API Keys Content</div>; // <ApuKeysSettings />
+                return <div>API Keys Content</div>; // <ApiKeysSettings />
+            case 'Models':
+                return <div>Models Content</div>; // < />
             case 'Scores':
                 return <div>Scores Content</div>; // <GeneralSettings />
             case 'Members':
