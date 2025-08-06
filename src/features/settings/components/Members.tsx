@@ -1,9 +1,9 @@
 import React from 'react';
 
 const DUMMY_MEMBERS = [
-    { id: '1', name = "김인턴", email: 'intern.kim@wini-tech.com', role: 'Admin' },
-    { id: '2', name = "이사원", email: 'lee_work@wini-tech.com', role: 'Member' },
-    { id: '3', name = "박대리", email: 'park-wini@wini-tech.com', role: 'Member' },
+    { id: '1', name: "김인턴", email: 'intern.kim@wini-tech.com', role: 'Admin' },
+    { id: '2', name: "이사원", email: 'lee_work@wini-tech.com', role: 'Member' },
+    { id: '3', name: "박대리", email: 'park-wini@wini-tech.com', role: 'Member' },
 ];
 
 const Members: React.FC = () => {

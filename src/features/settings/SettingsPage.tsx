@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Members from './components/Members';
 
 // import GeneralSettings from './components/GeneralSettings'
 // import ApiKeysSettings from './components/ApiKeysSettings'
@@ -19,7 +20,7 @@ const SettingsPage: React.FC = () => {
             case 'Scores':
                 return <div>Scores Content</div>; // <GeneralSettings />
             case 'Members':
-                return <div>Members Content</div>; // <GeneralSettings />
+                return <Members />; // <GeneralSettings />
             default:
                 return <div>Select a menu</div>;
         }
