@@ -26,15 +26,14 @@ function App() {
                         <Route path = "/evaluation" element = {<EvaluationPage />} />
                         <Route path = "/settings" element = {<SettingsPage />}>
                             <Route index element = {<General />} />
-                            <Route path = "/settings/api-keys" element = {<ApiKeys />} />
-                            <Route path = "/settings/llm-connections" element = {<LLMConnections />} />
-                            <Route path = "/settings/models" element = {<Models />} />
-                            <Route path = "/settings/scores" element = {<Scores />} />
-                            <Route path = "/settings/members" element = {<Members />} />
-                            <Route path = "/settings/integrations" element = {<Integrations />} />
-                            <Route path = "/settings/exports" element = {<Exports />} />
-                            <Route path = "/settings/audit-logs" element = {<AuditLogs />} />
-                            <Route path = "/" element = {<ApiKeys />} />
+                            <Route path = "api-keys" element = {<ApiKeys />} />
+                            <Route path = "llm-connections" element = {<LLMConnections />} />
+                            <Route path = "models" element = {<Models />} />
+                            <Route path = "scores" element = {<Scores />} />
+                            <Route path = "members" element = {<Members />} />
+                            <Route path = "integrations" element = {<Integrations />} />
+                            <Route path = "exports" element = {<Exports />} />
+                            <Route path = "audit-logs" element = {<AuditLogs />} />
                         </Route>
                     </Route>
                 </Routes>
