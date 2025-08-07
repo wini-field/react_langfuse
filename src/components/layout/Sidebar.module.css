@@ -75,9 +75,52 @@
     color: #fff;
 }
 
-.icon {
+/* 하단 메뉴 및 프로필 */
+.footer {
+    padding-top: 16px;
+    border-top: 1px solid #333;
+    margin-top: auto; /* 푸터 항상 맨 아래로 */
+}
+
+.userProfile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.userProfile:hover {
+    background-color: #2a2a2a;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #007bff;
     margin-right: 12px;
-    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.userName {
+    color: #fff;
+    font-weight: 500;
+}
+
+.userEmail {
+    color: #888;
+    font-size: 0.8rem;
 }
 
 .sidebar ul {
