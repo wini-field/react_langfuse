@@ -1,16 +1,14 @@
 import React from 'react';
-import Header from './Header'
 import Sidebar from './Sidebar'
 import { Outlet } from 'react-router-dom';
+import styles from './MainLayout.module.css'
 
 const MainLayout: React.FC = () => {
     return (
-        <div style = { { display: 'flex' } }>
-            <Sidebar />
-            <div style ={ { flex: 1} }>
-                <Header />
-                <main style = { { padding: '20px' } }>
-                    { /* 페이지 내용 여기에 */ }
+        <div className = { styles.layout }>
+            <div className = { styles.contentWrapper }>
+                <Sidebar />
+                <main className = { styles.mainContent }>
                     <Outlet />
                 </main>
             </div>

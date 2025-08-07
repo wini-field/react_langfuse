@@ -1,46 +1,18 @@
-import React, { useState } from 'react';
-import Members from './components/Members';
-
-// import GeneralSettings from './components/GeneralSettings'
-// import ApiKeysSettings from './components/ApiKeysSettings'
-
-type Menu = 'General' | 'API Keys' | 'Models' | 'Scores' | 'Members';
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Header from '../../components/layout/Header';
+import SettingsSidebar from '../../components/layout/SettingsSidebar';
 
 const SettingsPage: React.FC = () => {
-    const [currentMenu, setCurrentMenu] = useState<Menu>('General');
-
-    const renderContent = () => {
-        switch (currentMenu) {
-            case 'General':
-                return <div>General Settings Content</div>; // <GeneralSettings />
-            case 'API Keys':
-                return <div>API Keys Content</div>; // <ApiKeysSettings />
-            case 'Models':
-                return <div>Models Content</div>; // < />
-            case 'Scores':
-                return <div>Scores Content</div>; // <GeneralSettings />
-            case 'Members':
-                return <Members />; // <GeneralSettings />
-            default:
-                return <div>Select a menu</div>;
-        }
-    };
-
     return (
-        <div style = { { display: 'flex' } }>
-            <nav style = { { borderRight: '1px solid #ccc', padding: '20px' } }>
-                <h2>Settings</h2>
-                <ul>
-                    <li onClick = { () => setCurrentMenu('General')}>General</li>
-                    <li onClick = { () => setCurrentMenu('API Keys')}>API Keys</li>
-                    <li onClick = { () => setCurrentMenu('Models')}>Models</li>
-                    <li onClick = { () => setCurrentMenu('Scores')}>Scores</li>
-                    <li onClick = { () => setCurrentMenu('Members')}>Members</li>
-                </ul>
-            </nav>
-            <main style = { { padding: '20px', flex: 1 } }>
-                {renderContent()}
-            </main>
+        <div>
+            <Header title = "Project Settings" />
+            <div style = { { display: 'flex', marginTop: '32px' } }>
+                <SettingsSidebar />
+                <div style = { { flex: 1 } }>
+                    <Outlet />
+                </div>
+            </div>
         </div>
     );
 };

@@ -1,9 +1,18 @@
 import React from 'react';
+import styles from './Header.module.css'
 
-const Header: React.FC = () => {
+interface HeaderProps {
+    title: string;
+    actions?: React.ReactNode; // 'actions'는 있든 말든 상관없음
+}
+
+const Header: React.FC<HeaderProps> = ( { title, actions }) => {
     return (
-        <header style = { { padding: '20px', borderBottom: '1px solid #ccc', backgroundColor: '#f8f8f8' } }>
-            <h1>Langfuse Dashboard</h1>
+        <header className = { styles.header }>
+            <h1 className = { styles.title }>{title}</h1>
+            <div className = { styles.actions }>
+                {actions}
+            </div>
         </header>
     );
 };

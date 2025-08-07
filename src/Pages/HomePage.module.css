@@ -1,0 +1,13 @@
+/* HomePage 화면 설정 */
+.homeButton {
+    background-color: #fff;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.homeContainer {
+    margin-top: 32px;
+}

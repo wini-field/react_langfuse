@@ -1,0 +1,31 @@
+.nav {
+    width: 200px;
+    min-width: 200px;
+    padding-right: 24px;
+}
+
+.nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav a {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #888;
+    border-radius: 6px;
+}
+
+.nav a:hover {
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+/* NavLink가 활성화 됐을 때 적용 */
+.nav a.active {
+    background-color: #2a2a2a;
+    color: #fff;
+    font-weight: bold;
+}

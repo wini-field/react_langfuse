@@ -1,0 +1,103 @@
+/* SideBar 부분 설정 */
+.sidebar {
+    width: 280px; /* 늘지도 */
+    min-width: 280px; /* 줄지도 않게 */
+    background-color: #0c0c0c;
+    border-right: 1px solid #333;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    font-size: 0.9rem;
+}
+
+/* 검색창 */
+.searchBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    cursor: pointer;
+}
+
+.searchBar span {
+    color: #888;
+}
+
+.searchBar kbd {
+    background-color: #333;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    border: 1px solid #555;
+}
+
+/* 내비게이션 영역 */
+.nav {
+    flex-grow: 1; /* 남는 공간 다 차지 */
+    overflow-y: auto;
+}
+
+.navSection {
+    margin-top: 24px;
+}
+
+.navHeader {
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 0 12px 8px 12px;
+}
+
+.navSection ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.navItem a {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 6px;
+    color: #bbb;
+    text-decoration: none;
+}
+
+.navItem a:hover {
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+.icon {
+    margin-right: 12px;
+    font-size: 1.1rem;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    padding: 12px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.sidebar li:hover {
+    background-color: #2a2a2a;
+}
+
+.sidebar a {
+    color: #f0f0f0;
+    text-decoration: none;
+    display: block;
+}
