@@ -1,56 +1,65 @@
 import React from 'react';
+import { Info, Plus, Clipboard, Trash2 } from 'lucide-react';
+import styles from "./ApiKeys.module.css";
 
 const DUMMY_API_KEYS = [
     {
         id: '1',
-        name: 'My First App Key',
-        keyPreview: 'sk-......aBcDe',
-        createdAt: '2023-07-15',
-        lastUsed: '2023-08-03',
+        created: '2025. 8. 7',
+        note: 'Click to add note',
+        publicKey: 'pkey',
+        secretKey: 'skey',
     },
     {
         id: '2',
-        name: 'Staging Server Key',
-        keyPreview: 'sk-......fGhIj',
-        createdAt: '2023-07-20',
-        lastUsed: '2023-08-01',
+        created: '2025. 8. 1',
+        note: 'Click to add note',
+        publicKey: 'pkey',
+        secretKey: 'skey',
     },
     {
-        id: '2',
-        name: 'Local Test Key',
-        keyPreview: 'sk-......kLmNo',
-        createdAt: '2023-08-01',
-        lastUsed: 'Never used',
+        id: '3',
+        created: '2025. 8. 27',
+        note: 'Click to add note',
+        publicKey: 'pkey',
+        secretKey: 'skey',
     },
 ];
 
 const ApiKeys: React.FC = () => {
     return (
-        <div>
-            <h2>API Keys</h2>
-            <p>백엔드와 통신하기 위한 API 키를 관리하세요.</p>
-            <button>+ Add Model</button>
+        <div className = { styles.container }>
+            { /* Host Name Section */ }
+            <h3 className = { styles.h3 }>Project API Keys <Info size = { 16 } className = { styles.infoIcon } /></h3>
 
-            <table style = { { width: '100%', marginTop: '20px', borderCollapse: 'collapse' } }>
-                <thead>
-                    <tr style = { { borderBottom: '1px solid #ccc', textAlign: 'left' } }>
-                        <th style={ { padding: '8px' } }>Name</th>
-                        <th style={ { padding: '8px' } }>Secret Key</th>
-                        <th style={ { padding: '8px' } }>Created At</th>
-                        <th style={ { padding: '8px' } }>Last Used</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {DUMMY_API_KEYS.map(apiKey => (
-                    <tr key = { apiKey.id } style = { { borderBottom: '1px solid #eee'} }>
-                        <td style= { { padding: '8px' } }>{apiKey.name}</td>
-                        <td style= { { padding: '8px' } }><code>{apiKey.keyPreview}</code></td>
-                        <td style= { { padding: '8px' } }>{apiKey.createdAt}</td>
-                        <td style= { { padding: '8px' } }>{apiKey.lastUsed}</td>
-                    </tr>
+            <div className = { styles.keyList }>
+                <div className = { `${ styles.keyRow } ${ styles.keyHeader }` }>
+                    <div>Created</div>
+                    <div>Note</div>
+                    <div>Public Key</div>
+                    <div>Secret Key</div>
+                </div>
+
+                { DUMMY_API_KEYS.map(apiKey => (
+                    <div key = { apiKey.id } className = { styles.keyRow }>
+                        <div>{ apiKey.created }</div>
+                        <div>{ apiKey.note }</div>
+                        <div className = { styles.keyBox }>
+                            <span><code>{ `${ styles.key } ${ apiKey.publicKey }` }</code></span>
+                            <Clipboard size = { 14 } className = { styles.copyIcon } />
+                        </div>
+                        <div className = { styles.key }>
+                            <code>{ apiKey.secretKey }</code>
+                        </div>
+                        <div>
+                            <Trash2 size = { 16 } className = { styles.deleteIcon } />
+                        </div>
+                    </div>
                 ))}
-                </tbody>
-            </table>
+            </div>
+            <button className = { styles.createbutton }>
+                <Plus size = { 16 } /> Create new API keys
+            </button>
         </div>
     );
 };

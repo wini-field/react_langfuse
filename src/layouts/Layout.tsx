@@ -13,13 +13,14 @@ import {
   Settings,
   UserRound,
   HelpCircle,
-  ChevronLeft,
-  ChevronRight,
+  //ChevronLeft,
+  //ChevronRight,
   ArrowUpRight,
   Search
 } from "lucide-react";
 
 import styles from "./Layout.module.css";
+import ProjectHeader from "./ProjectHeader";
 
 // 타입 선언
 type MenuItem = { label: string; icon: JSX.Element; path: string };
@@ -78,13 +79,6 @@ export default function Layout() {
         <div className={styles.header}>
           <div className={styles.logoText}>
             {!collapsed && <span>Langfuse</span>}
-            <button
-              className={styles.toggleButton}
-              onClick={() => setCollapsed(prev => !prev)}
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-            </button>
           </div>
           {!collapsed && (
             <div className={styles.searchBox} role="search">
@@ -157,6 +151,7 @@ export default function Layout() {
       </aside>
 
       <main className={styles.mainContainer}>
+          <ProjectHeader onToggleSidebar = { () => setCollapsed(prev => !prev) } />
         <Outlet />
       </main>
     </div>

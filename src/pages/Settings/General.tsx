@@ -22,18 +22,16 @@ const General: React.FC = () => {
 
     return (
         <div className = { styles.container }>
-            <h2>General</h2>
-
             { /* Host Name Section */ }
+            <h3 className = { styles.h3 }>Host Name</h3>
             <section className = { styles.section }>
-                <h3 className = { styles.h3 }>Host Name</h3>
                 <p className = { styles.p }>When connecting to Langfuse, use this hostname / baseurl.</p>
                 <input type = "text" value = { generalSettingsData.hostName } readOnly className={ styles.input } />
             </section>
 
             { /* Project Name Section */ }
+            <h3 className = { styles.h3 }>Project Name</h3>
             <section className={ styles.section }>
-                <h3 className = { styles.h3 }>Project Name</h3>
                 <p className = { styles.p }>Your Project is currently named '{generalSettingsData.projectName}'.</p>
                 <input
                     type = "text"
@@ -45,22 +43,22 @@ const General: React.FC = () => {
             </section>
 
             { /* Debug Information Section */ }
+            <h3 className = { styles.h3 }>Debug Information</h3>
             <section className = { styles.section }>
-                <h3 className = { styles.h3 }>Debug Information</h3>
                 <div className = { styles.codeBlock }>
                     { JSON.stringify(generalSettingsData.debugInfo, null, 2) }
                 </div>
             </section>
 
             { /* Danger Zone Section */ }
+            <h3 className = { styles.h3 }>Danger Zone</h3>
             <section className = { `${ styles.section } ${ styles.dangerZone }` }>
-                <h3 className = { styles.h3 }>Danger Zone</h3>
                 <div className = { styles.flexBetween }>
                     <div>
                         <h4>Transfer ownership</h4>
                         <p className = { styles.p }>Transfer this project to another organization where you have the ability to create projects.</p>
                     </div>
-                    <button className = { `${ styles.button } ${ styles.secondaryButton }` }>Transfer Project</button>
+                    <button className = { `${ styles.button } ${ styles.dangerButton }` }>Transfer Project</button>
                 </div>
                 <div className = { styles.flexBetween }>
                     <div>

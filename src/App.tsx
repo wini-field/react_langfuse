@@ -24,6 +24,7 @@ import LLMDashboard from './pages/Dashboard/LLMDashboard';
 import SettingsPage from './pages/Settings/SettingsPage';
 import General from './pages/Settings/General';
 import ApiKeys from './pages/Settings/ApiKeys';
+import LLMConnections from "./pages/Settings/LLMConnections";
 import Models from './pages/Settings/Models';
 import Members from './pages/Settings/Members';
 
@@ -33,7 +34,7 @@ const Placeholder =
   () =>
     <div style={{ color: 'white', padding: 24 }}>{title}</div>;
 
-const LLMConnections = Placeholder('LLM Connections');
+//const LLMConnections = Placeholder('LLM Connections');
 const Scores = Placeholder('Scores (Settings)');
 const Integrations = Placeholder('Integrations');
 const Exports = Placeholder('Exports');
