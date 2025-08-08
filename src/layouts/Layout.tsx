@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, NavLink } from "react-router-dom";
 import {
   Home,
   LayoutDashboard,
@@ -21,11 +21,14 @@ import {
 
 import styles from "./Layout.module.css";
 
+// 타입 선언
+type MenuItem = { label: string; icon: JSX.Element; path: string };
+type MenuSection = { title: string | null; items: MenuItem[] };
+
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false);
-  const location = useLocation();
 
-  const mainMenuSections = [
+  const mainMenuSections: MenuSection[] = [
     {
       title: null,
       items: [
@@ -59,11 +62,14 @@ export default function Layout() {
     },
   ];
 
-  const bottomMenu = [
+  const bottomMenu: MenuItem[] = [
     { label: "Upgrade", icon: <ArrowUpRight size={18} />, path: "/upgrade" },
     { label: "Settings", icon: <Settings size={18} />, path: "/settings" },
     { label: "Support", icon: <HelpCircle size={18} />, path: "/support" },
   ];
+
+  const navClass = ({ isActive }: { isActive: boolean }) =>
+    `${styles.menuItem} ${isActive ? styles.active : ""} ${collapsed ? styles.iconOnly : ""}`.trim();
 
   return (
     <div className={styles.layout}>
@@ -75,13 +81,14 @@ export default function Layout() {
             <button
               className={styles.toggleButton}
               onClick={() => setCollapsed(prev => !prev)}
+              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
             </button>
           </div>
           {!collapsed && (
-            <div className={styles.searchBox}>
-              <Search size={12} />
+            <div className={styles.searchBox} role="search">
+              <Search size={12} aria-hidden />
               <span>Go to... (Ctrl+K)</span>
             </div>
           )}
@@ -89,24 +96,26 @@ export default function Layout() {
 
         {/* [2] 중간 스크롤 가능한 메뉴 */}
         <div className={styles.menuWrapper}>
-          <ul className={styles.menu}>
+          <ul className={styles.menu} role="menu" aria-label="Main navigation">
             {mainMenuSections.map((section, i) => (
               <li key={i}>
                 {section.title && !collapsed && (
                   <div className={styles.sectionTitle}>{section.title}</div>
                 )}
                 {section.items.map((item) => (
-                  <a
+                  <NavLink
                     key={item.label}
-                    href={item.path}
-                    className={`${styles.menuItem} ${collapsed ? styles.iconOnly : ""}`}
-                    style={{
-                      backgroundColor: location.pathname === item.path ? "#1e293b" : "transparent",
-                    }}
+                    to={item.path}
+                    className={navClass}
+                    end={item.path === "/"}
+                    // 접힘 상태에서 툴팁/스크린리더 라벨 제공
+                    title={collapsed ? item.label : undefined}
+                    aria-label={collapsed ? item.label : undefined}
+                    role="menuitem"
                   >
                     {item.icon}
                     {!collapsed && <span>{item.label}</span>}
-                  </a>
+                  </NavLink>
                 ))}
                 {i < mainMenuSections.length - 1 && (
                   <div className={styles.sectionDivider}></div>
@@ -118,24 +127,25 @@ export default function Layout() {
 
         {/* [3] 하단 고정 */}
         <div className={styles.bottomArea}>
-          <ul className={`${styles.menu} ${styles.bottomMenu}`}>
+          <ul className={`${styles.menu} ${styles.bottomMenu}`} role="menu" aria-label="Secondary navigation">
             {bottomMenu.map((item) => (
-              <a
+              <NavLink
                 key={item.label}
-                href={item.path}
-                className={`${styles.menuItem} ${collapsed ? styles.iconOnly : ""}`}
-                style={{
-                  backgroundColor: location.pathname === item.path ? "#1e293b" : "transparent",
-                }}
+                to={item.path}
+                className={navClass}
+                end={false}
+                title={collapsed ? item.label : undefined}
+                aria-label={collapsed ? item.label : undefined}
+                role="menuitem"
               >
                 {item.icon}
                 {!collapsed && <span>{item.label}</span>}
-              </a>
+              </NavLink>
             ))}
           </ul>
 
           <div className={styles.userInfo}>
-            <img src="/user-profile.png" className={styles.userAvatar} />
+            <img src="/user-profile.png" className={styles.userAvatar} alt="" />
             {!collapsed && (
               <div className={styles.userText}>
                 <div className={styles.userName}>test</div>

@@ -15,6 +15,11 @@
   flex-shrink: 0;
   transition: width 0.3s ease;
 }
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
+  }
+}
 
 .sidebarCollapsed {
   width: 60px;
@@ -61,6 +66,21 @@
   overflow-y: auto;
 }
 
+/* 커스텀 스크롤바 (WebKit/Chromium) */
+.menuWrapper::-webkit-scrollbar {
+  width: 8px;
+}
+.menuWrapper::-webkit-scrollbar-thumb {
+  background: #1f2a44;
+  border-radius: 6px;
+}
+.menuWrapper::-webkit-scrollbar-thumb:hover {
+  background: #2a3a5c;
+}
+.menuWrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .menu {
   list-style: none;
   padding: 0;
@@ -80,7 +100,8 @@
 }
 
 .menuItem {
-  padding: 8px 14px;
+  position: relative;
+  padding: 8px 14px 8px 14px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -92,7 +113,30 @@
 }
 
 .menuItem:hover {
+  background-color: #223049;
+}
+
+/* ✅ NavLink 활성 상태 */
+.active {
   background-color: #1e293b;
+}
+
+/* 왼쪽 하이라이트 바 */
+.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background-color: #60a5fa;
+  border-radius: 2px;
+}
+
+/* 키보드 포커스 시 접근성 강화 */
+.menuItem:focus-visible {
+  outline: 2px solid #64748b;
+  outline-offset: 2px;
 }
 
 .iconOnly {
