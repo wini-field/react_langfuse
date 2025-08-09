@@ -3,54 +3,49 @@ import React from 'react'
 const DUMMY_MODELS = [
     {
         id: '1',
-        modelName: 'gpt-4-1106-preview',
-        provider: 'OpenAI',
-        isAvailable: true,
+        maintainer: 'user',
+        matchPattern: '(babbage-002)$',
+        pricesPerUnit: {
+            input: '$0.0001',
+            output: '$0.0002',
+        },
+        tokenize: 'OpenAI',
+        tokenizerConfiguration: '',
+        lastUsed: '2025-08-05'
     },
     {
         id: '2',
-        modelName: 'claude-2',
-        provider: 'Anthropic',
-        isAvailable: true,
+        maintainer: 'user',
+        matchPattern: '(babbage-001)$',
+        pricesPerUnit: {
+            input: '$0.0001',
+            output: '$0.0002',
+        },
+        tokenize: 'Google',
+        tokenizerConfiguration: '',
+        lastUsed: '2025-08-05'
     },
     {
         id: '3',
-        modelName: 'gpt-3.5-turbo',
-        provider: 'OpenAI',
-        isAvailable: false,
-    },
-    {
-        id: '4',
-        modelName: 'gemini-pro',
-        provider: 'Google',
-        isAvailable: true,
+        maintainer: 'user',
+        matchPattern: '(babbage-003)$',
+        pricesPerUnit: {
+            input: '$0.0001',
+            output: '$0.0002',
+        },
+        tokenize: 'Anthropic',
+        tokenizerConfiguration: '',
+        lastUsed: '2025-08-05'
     },
 ];
 
 const Models: React.FC = () => {
     return (
         <div>
-            <h2>Models</h2>
-            <p>프로젝트에서 사용할 LLM 모델을 설정하세요.</p>
+            <h4>Models</h4>
+            <p>A model represents a LLM model. It is used to calculate tokens and cost.</p>
 
-            <table style = { { width : '100%', marginTop: '20px', borderCollapse: 'collapse' } }>
-                <thead>
-                    <tr style = { { borderBottom: '1px solid #ccc', textAlign: 'left' } }>
-                        <th style = { { padding: '8px' } }>Model Name</th>
-                        <th style = { { padding: '8px' } }>Provider</th>
-                        <th style = { { padding: '8px' } }>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    { DUMMY_MODELS.map(model => (
-                        <tr key = { model.id } style = { { borderBottom: '1px solid #eee' } }>
-                            <td style = { { padding: '8px' } }>{model.modelName}</td>
-                            <td style = { { padding: '8px' } }>{model.provider}</td>
-                            <td style = { { padding: '8px' } }>{model.isAvailable ? 'Available' : 'Not Available'}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+
         </div>
     );
 };

@@ -18,7 +18,7 @@
 
 .button {
     padding: 5px 14px;
-    background-color: #4aa3ff;
+    background-color: #c2d4e5;
     color: white;
     border: none;
     border-radius: 4px;
@@ -28,5 +28,5 @@
 }
 
 .button:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.5);
 }
