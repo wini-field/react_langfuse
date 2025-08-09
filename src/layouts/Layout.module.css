@@ -29,7 +29,6 @@
 /* [1] 상단 고정 영역 */
 .header {
   padding: 12px 16px;
-  border-bottom: 1px solid #1e293b;
 }
 
 .logoText {
@@ -39,8 +38,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #1e293b;
+    gap: 8px;
+}
+
+.divider {
+    height: 1px;
+    background-color: #020817;
+    margin-top: 12px;
+    margin-bottom: 12px;
 }
 
 .toggleButton {
@@ -55,12 +60,32 @@
   margin-top: 12px;
   display: flex;
   align-items: center;
+    justify-content: space-between;
   gap: 6px;
   padding: 6px 10px;
-  background-color: #1e293b;
+  background-color: #020817;
   border-radius: 6px;
   font-size: 12px;
   color: #cbd5e1;
+}
+
+.searchBox:hover {
+    background-color: #1c2738;
+}
+
+.searchText {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
+.hotkey {
+    background-color: #020817;
+    border: 1px solid #4b5563;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
 }
 
 /* [2] 스크롤 가능한 메뉴 영역 */
@@ -113,10 +138,12 @@
   text-decoration: none;
   font-size: 13px;
   transition: background 0.2s ease;
+    border-radius: 6px;
 }
 
 .menuItem:hover {
   background-color: #223049;
+
 }
 
 /* ✅ NavLink 활성 상태 */
@@ -147,10 +174,6 @@
 }
 
 /* [3] 하단 고정 영역 */
-.bottomArea {
-  border-top: 1px solid #1e293b;
-}
-
 .bottomMenu {
   padding: 8px 0;
 }

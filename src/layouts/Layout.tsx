@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import {
-  Home,
-  LayoutDashboard,
-  Activity,
-  Users,
-  MessageCircleCode,
-  FlaskConical,
-  SquareStack,
-  Lightbulb,
-  Database,
-  Settings,
-  UserRound,
-  HelpCircle,
-  //ChevronLeft,
-  //ChevronRight,
-  ArrowUpRight,
-  Search
+    Home,
+    LayoutDashboard,
+    Activity,
+    Users,
+    MessageCircleCode,
+    FlaskConical,
+    SquareStack,
+    Lightbulb,
+    Database,
+    Settings,
+    UserRound,
+    HelpCircle,
+    //ChevronLeft,
+    //ChevronRight,
+    ArrowUpRight,
+    Search,
 } from "lucide-react";
 
 import styles from "./Layout.module.css";
@@ -77,13 +77,19 @@ export default function Layout() {
       <aside className={`${styles.sidebar} ${collapsed ? styles.sidebarCollapsed : ""}`}>
         {/* [1] 상단 고정 */}
         <div className={styles.header}>
-          <div className={styles.logoText}>
-            {!collapsed && <span>Langfuse</span>}
-          </div>
+            <div className={styles.logoArea}>
+                <div className={styles.logoText}>
+                    {!collapsed && <span>Langfuse</span>}
+                </div>
+            </div>
+            { !collapsed && <div className = { styles.divider } /> }
           {!collapsed && (
             <div className={styles.searchBox} role="search">
-              <Search size={12} aria-hidden />
-              <span>Go to... (Ctrl+K)</span>
+                <div className={styles.searchText}>
+                  <Search size={12} aria-hidden />
+                  <span>Go to...</span>
+                </div>
+                <span className={styles.hotkey}>Ctrl K</span>
             </div>
           )}
         </div>
@@ -120,7 +126,7 @@ export default function Layout() {
         </div>
 
         {/* [3] 하단 고정 */}
-        <div className={styles.bottomArea}>
+        <div>
           <ul className={`${styles.menu} ${styles.bottomMenu}`} role="menu" aria-label="Secondary navigation">
             {bottomMenu.map((item) => (
               <NavLink

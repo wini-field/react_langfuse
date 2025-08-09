@@ -17,7 +17,7 @@ const ProjectHeader: React.FC<ProjectHeaderProps> = ({ onToggleSidebar }) => {
                     <span>Organization</span>
                     <span className = { styles.tag }>Hobby</span>
                     <ChevronDown size = { 14 } />
-                    <span className = { styles.separator }></span>
+                    <span className = { styles.separator }>/</span>
                     <div className = { styles.dropdown }>
                         <span>Project</span>
                         <ChevronDown size = { 14 } />
