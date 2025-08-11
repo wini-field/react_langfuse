@@ -14,7 +14,7 @@ const SettingsSidebar: React.FC = () => {
                 <li><NavLink to = "/settings/members">Members</NavLink></li>
                 <li><NavLink to = "/settings/integrations">Integrations</NavLink></li>
                 <li><NavLink to = "/settings/exports">Exports</NavLink></li>
-                <li><NavLink to = "/settings/auditLogs">Audit Logs</NavLink></li>
+                <li><NavLink to = "/settings/audit-logs">Audit Logs</NavLink></li>
                 <li><NavLink to = "/organization/" end>Organization Settings</NavLink></li>
             </ul>
         </nav>

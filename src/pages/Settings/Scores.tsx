@@ -3,7 +3,7 @@ import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { ColDef, ICellRendererParams} from 'ag-grid-react';
-import { Plus, GitCommitHorizontal, Menu } from 'lucide-react';
+import { Plus, GitCommitHorizontal } from 'lucide-react';
 import styles from './Models.module.css';
 
 // Maintainer 아이콘
@@ -26,12 +26,13 @@ const TokenizerConfRenderer: React.FC<ICellRendererParams> = (props) => {
     return (
         <pre className = { styles.tokenizerConfCell }>
             {JSON.stringify(props.data.tokenizerConfig, null, 2)}
+
         </pre>
     );
 };
 
 // Actions 버튼
-const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
+const ActionsRederer: React.FC<ICellRendererParams> = (props) => {
     return (
         <div className = { styles.cellCenter }>
             <button className = { styles.cloneButton }>Clone</button>
@@ -39,7 +40,7 @@ const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
     );
 };
 
-const Models: React.FC = () => {
+const Scores: React.FC = () => {
     const [columnDefs] = useState<ColDef[]>([
         { field: 'modelName', headerName: 'Model Name', flex: 2 },
         {
@@ -51,8 +52,8 @@ const Models: React.FC = () => {
         { field: 'matchPattern', headerName: 'Match Pattern', flex: 3 },
         {
             field: 'prices',
-            headerName: 'Prices per unit',
-            cellRenderer: PricesRenderer,
+            haederName: 'Prices per unit',
+            cleeRenderer: PricesRenderer,
             flex: 1.5
         },
         { field: 'tokenizer', headerName: 'Tokenizer', flex: 1 },
@@ -67,7 +68,7 @@ const Models: React.FC = () => {
         {
             field: 'actions',
             headerName: 'Actions',
-            cellRenderer: ActionsRenderer,
+            cellRenderer: ActionsRederer,
             flex: 1,
         },
     ]);
@@ -82,23 +83,13 @@ const Models: React.FC = () => {
 
 
     return (
-        <div className = { styles.container }>
-            <h3>Models</h3>
-            <p>A model represents a LLM model. It is used to calculate tokens and cost.</p>
+        <div className = { styles.container }>z
             <div className = { styles.header }>
-                <button className = { styles.columnsButton }>
-                    <span>Column</span>
-                    <span className = { styles.count }>8/8</span>
-                </button>
-                <button className = { styles.iconButton }>
-                    <Menu size = { 16 } />
-                </button>
-                <button className = { styles.addButton }>
-                    <Plus size = { 16 } /> Add model definition
-                </button>
+                <button>Column = 8/8</button>
+                <button><Plus size = { 16 } /> Add model definition</button>
             </div>
 
-            <div className = { styles.gridContainer }>
+            <div className = { `ag-theme-alpine-dark ${ styles.gridContainer }` }>
                 <AgGridReact
                     rowData = { rowData }
                     columnDefs = { columnDefs }
@@ -111,4 +102,4 @@ const Models: React.FC = () => {
     );
 };
 
-export default Models;
+export default Scores;

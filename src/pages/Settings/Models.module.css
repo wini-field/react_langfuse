@@ -4,31 +4,69 @@
 
 .header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    margin-bottom: 16px
+    margin-bottom: 16px;
+    gap: 8px;
 }
 
-.header button {
+.columnsButton .addButton {
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background-color: #020817;
-    color: white;
-    border: 1px solid #555;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
     font-size: 14px;
 }
 
-.header button:hover {
-    background-color: #444;
+.columnsButton {
+    background-color: #020817;
+    color: white;
+    padding-right: 6px;
+    border: 1px solid #888;
+}
+
+.columnsButton:hover {
+    background-color: #192333;
+}
+
+.count {
+    background-color: #30405d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+.addButton {
+    background-color: #1c1c1c;
+    color: #a0a0a0;
+    border: 1px solid #555;
+}
+
+.addButton:hover {
+    background-color: #2c2c2c;
+}
+
+.iconButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background-color: #020817;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .gridContainer {
     height: 600px;
+    border: 1px solid #888;
+    border-radius: 6px;
 }
 
 .pricesCell {
@@ -41,9 +79,42 @@
     margin-right: 4px;
 }
 
-.maintainerCell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
+.tokenizerConfCell {
+    font-family: 'D2Coding', monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    margin: 0;
+    padding: 4px;
+    background-color: #2a2a3b;
+    border-radius: 6px;
+    color: #c7d2fe;
+}
+
+:global(.ag-paging-panel) {
+    color: #a0a0a0;
+    border-top: 1px solid #333;
+    padding: 8px 16px;
+}
+
+:global(.ag-paging-panel > span) {
+    margin: 0 8px;
+}
+
+:global(.ag-paging-panel .ag-select .ag-picker-picker-field-wrapper),
+:global(.ag-paging-panel .ag-text-input-wrapper) {
+    background-color: #020817;
+    border: 1px solid #444;
+    border-radius: 6px;
+    height: 32px;
+}
+
+:global(.ap-paging-button) {
+    border: 1px solid #444;
+    border-radius: 6px;
+    background-color: #111;
+    color: #a0a0a0;
+}
+
+:global(.ag-paging-button:not(.ag-disabled):hover) {
+    background-color: #333;
 }

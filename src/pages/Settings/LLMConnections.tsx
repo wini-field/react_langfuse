@@ -30,7 +30,7 @@ const LLMConnections: React.FC = () => {
         <div className = { styles.container }>
             { /* Host Name Section */ }
             <h3 className = { styles.h3 }>LLM Connections </h3>
-            <h5>Connect your LLM services to enable evaluations and playground features. Your provider will charge based on usage.</h5>
+            <p>Connect your LLM services to enable evaluations and playground features. Your provider will charge based on usage.</p>
 
             <div className = { styles.keyList }>
                 <div className = { `${ styles.keyRow } ${ styles.keyHeader }` }>
