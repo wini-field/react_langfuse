@@ -1,0 +1,49 @@
+.container {
+    padding: 0 24px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px
+}
+
+.header button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background-color: #020817;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.header button:hover {
+    background-color: #444;
+}
+
+.gridContainer {
+    height: 600px;
+}
+
+.pricesCell {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.pricesCell span {
+    color: #888;
+    margin-right: 4px;
+}
+
+.maintainerCell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}

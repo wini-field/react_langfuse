@@ -1,51 +1,87 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { AgGridReact } from 'ag-grid-react';
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import { ColDef, ICellRendererParams} from 'ag-grid-react';
+import { Plus, GitCommitHorizontal } from 'lucide-react';
+import styles from './Models.module.css';
 
-const DUMMY_MODELS = [
-    {
-        id: '1',
-        maintainer: 'user',
-        matchPattern: '(babbage-002)$',
-        pricesPerUnit: {
-            input: '$0.0001',
-            output: '$0.0002',
-        },
-        tokenize: 'OpenAI',
-        tokenizerConfiguration: '',
-        lastUsed: '2025-08-05'
-    },
-    {
-        id: '2',
-        maintainer: 'user',
-        matchPattern: '(babbage-001)$',
-        pricesPerUnit: {
-            input: '$0.0001',
-            output: '$0.0002',
-        },
-        tokenize: 'Google',
-        tokenizerConfiguration: '',
-        lastUsed: '2025-08-05'
-    },
-    {
-        id: '3',
-        maintainer: 'user',
-        matchPattern: '(babbage-003)$',
-        pricesPerUnit: {
-            input: '$0.0001',
-            output: '$0.0002',
-        },
-        tokenize: 'Anthropic',
-        tokenizerConfiguration: '',
-        lastUsed: '2025-08-05'
-    },
-];
+// Maintainer 아이콘
+const MaintainerRenderer: React.FC<ICellRendererParams> = () => (
+    <div className = { styles.maintainerCell }>
+        <GitCommitHorizontal size = { 16 } color = "#ef444" />
+    </div>
+);
+
+// 가격
+const PricesRenderer: React.FC<ICellRendererParams> = (props) => (
+    <div className = { styles.pricesCell }>
+        <div><span>input</span> ${ props.data.inputPrice.toFixed(4) }</div>
+        <div><span>output</span> ${ props.data.outputPrice.toFixed(4) }</div>
+    </div>
+)
+
+// Tokenizer 설정
+const TokenizerConfRenderer: React.FC<ICellRendererParams> = (props) => {
+    return (
+        <pre className = { styles.tokenizerConfCell }>
+            {JSON.stringify(props.data.tokenizerConfig, null, 2)}
+
+        </pre>
+    );
+};
+
+// Actions 버튼
+const ActionsRederer: React.FC<ICellRendererParams> = (props) => {
+    return (
+        <div className = { styles.cellCenter }>
+            <button className = { styles.cloneButton }>Clone</button>
+        </div>
+    );
+};
 
 const Models: React.FC = () => {
+    const [columnDefs] = useState<ColDef[]>([
+        { field: 'modelName', headerName: 'Model Name', flex: 2 },
+        {
+            field: 'maintainer',
+            headerName: 'Maintainer',
+            cellRenderer: MaintainerRenderer,
+            flex: 1
+        },
+        { field: 'matchPattern', headerName: 'Match Pattern', flex: 3 },
+        {
+            field: 'prices',
+            haederName: 'Prices per unit',
+            cleeRenderer: PricesRenderer,
+            flex: 1.5
+        },
+    ]);
+
+     const [rowData] = useState([
+        { modelName: 'babbage-002', matchPattern: '(?i)^(babbage-002)$', inputPrice: 0.000004, outputPrice: 0.000016, tokenizer: 'openai', tokenizerConfig: { tokenizerModel: "babbage-002" }, lastUsed: '' },
+        { modelName: 'chat-bison', matchPattern: '(?i)^(chat-bison)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: '', tokenizerConfig: {}, lastUsed: '' },
+        { modelName: 'chat-bison-32k', matchPattern: '(?i)^(chat-bison-32k)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: '', tokenizerConfig: {}, lastUsed: '' },
+        { modelName: 'chatgpt-4o-latest', matchPattern: '(?i)^(chatgpt-4o-latest)$', inputPrice: 0.000005, outputPrice: 0.000015, tokenizer: 'openai', tokenizerConfig: { "tokensPerMessage": 1, "tokenizerModel": "gpt-4o" }, lastUsed: '' },
+        { modelName: 'claude-1.1', matchPattern: '(?i)^(claude-1.1)$', inputPrice: 0.000008, outputPrice: 0.000024, tokenizer: 'claude', tokenizerConfig: {}, lastUsed: '' },
+    ]);
+
+
     return (
-        <div>
-            <h4>Models</h4>
-            <p>A model represents a LLM model. It is used to calculate tokens and cost.</p>
+        <div className = { styles.container }>
+            <div className = { styles.header }>
+                <button>Column = 8/8</button>
+                <button><Plus size = { 16 } /> Add model definition</button>
+            </div>
 
-
+            <div className = { `ag-theme-alpine-dark ${ styles.gridContainer }` }>
+                <AgGridReact
+                    rowData = { rowData }
+                    columnDefs = { columnDefs }
+                    paginationPageSize = { 50 }
+                    suppressRowClickSelection = { true }
+                />
+            </div>
         </div>
     );
 };
