@@ -4,7 +4,6 @@
 
 .header {
     display: flex;
-    justify-content: flex-start;
     align-items: center;
     margin-bottom: 16px;
     gap: 8px;
@@ -26,7 +25,6 @@
 .columnsButton {
     background-color: #020817;
     color: white;
-    padding-right: 6px;
     border: 1px solid #2f415d;
 }
 
@@ -53,34 +51,21 @@
 }
 
 .iconButton {
-    display: flex;
-    align-items: center;
     justify-content: center;
-    padding: 8px;
     background-color: #020817;
     border: 1px solid #2f415d;
     color: #cbd5e1;
     border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
     width: 36px;
     height: 36px;
 }
 
 .cloneButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 6px;
+    padding: 6px 12px;
     background-color: #020817;
     border: 1px solid #2f415d;
     color: #cbd5e1;
-    border-radius: 6px;
-}
-
-.gridContainer {
-    height: 600px;
-    border: 1px solid #2f415d;
     border-radius: 6px;
 }
 
@@ -98,22 +83,37 @@
     font-family: 'D2Coding', monospace;
     font-size: 12px;
     line-height: 1.5;
-    white-space: normal;
     color: #c7d2fe;
     padding: 4px;
 }
+
+.gridContainer {
+    height: 600px;
+    border: 1px solid #2f415d;
+    border-radius: 6px;
+
+    --ag-background-color: #020817;
+    --ag-header-background-color: #020817;
+    --ag-row-background-color: #020817;
+    --ag-odd-row-background-color: #020817;
+    --ag-border-color: #2f415d;
+    --ag-header-column-separator-color: #2f415d;
+    --ag-header-foreground-color: #94a3b8;
+    --ag-foreground-color: #e2e8f0;
+}
+
+:global(.ag-theme-alpine .ag-cell) {
+    display: flex;
+    align-items: center;
+}
+
+:global(.ag-theme-alpine .ag-header) {
+    border-bottom: 1px solid #2f415d;
 
 .agIcon {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
-}
-
-:global(.ag-paging-panel) {
-    color: #a0a0a0;
-    border-top: 1px solid #2f415d;
-    padding: 8px 16px;
 }
 
 :global(.ag-paging-panel > span) {
@@ -128,18 +128,6 @@
     height: 32px;
 }
 
-:global(.ap-paging-button) {
-    border: 1px solid #2f415d;
-    border-radius: 6px;
-    background-color: #111;
-    color: #a0a0a0;
-    padding: 4px;
-}
-
-:global(.ag-paging-button:not(.ag-disabled):hover) {
-    background-color: #333;
-}
-
 :global(.ag-theme-alpine) {
     --ag-background-color: #020817;
     --ag-header-background-color: #020817;
@@ -149,12 +137,34 @@
     --ag-header-foreground-color: #94a3b8;
     --ag-foreground-color: #94a3b8;
 }
-
-:global(.ag-theme-alpine .ag-cell) {
-    display: flex;
-    align-items: center;
 }
 
-:global(.ag-theme-alpine .ag-header) {
-    border-bottom: 1px solid #2f415d;
+:global(.ag-theme-alpine .ag-paging-panel) {
+    background-color: #020817;
+    color: #a6c3c9;
+    border-top: 1px solid #2f415d;
+}
+
+:global(.ag-theme-alpine .ag-paging-button) {
+    cursor: pointer;
+    border: 1px solid #444;
+    border-radius: 6px;
+}
+
+:global(.ag-theme-alpine .ag-paging-button:not(.ag-disabled):hover) {
+    background-color: #333;
+}
+
+:global(.ag-theme-alpine .ag-paging-button:not(.ag-disabled):hover) .agIcon svg {
+    stroke: white;
+}
+
+/* 비활성화된 버튼 안의 아이콘은 흐리게 */
+:global(.ag-theme-alpine .ag-paging-button.ag-disabled) .agIcon svg {
+    opacity: 0.4;
+}
+
+:global(.ag-theme-alpine .ag-icon) {
+    -webkit-font-smoothing: antialiased;
+    font-family: "agGridAlpine" !important; /* 폰트를 강제로 유지하되 */
 }

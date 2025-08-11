@@ -13,8 +13,6 @@ import {
     Settings,
     UserRound,
     HelpCircle,
-    //ChevronLeft,
-    //ChevronRight,
     ArrowUpRight,
     Search,
 } from "lucide-react";
