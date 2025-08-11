@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, NavLink } from "react-router-dom";
+import {Outlet, NavLink, matchPath} from "react-router-dom";
 import {
     Home,
     LayoutDashboard,
@@ -72,6 +72,13 @@ export default function Layout() {
   const navClass = ({ isActive }: { isActive: boolean }) =>
     `${styles.menuItem} ${isActive ? styles.active : ""} ${collapsed ? styles.iconOnly : ""}`.trim();
 
+  // 현재 경로가 섹션의 어떤 item과도 매치되면 true → 섹션 타이틀 강조
+  const sectionActive = (section: MenuSection) =>
+    section.items.some(({ path }) =>
+      !!matchPath({ path, end: path === "/" }, location.pathname) ||
+      (path !== "/" && location.pathname.startsWith(path))
+    );
+
   return (
     <div className={styles.layout}>
       <aside className={`${styles.sidebar} ${collapsed ? styles.sidebarCollapsed : ""}`}>
@@ -100,7 +107,9 @@ export default function Layout() {
             {mainMenuSections.map((section, i) => (
               <li key={i}>
                 {section.title && !collapsed && (
-                  <div className={styles.sectionTitle}>{section.title}</div>
+                  <div className={`${styles.sectionTitle} ${
+                      sectionActive(section) ? styles.sectionTitleActive : ""
+                    }`}>{section.title}</div>
                 )}
                 {section.items.map((item) => (
                   <NavLink

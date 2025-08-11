@@ -1,5 +1,5 @@
 // src/App.tsx
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './layouts/Layout';
 
 import Home from './pages/Home/Home';
@@ -14,10 +14,14 @@ import PromptDetail from './pages/Prompts/PromptsDetail';
 import PromptNew from './pages/Prompts/PromptNew';
 import PromptEdit from './pages/Prompts/PromptEdit';
 
-import EvaluationList from './pages/Evaluation/EvaluationList';
-import EvaluationDetail from './pages/Evaluation/EvaluationDetail';
-import EvaluationNew from './pages/Evaluation/EvaluationNew';
-import EvaluationEdit from './pages/Evaluation/EvaluationEdit';
+import ScoresList from './pages/Evaluation/Scores/ScoresList';
+import ScoresDetail from './pages/Evaluation/Scores/ScoresDetail';
+import ScoresNew from './pages/Evaluation/Scores/ScoresNew';
+import ScoresEdit from './pages/Evaluation/Scores/ScoresEdit';
+
+import JudgePage from './pages/Evaluation/Judge/JudgePage';
+import HumanAnnotationPage from './pages/Evaluation/HumanAnnotation/HumanAnnotationPage';
+import DatasetsList from './pages/Evaluation/DataSets/DatasetsList';
 
 import LLMDashboard from './pages/Dashboard/LLMDashboard';
 
@@ -35,7 +39,7 @@ const Placeholder =
     <div style={{ color: 'white', padding: 24 }}>{title}</div>;
 
 //const LLMConnections = Placeholder('LLM Connections');
-const Scores = Placeholder('Scores (Settings)');
+const ScoresSettings = Placeholder('Scores (Settings)');
 const Integrations = Placeholder('Integrations');
 const Exports = Placeholder('Exports');
 const AuditLogs = Placeholder('Audit Logs');
@@ -43,9 +47,9 @@ const AuditLogs = Placeholder('Audit Logs');
 const Sessions = Placeholder('Sessions');  // 사이드바 링크용 (/sessions)
 const Users = Placeholder('Users');        // 사이드바 링크용 (/users)
 const Playground = Placeholder('Playground');  // 사이드바 링크용 (/playground)
-const Datasets = Placeholder('Datasets');      // 사이드바 링크용 (/datasets)
-const LlmAsAJudge = Placeholder('LLM as a Judge'); // 사이드바 링크용 (/llm-as-a-judge)
-const HumanAnnotation = Placeholder('Human Annotation'); // (/human-annotation)
+// const Datasets = Placeholder('Datasets');      // 사이드바 링크용 (/datasets)
+// const LlmAsAJudge = Placeholder('LLM as a Judge'); // 사이드바 링크용 (/llm-as-a-judge)
+// const HumanAnnotation = Placeholder('Human Annotation'); // (/human-annotation)
 
 export default function App() {
   return (
@@ -58,9 +62,7 @@ export default function App() {
         <Route path="sessions" element={<Sessions />} />
         <Route path="users" element={<Users />} />
         <Route path="playground" element={<Playground />} />
-        <Route path="datasets" element={<Datasets />} />
-        <Route path="llm-as-a-judge" element={<LlmAsAJudge />} />
-        <Route path="human-annotation" element={<HumanAnnotation />} />
+
 
         {/* Tracing */}
         <Route path="tracing" element={<Tracing />} />
@@ -74,18 +76,25 @@ export default function App() {
         <Route path="prompts/:id" element={<PromptDetail />} />
         <Route path="prompts/:id/edit" element={<PromptEdit />} />
 
-        {/* Evaluation */}
-        <Route path="evaluation" element={<EvaluationList />} />
-        <Route path="evaluation/new" element={<EvaluationNew />} />
-        <Route path="evaluation/:id" element={<EvaluationDetail />} />
-        <Route path="evaluation/:id/edit" element={<EvaluationEdit />} />
+        {/* Scores */}
+        <Route path="scores" element={<ScoresList />} />
+        <Route path="scores/new" element={<ScoresNew />} />
+        <Route path="scores/:id" element={<ScoresDetail />} />
+        <Route path="scores/:id/edit" element={<ScoresEdit />} />
 
-        {/* Dashboards (복수형으로 맞춤: /dashboards/llm) */}
+        {/* ✅ 실제 페이지로 교체 */}
+        <Route path="llm-as-a-judge" element={<JudgePage />} />
+        <Route path="human-annotation" element={<HumanAnnotationPage />} />
+        <Route path="datasets" element={<DatasetsList />} />
+
+        {/* 구 /evaluation 경로 호환 */}
+        <Route path="evaluation" element={<Navigate to="/scores" replace />} />
+        <Route path="evaluation/new" element={<Navigate to="/scores/new" replace />} />
+        <Route path="evaluation/:id" element={<Navigate to="/scores/:id" replace />} />
+        <Route path="evaluation/:id/edit" element={<Navigate to="/scores/:id/edit" replace />} />
+
+        {/* Dashboards */}
         <Route path="dashboards/llm" element={<LLMDashboard />} />
-
-        {/* 기타 테스트 */}
-        <Route path="cost" element={<div style={{ color: 'white', padding: 24 }}>💰 Cost Page</div>} />
-        <Route path="scores" element={<div style={{ color: 'white', padding: 24 }}>🏆 Scores Page</div>} />
 
         {/* Settings (상대 경로로 선언) */}
         <Route path="settings" element={<SettingsPage />}>
@@ -93,7 +102,7 @@ export default function App() {
           <Route path="api-keys" element={<ApiKeys />} />
           <Route path="llm-connections" element={<LLMConnections />} />
           <Route path="models" element={<Models />} />
-          <Route path="scores" element={<Scores />} />
+          <Route path="scores" element={<ScoresSettings />} />
           <Route path="members" element={<Members />} />
           <Route path="integrations" element={<Integrations />} />
           <Route path="exports" element={<Exports />} />
