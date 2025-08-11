@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { ColDef, ICellRendererParams} from 'ag-grid-react';
-import { Plus, GitCommitHorizontal, Menu } from 'lucide-react';
+import { ColDef, ICellRendererParams } from 'ag-grid-react';
+import { Plus, GitCommitHorizontal, Menu, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import styles from './Models.module.css';
 
 // Maintainer 아이콘
@@ -22,11 +22,18 @@ const PricesRenderer: React.FC<ICellRendererParams> = (props) => (
 )
 
 // Tokenizer 설정
-const TokenizerConfRenderer: React.FC<ICellRendererParams> = (props) => {
+const TokenizerConfRenderer: React.FC<ICellRendererParams> = ({ data }) => {
+    const config = data.tokenizerConfig;
+    const entries = Object.entries(config);
+
     return (
-        <pre className = { styles.tokenizerConfCell }>
-            {JSON.stringify(props.data.tokenizerConfig, null, 2)}
-        </pre>
+        <div className = { styles.simpleTokenizerCell }>
+            { entries.map(([key, value]) => (
+                <div key = { key }>
+                    { `{${ key }: "${ value }"` }
+                </div>
+            ))}
+        </div>
     );
 };
 
@@ -41,34 +48,44 @@ const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
 
 const Models: React.FC = () => {
     const [columnDefs] = useState<ColDef[]>([
-        { field: 'modelName', headerName: 'Model Name', flex: 2 },
+        {
+            field: 'modelName',
+            headerName: 'Model Name',
+            defaultWidth: 100,
+            minWidth: 50,
+            cellStyle: { 'fontWeight': 'bold' }
+        },
         {
             field: 'maintainer',
             headerName: 'Maintainer',
             cellRenderer: MaintainerRenderer,
-            flex: 1
+            defaultWidth: 100,
+            minWidth: 50,
         },
-        { field: 'matchPattern', headerName: 'Match Pattern', flex: 3 },
+        { field: 'matchPattern', headerName: 'Match Pattern', defaultWidth: 100, minWidth: 50, },
         {
             field: 'prices',
             headerName: 'Prices per unit',
             cellRenderer: PricesRenderer,
-            flex: 1.5
+            defaultWidth: 100,
+            minWidth: 50,
         },
-        { field: 'tokenizer', headerName: 'Tokenizer', flex: 1 },
+        { field: 'tokenizer', headerName: 'Tokenizer', defaultWidth: 100, minWidth: 50, },
         {
             field: 'tokenizerConfig',
             headerName: 'Tokenizer Config',
             cellRenderer: TokenizerConfRenderer,
-            flex: 2,
+            defaultWidth: 100,
+            minWidth: 50,
             autoHeight: true
         },
-        { field: 'lastUsed', headerName: 'Last used', flex: 1 },
+        { field: 'lastUsed', headerName: 'Last used', defaultWidth: 100, minWidth: 50, },
         {
             field: 'actions',
             headerName: 'Actions',
             cellRenderer: ActionsRenderer,
-            flex: 1,
+            defaultWidth: 100,
+            minWidth: 50,
         },
     ]);
 
@@ -80,31 +97,39 @@ const Models: React.FC = () => {
         { modelName: 'claude-1.1', matchPattern: '(?i)^(claude-1.1)$', inputPrice: 0.000008, outputPrice: 0.000024, tokenizer: 'claude', tokenizerConfig: {}, lastUsed: '' },
     ]);
 
+     const icons = {
+        paginationFirst: () => <ChevronsLeft size={18} />,
+        paginationPrev: () => <ChevronLeft size={18} />,
+        paginationNext: () => <ChevronRight size={18} />,
+        paginationLast: () => <ChevronsRight size={18} />,
+    };
 
     return (
         <div className = { styles.container }>
             <h3>Models</h3>
             <p>A model represents a LLM model. It is used to calculate tokens and cost.</p>
             <div className = { styles.header }>
-                <button className = { styles.columnsButton }>
+                <button className = { `${ styles.headerButton } ${ styles.columnsButton }` }>
                     <span>Column</span>
                     <span className = { styles.count }>8/8</span>
                 </button>
-                <button className = { styles.iconButton }>
+                <button className = { `${ styles.headerButton } ${ styles.iconButton }` } >
                     <Menu size = { 16 } />
                 </button>
-                <button className = { styles.addButton }>
+                <button className = { `${ styles.headerButton} ${ styles.addButton }` } >
                     <Plus size = { 16 } /> Add model definition
                 </button>
             </div>
 
-            <div className = { styles.gridContainer }>
+            <div className = { `ag-theme-alpine ${styles.gridContainer }` }>
                 <AgGridReact
                     rowData = { rowData }
                     columnDefs = { columnDefs }
                     pagination = { true }
                     paginationPageSize = { 50 }
                     suppressRowClickSelection = { true }
+                    icons = { icons }
+                    rowHeight = { 96 }
                 />
             </div>
         </div>

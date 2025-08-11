@@ -30,7 +30,9 @@ import General from './pages/Settings/General';
 import ApiKeys from './pages/Settings/ApiKeys';
 import LLMConnections from "./pages/Settings/LLMConnections";
 import Models from './pages/Settings/Models';
+import Scores from './pages/Settings/Scores';
 import Members from './pages/Settings/Members';
+import AuditLogs from "./pages/Settings/AuditLogs";
 
 // ---- 임시 플래이스홀더들 (파일이 아직 없거나 빈 페이지일 때 대비) ----
 const Placeholder =
@@ -39,10 +41,10 @@ const Placeholder =
     <div style={{ color: 'white', padding: 24 }}>{title}</div>;
 
 //const LLMConnections = Placeholder('LLM Connections');
-const ScoresSettings = Placeholder('Scores (Settings)');
+//const Scores = Placeholder('Scores (Settings)');
 const Integrations = Placeholder('Integrations');
 const Exports = Placeholder('Exports');
-const AuditLogs = Placeholder('Audit Logs');
+//const AuditLogs = Placeholder('Audit Logs');
 
 const Sessions = Placeholder('Sessions');  // 사이드바 링크용 (/sessions)
 const Users = Placeholder('Users');        // 사이드바 링크용 (/users)
@@ -102,7 +104,7 @@ export default function App() {
           <Route path="api-keys" element={<ApiKeys />} />
           <Route path="llm-connections" element={<LLMConnections />} />
           <Route path="models" element={<Models />} />
-          <Route path="scores" element={<ScoresSettings />} />
+          <Route path="scores" element={<Scores />} />
           <Route path="members" element={<Members />} />
           <Route path="integrations" element={<Integrations />} />
           <Route path="exports" element={<Exports />} />

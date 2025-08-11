@@ -10,7 +10,7 @@
     gap: 8px;
 }
 
-.columnsButton .addButton {
+.headerButton {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -18,14 +18,16 @@
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
-    font-size: 14px;
+    font-size: 13px;
+    height: 36px;
+    box-sizing: border-box;
 }
 
 .columnsButton {
     background-color: #020817;
     color: white;
     padding-right: 6px;
-    border: 1px solid #888;
+    border: 1px solid #2f415d;
 }
 
 .columnsButton:hover {
@@ -41,9 +43,9 @@
 }
 
 .addButton {
-    background-color: #1c1c1c;
+    background-color: #1e293c;
     color: #a0a0a0;
-    border: 1px solid #555;
+    border: 1px solid #2f415d;
 }
 
 .addButton:hover {
@@ -56,16 +58,29 @@
     justify-content: center;
     padding: 8px;
     background-color: #020817;
-    border: 1px solid #334155;
+    border: 1px solid #2f415d;
     color: #cbd5e1;
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    width: 36px;
+    height: 36px;
+}
+
+.cloneButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    background-color: #020817;
+    border: 1px solid #2f415d;
+    color: #cbd5e1;
+    border-radius: 6px;
 }
 
 .gridContainer {
     height: 600px;
-    border: 1px solid #888;
+    border: 1px solid #2f415d;
     border-radius: 6px;
 }
 
@@ -79,20 +94,25 @@
     margin-right: 4px;
 }
 
-.tokenizerConfCell {
+.simpleTokenizerCell {
     font-family: 'D2Coding', monospace;
     font-size: 12px;
-    white-space: pre-wrap;
-    margin: 0;
-    padding: 4px;
-    background-color: #2a2a3b;
-    border-radius: 6px;
+    line-height: 1.5;
+    white-space: normal;
     color: #c7d2fe;
+    padding: 4px;
+}
+
+.agIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 }
 
 :global(.ag-paging-panel) {
     color: #a0a0a0;
-    border-top: 1px solid #333;
+    border-top: 1px solid #2f415d;
     padding: 8px 16px;
 }
 
@@ -103,18 +123,38 @@
 :global(.ag-paging-panel .ag-select .ag-picker-picker-field-wrapper),
 :global(.ag-paging-panel .ag-text-input-wrapper) {
     background-color: #020817;
-    border: 1px solid #444;
+    border: 1px solid #2f415d;
     border-radius: 6px;
     height: 32px;
 }
 
 :global(.ap-paging-button) {
-    border: 1px solid #444;
+    border: 1px solid #2f415d;
     border-radius: 6px;
     background-color: #111;
     color: #a0a0a0;
+    padding: 4px;
 }
 
 :global(.ag-paging-button:not(.ag-disabled):hover) {
     background-color: #333;
+}
+
+:global(.ag-theme-alpine) {
+    --ag-background-color: #020817;
+    --ag-header-background-color: #020817;
+    --ag-row-background-color: #020817;
+    --ag-odd-row-background-color: #020817;
+    --ag-border-color: #2f415d;
+    --ag-header-foreground-color: #94a3b8;
+    --ag-foreground-color: #94a3b8;
+}
+
+:global(.ag-theme-alpine .ag-cell) {
+    display: flex;
+    align-items: center;
+}
+
+:global(.ag-theme-alpine .ag-header) {
+    border-bottom: 1px solid #2f415d;
 }

@@ -26,7 +26,6 @@ const TokenizerConfRenderer: React.FC<ICellRendererParams> = (props) => {
     return (
         <pre className = { styles.tokenizerConfCell }>
             {JSON.stringify(props.data.tokenizerConfig, null, 2)}
-
         </pre>
     );
 };
@@ -42,32 +41,32 @@ const ActionsRederer: React.FC<ICellRendererParams> = (props) => {
 
 const Scores: React.FC = () => {
     const [columnDefs] = useState<ColDef[]>([
-        { field: 'modelName', headerName: 'Model Name', flex: 2 },
+        { field: 'modelName', headerName: 'Name', flex: 2 },
         {
             field: 'maintainer',
             headerName: 'Maintainer',
             cellRenderer: MaintainerRenderer,
             flex: 1
         },
-        { field: 'matchPattern', headerName: 'Match Pattern', flex: 3 },
+        { field: 'matchPattern', headerName: 'Data Type', flex: 3 },
         {
             field: 'prices',
             haederName: 'Prices per unit',
             cleeRenderer: PricesRenderer,
             flex: 1.5
         },
-        { field: 'tokenizer', headerName: 'Tokenizer', flex: 1 },
+        { field: 'tokenizer', headerName: 'Range', flex: 1 },
         {
             field: 'tokenizerConfig',
-            headerName: 'Tokenizer Config',
+            headerName: 'Description',
             cellRenderer: TokenizerConfRenderer,
             flex: 2,
             autoHeight: true
         },
-        { field: 'lastUsed', headerName: 'Last used', flex: 1 },
+        { field: 'lastUsed', headerName: 'Status', flex: 1 },
         {
             field: 'actions',
-            headerName: 'Actions',
+            headerName: 'Action',
             cellRenderer: ActionsRederer,
             flex: 1,
         },
@@ -83,10 +82,12 @@ const Scores: React.FC = () => {
 
 
     return (
-        <div className = { styles.container }>z
+        <div className = { styles.container }>
+            <h3>Score Configs</h3>
+            <p>Score configs define which scores are available for annotation in your project. Please note that all score configs are immutable.</p>
             <div className = { styles.header }>
-                <button>Column = 8/8</button>
-                <button><Plus size = { 16 } /> Add model definition</button>
+                <button>Column = 6/8</button>
+                <button><Plus size = { 16 } /> Add new score config</button>
             </div>
 
             <div className = { `ag-theme-alpine-dark ${ styles.gridContainer }` }>
