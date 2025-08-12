@@ -33,6 +33,7 @@ import LLMConnections from "./pages/Settings/LLMConnections";
 import Models from './pages/Settings/Models';
 import Scores from './pages/Settings/Scores';
 import Members from './pages/Settings/Members';
+import Exports from "./pages/Settings/Exports";
 
 // ---- 임시 플레이스홀더들 (파일이 아직 없거나 빈 페이지일 때 대비) ----
 const Placeholder =
@@ -43,7 +44,7 @@ const Placeholder =
 //const LLMConnections = Placeholder('LLM Connections');
 //const Scores = Placeholder('Scores (Settings)');
 //const Integrations = Placeholder('Integrations');
-const Exports = Placeholder('Exports');
+//const Exports = Placeholder('Exports');
 //const AuditLogs = Placeholder('Audit Logs');
 
 const Sessions = Placeholder('Sessions');  // 사이드바 링크용 (/sessions)

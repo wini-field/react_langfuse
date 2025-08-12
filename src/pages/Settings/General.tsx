@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styles from './General.module.css'
+import styles from './layout/General.module.css'
 
 const generalSettingsData = {
   hostName: 'https://cloud.langfuse.com',

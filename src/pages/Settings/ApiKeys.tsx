@@ -1,6 +1,6 @@
 import React from 'react';
 import { Info, Plus, Clipboard, Trash2 } from 'lucide-react';
-import styles from "./ApiKeys.module.css";
+import styles from "./layout/Apikeys.module.css";
 
 const DUMMY_API_KEYS = [
     {

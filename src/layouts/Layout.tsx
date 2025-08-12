@@ -13,7 +13,6 @@ import {
     Settings,
     UserRound,
     HelpCircle,
-    ArrowUpRight,
     Search,
 } from "lucide-react";
 
@@ -62,7 +61,6 @@ export default function Layout() {
   ];
 
   const bottomMenu: MenuItem[] = [
-    { label: "Upgrade", icon: <ArrowUpRight size={18} />, path: "/upgrade" },
     { label: "Settings", icon: <Settings size={18} />, path: "/settings" },
     { label: "Support", icon: <HelpCircle size={18} />, path: "/support" },
   ];

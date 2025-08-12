@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from "./ApiKeys.module.css";
+import styles from "./layout/Apikeys.module.css";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 const DUMMY_LLM_DATA = [

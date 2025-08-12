@@ -4,7 +4,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { ColDef, ICellRendererParams } from 'ag-grid-react';
 import {Plus, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Menu} from 'lucide-react';
-import styles from './Models.module.css';
+import styles from './layout/Models.module.css';
 import CustomPagination from "./CustomPagination.tsx";
 import {GridApi, GridReadyEvent} from "ag-grid-community";
 

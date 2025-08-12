@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { GridApi } from 'ag-grid-community';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import styles from './CustomPagination.module.css';
+import styles from './layout/CustomPagination.module.css';
 
 interface CustomPaginationProps {
   gridApi: GridApi;
