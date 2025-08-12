@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useRef } from 'react'
-import { ColDef, ICellRendererParams, PaginationChangedEvent, GridReadyEvent, GridApi } from 'ag-grid-community';
+import React, { useState, useCallback, useRef, useMemo } from 'react'
+import { ColDef, ICellRendererParams, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { Plus, GitCommitHorizontal, Menu, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import styles from './Models.module.css';
+import CustomPagination from './CustomPagination';
 
 // Maintainer 아이콘
 const MaintainerRenderer: React.FC<ICellRendererParams> = () => (
@@ -48,54 +49,53 @@ const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
 
 const Models: React.FC = () => {
     const gridRef = useRef<AgGridReact>(null);
-    const [columnDefs] = useState<ColDef[]>([
-        {
-            field: 'modelName',
-            headerName: 'Model Name',
-            defaultWidth: 100,
-            minWidth: 50,
-            cellStyle: { 'fontWeight': 'bold' }
-        },
-        {
-            field: 'maintainer',
-            headerName: 'Maintainer',
-            cellRenderer: MaintainerRenderer,
-            defaultWidth: 100,
-            minWidth: 50,
-        },
-        { field: 'matchPattern', headerName: 'Match Pattern', defaultWidth: 100, minWidth: 50, },
-        {
-            field: 'prices',
-            headerName: 'Prices per unit',
-            cellRenderer: PricesRenderer,
-            defaultWidth: 100,
-            minWidth: 50,
-        },
-        { field: 'tokenizer', headerName: 'Tokenizer', defaultWidth: 100, minWidth: 50, },
-        {
-            field: 'tokenizerConfig',
-            headerName: 'Tokenizer Config',
-            cellRenderer: TokenizerConfRenderer,
-            defaultWidth: 100,
-            minWidth: 50,
-            autoHeight: true
-        },
-        { field: 'lastUsed', headerName: 'Last used', defaultWidth: 100, minWidth: 50, },
-        {
-            field: 'actions',
-            headerName: 'Actions',
-            cellRenderer: ActionsRenderer,
-            defaultWidth: 100,
-            minWidth: 50,
-        },
-    ]);
+    const [gridApi, setGridApi] = useState<GridApi | null>(null);
+    const pageSizes = useMemo(() => [10, 20, 30, 40, 50], []);
+    const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+
+    const [columnVisibility, setColumnVisibility] = useState({
+        modelName: true,
+        maintainer: true,
+        matchPattern: true,
+        prices: true,
+        tokenizer: true,
+        tokenizerConfig: true,
+        lastUsed: true,
+        actions: true,
+    });
+
+    const columnDefs = useMemo((): ColDef[] => [
+        { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, hide: !columnVisibility.modelName },
+        { field: 'maintainer', headerName: 'Maintainer', width: 100, cellRenderer: MaintainerRenderer, hide: !columnVisibility.maintainer },
+        { field: 'matchPattern', headerName: 'Match Pattern', width: 200, hide: !columnVisibility.matchPattern },
+        { field: 'prices', headerName: 'Prices per unit', width: 150, cellRenderer: PricesRenderer, hide: !columnVisibility.prices },
+        { field: 'tokenizer', headerName: 'Tokenizer', width: 120, hide: !columnVisibility.tokenizer },
+        { field: 'tokenizerConfig', headerName: 'Tokenizer Config', width: 250, cellRenderer: TokenizerConfRenderer, autoHeight: true, hide: !columnVisibility.tokenizerConfig },
+        { field: 'lastUsed', headerName: 'Last used', width: 120, hide: !columnVisibility.lastUsed },
+        { field: 'actions', headerName: 'Actions', width: 100, cellRenderer: ActionsRenderer, sortable: false, resizable: false, hide: !columnVisibility.actions },
+    ], [columnVisibility]);
+
+    const defaultColDef = useMemo(() => ({
+        minWidth: 50,
+        resizable: true,
+        sortable: true,
+    }), []);
 
      const [rowData] = useState([
-        { modelName: 'babbage-002', matchPattern: '(?i)^(babbage-002)$', inputPrice: 0.000004, outputPrice: 0.000016, tokenizer: 'openai', tokenizerConfig: { tokenizerModel: "babbage-002" }, lastUsed: '' },
-        { modelName: 'chat-bison', matchPattern: '(?i)^(chat-bison)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: '', tokenizerConfig: {}, lastUsed: '' },
-        { modelName: 'chat-bison-32k', matchPattern: '(?i)^(chat-bison-32k)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: '', tokenizerConfig: {}, lastUsed: '' },
-        { modelName: 'chatgpt-4o-latest', matchPattern: '(?i)^(chatgpt-4o-latest)$', inputPrice: 0.000005, outputPrice: 0.000015, tokenizer: 'openai', tokenizerConfig: { "tokensPerMessage": 1, "tokenizerModel": "gpt-4o" }, lastUsed: '' },
-        { modelName: 'claude-1.1', matchPattern: '(?i)^(claude-1.1)$', inputPrice: 0.000008, outputPrice: 0.000024, tokenizer: 'claude', tokenizerConfig: {}, lastUsed: '' },
+        { modelName: 'babbage-002', matchPattern: '(?i)^(babbage-002)$', inputPrice: 0.000004, outputPrice: 0.000016, tokenizer: 'openai', tokenizerConfig: { tokenizerModel: "babbage-002" }, lastUsed: '2025-08-10' },
+        { modelName: 'chat-bison', matchPattern: '(?i)^(chat-bison)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: 'google', tokenizerConfig: {}, lastUsed: '2025-08-11' },
+        { modelName: 'chat-bison-32k', matchPattern: '(?i)^(chat-bison-32k)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: 'google', tokenizerConfig: {}, lastUsed: '2025-08-11' },
+        { modelName: 'chatgpt-4o-latest', matchPattern: '(?i)^(chatgpt-4o-latest)$', inputPrice: 0.000005, outputPrice: 0.000015, tokenizer: 'openai', tokenizerConfig: { "tokensPerMessage": 1, "tokenizerModel": "gpt-4o" }, lastUsed: '2025-08-12' },
+        { modelName: 'claude-1.1', matchPattern: '(?i)^(claude-1.1)$', inputPrice: 0.000008, outputPrice: 0.000024, tokenizer: 'claude', tokenizerConfig: {}, lastUsed: '2025-08-09' },
+        ...Array.from({ length: 15 }, (_, i) => ({
+            modelName: `test-model-${i + 1}`,
+            matchPattern: `(?i)^(test-model-${i + 1})$`,
+            inputPrice: 0.00001 + i * 0.000001,
+            outputPrice: 0.00002 + i * 0.000002,
+            tokenizer: ['openai', 'claude', 'google'][i % 3],
+            tokenizerConfig: { model: `test-${i}`},
+            lastUsed: `2025-07-${15 + i}`
+        }))
     ]);
 
      const icons = {
@@ -105,36 +105,46 @@ const Models: React.FC = () => {
         paginationLast: () => <ChevronsRight size={18} />,
     };
 
-     const updateTotalPages = useCallback((event: PaginationChangedEvent) => {
-         const summaryPanel = gridRef.current?.api?.getGridCore().eGridDiv.querySelector('.ag-paging-page-summary-panel');
-         if (summaryPanel) {
-             const totalPages = event.api.paginationGetTotalPages();
-             summaryPanel.setAttribute('data-total-pages', totalPages.toString());
-         }
-    }, []);
+     const onGridReady = useCallback((event: GridReadyEvent) => {
+         setGridApi(event.api);
+     }, []);
 
-    // 그리드가 처음 준비되었을 때 호출되는 함수
-    const onGridReady = useCallback((event: GridReadyEvent) => {
-        updateTotalPages(event.api);
-    }, [updateTotalPages]);
-
-    // 페이지가 변경될 때마다 호출되는 함수
-    const onPaginationChanged = useCallback((event: PaginationChangedEvent) => {
-        updateTotalPages(event.api);
-    }, [updateTotalPages]);
+     const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
+         setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+     };
 
     return (
         <div className = { styles.container }>
             <h3>Models</h3>
             <p>A model represents a LLM model. It is used to calculate tokens and cost.</p>
             <div className = { styles.header }>
-                <button className = { `${ styles.headerButton } ${ styles.columnsButton }` }>
-                    <span>Column</span>
-                    <span className = { styles.count }>8/8</span>
-                </button>
-                <button className = { `${ styles.headerButton } ${ styles.iconButton }` } >
-                    <Menu size = { 16 } />
-                </button>
+                {/* ✅ Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
+                <div className={styles.columnButtonWrapper}>
+                    <button
+                        className = { `${ styles.headerButton } ${ styles.columnsButton }` }
+                        onClick={() => setIsColumnMenuOpen(prev => !prev)}
+                    >
+                        <span>Columns</span>
+                        <span className = { styles.count }>8/8</span>
+                    </button>
+                    {/* ✅ 드롭다운 메뉴 */}
+                    {isColumnMenuOpen && (
+                        <div className={styles.columnMenu}>
+                            {Object.keys(columnVisibility).map(key => (
+                                <div
+                                    key={key}
+                                    className={styles.menuItem}
+                                    onClick={() => toggleColumnVisibility(key as keyof typeof columnVisibility)}
+                                >
+                                    <div className={styles.checkbox}>
+                                        {columnVisibility[key as keyof typeof columnVisibility] && <Check size={14} />}
+                                    </div>
+                                    <span>{key}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
                 <button className = { `${ styles.headerButton} ${ styles.addButton }` } >
                     <Plus size = { 16 } /> Add model definition
                 </button>
@@ -143,18 +153,17 @@ const Models: React.FC = () => {
             <div className = { `ag-theme-alpine ${styles.gridContainer }` }>
                 <AgGridReact
                     ref = { gridRef }
-                    rowData = { rowData }
+                    rowData = {rowData}
                     columnDefs = { columnDefs }
+                    defaultColDef={defaultColDef}
                     pagination = { true }
-                    paginationPageSize = { 50 }
-                    paginationPageSizeSelector = { [10, 20, 30, 40, 50] }
-                    suppressRowClickSelection = { true }
-                    icons = { icons }
-                    rowHeight = { 96 }
+                    paginationPageSize={pageSizes[0]}
+                    suppressPaginationPanel = { true }
                     onGridReady = { onGridReady }
-                    onPaginationChanged = { onPaginationChanged }
+                    rowHeight = { 96 }
                 />
             </div>
+            {gridApi && <CustomPagination gridApi={gridApi} pageSizes={pageSizes} />}
         </div>
     );
 };

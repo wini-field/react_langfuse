@@ -34,6 +34,16 @@
     margin-bottom: 16px;
 }
 
+.inputPristine {
+    color: #444;
+}
+
+.input:focus {
+    color: #fff;
+    outline: 1px solid #4f46e5;
+    border-color: #4f46e5;
+}
+
 .input:last-child {
     margin-bottom: 0;
 }
@@ -43,9 +53,17 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    background-color: #007bff;
+    background-color: #1e293b;
     color: white;
     font-weight: bold;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+
+.button:disabled {
+    background-color: #101828;
+    color: #64748b;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 .codeBlock {

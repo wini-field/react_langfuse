@@ -11,8 +11,9 @@ import SessionDetail from './pages/Tracing/SessionDetail';
 
 import Prompts from './pages/Prompts/Prompts';
 import PromptDetail from './pages/Prompts/PromptsDetail';
-import PromptNew from './pages/Prompts/PromptNew';
-import PromptEdit from './pages/Prompts/PromptEdit';
+import PromptNew from './pages/Prompts/PromptsNew';
+
+import Playground from './pages/Playground/Playground';
 
 import ScoresList from './pages/Evaluation/Scores/ScoresList';
 import ScoresDetail from './pages/Evaluation/Scores/ScoresDetail';
@@ -21,7 +22,7 @@ import ScoresEdit from './pages/Evaluation/Scores/ScoresEdit';
 
 import JudgePage from './pages/Evaluation/Judge/JudgePage';
 import HumanAnnotationPage from './pages/Evaluation/HumanAnnotation/HumanAnnotationPage';
-import DatasetsList from './pages/Evaluation/DataSets/DatasetsList';
+import DatasetsList from './pages/Evaluation/DataSets/DatasetsPage';
 
 import LLMDashboard from './pages/Dashboard/LLMDashboard';
 
@@ -32,7 +33,6 @@ import LLMConnections from "./pages/Settings/LLMConnections";
 import Models from './pages/Settings/Models';
 import Scores from './pages/Settings/Scores';
 import Members from './pages/Settings/Members';
-import AuditLogs from "./pages/Settings/AuditLogs";
 
 // ---- 임시 플래이스홀더들 (파일이 아직 없거나 빈 페이지일 때 대비) ----
 const Placeholder =
@@ -48,7 +48,7 @@ const Exports = Placeholder('Exports');
 
 const Sessions = Placeholder('Sessions');  // 사이드바 링크용 (/sessions)
 const Users = Placeholder('Users');        // 사이드바 링크용 (/users)
-const Playground = Placeholder('Playground');  // 사이드바 링크용 (/playground)
+//const Playground = Placeholder('Playground');  // 사이드바 링크용 (/playground)
 // const Datasets = Placeholder('Datasets');      // 사이드바 링크용 (/datasets)
 // const LlmAsAJudge = Placeholder('LLM as a Judge'); // 사이드바 링크용 (/llm-as-a-judge)
 // const HumanAnnotation = Placeholder('Human Annotation'); // (/human-annotation)
@@ -76,7 +76,9 @@ export default function App() {
         <Route path="prompts" element={<Prompts />} />
         <Route path="prompts/new" element={<PromptNew />} />
         <Route path="prompts/:id" element={<PromptDetail />} />
-        <Route path="prompts/:id/edit" element={<PromptEdit />} />
+
+          {/* Playground */}
+        <Route path="playground" element={<Playground />} />
 
         {/* Scores */}
         <Route path="scores" element={<ScoresList />} />
@@ -107,7 +109,6 @@ export default function App() {
           <Route path="scores" element={<Scores />} />
           <Route path="members" element={<Members />} />
           <Route path="exports" element={<Exports />} />
-          <Route path="audit-logs" element={<AuditLogs />} />
         </Route>
       </Route>
     </Routes>

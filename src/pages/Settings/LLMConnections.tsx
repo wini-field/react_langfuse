@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from "./ApiKeys.module.css";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 const DUMMY_LLM_DATA = [
     {
@@ -46,11 +47,15 @@ const LLMConnections: React.FC = () => {
                         <div>{ llmData.adapter }</div>
                         <div>{ llmData.baseUrl }</div>
                         <div>{ llmData.apiKey }</div>
+                        <div className = { styles.actionIcons }>
+                            <button className = { styles.iconButton }><Pencil size = { 16 } /></button>
+                            <button className = { styles.iconButton }><Trash2 size = { 16 } /></button>
+                        </div>
                     </div>
                 ))}
             </div>
-            <button className = { styles.addbutton }>
-                Add LLM Connection
+            <button className = { styles.createButton }>
+                <Plus size = { 16 } /> Add LLM Connection
             </button>
         </div>
     );

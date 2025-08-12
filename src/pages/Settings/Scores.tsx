@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React, {useCallback, useMemo, useRef, useState} from 'react'
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { ColDef, ICellRendererParams } from 'ag-grid-react';
 import {Plus, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Menu} from 'lucide-react';
 import styles from './Models.module.css';
+import CustomPagination from "./CustomPagination.tsx";
+import {GridApi, GridReadyEvent} from "ag-grid-community";
 
 interface ScoreConfig {
     id: number;
@@ -52,6 +54,10 @@ const ActionsRenderer: React.FC = () => {
 }
 
 const Scores: React.FC = () => {
+    const gridRef = useRef<AgGridReact>(null);
+    const [gridApi, setGridApi] = useState<GridApi | null>(null);
+    const pageSizes = useMemo(() => [10, 20, 30, 40, 50], []);
+
     const [rowData] = useState<ScoreConfig[]>(DUMMY_SCORES_DATA);
 
     const [columnDefs] = useState<ColDef[]>([
@@ -77,10 +83,14 @@ const Scores: React.FC = () => {
         paginationLast: () => <ChevronsRight size={18} />,
     };
 
+     const onGridReady = useCallback((event: GridReadyEvent) => {
+         setGridApi(event.api);
+     }, []);
+
     return (
         <div className = { styles.container }>
-            <h3></h3>
-            <p></p>
+            <h3>Score Configs</h3>
+            <p>Score configs define which scores are available for annotation in your project. Please note that all score configs are immutable.</p>
             <div className = { styles.header }>
                 <button className = { `${ styles.headerButton } ${ styles.columnsButton }`}>
                     <span>Column</span>
@@ -94,18 +104,18 @@ const Scores: React.FC = () => {
                 </button>
             </div>
 
-            <div className = { `ag-theme-alpine ${ styles.gridContainer }` }>
+            <div className = { `ag-theme-alpine ${styles.gridContainer }` }>
                 <AgGridReact
-                    rowData = {rowData}
+                    ref = { gridRef }
+                    rowData = { rowData }
                     columnDefs = { columnDefs }
-                    pagination = { true }
-                    paginationPageSize = { 50 }
-                    paginationPageSizeSelector = { [10, 20, 30, 40, 50] }
                     suppressRowClickSelection = { true }
                     icons = { icons }
                     rowHeight = { 96 }
+                    onGridReady = { onGridReady }
                 />
             </div>
+            { gridApi && <CustomPagination gridApi = { gridApi } pageSizes = { pageSizes } /> }
         </div>
     );
 };

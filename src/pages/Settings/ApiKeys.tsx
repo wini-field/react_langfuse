@@ -57,7 +57,7 @@ const ApiKeys: React.FC = () => {
                     </div>
                 ))}
             </div>
-            <button className = { styles.createbutton }>
+            <button className = { styles.createButton }>
                 <Plus size = { 16 } /> Create new API keys
             </button>
         </div>
