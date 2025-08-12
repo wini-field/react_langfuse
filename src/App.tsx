@@ -10,8 +10,8 @@ import SpanDetail from './pages/Tracing/SpanDetail';
 import SessionDetail from './pages/Tracing/SessionDetail';
 
 import Prompts from './pages/Prompts/Prompts';
-import PromptDetail from './pages/Prompts/PromptsDetail';
-import PromptNew from './pages/Prompts/PromptsNew';
+import PromptsDetail from './pages/Prompts/PromptsDetail';
+import PromptsNew from './pages/Prompts/PromptsNew';
 
 import Playground from './pages/Playground/Playground';
 
@@ -34,7 +34,7 @@ import Models from './pages/Settings/Models';
 import Scores from './pages/Settings/Scores';
 import Members from './pages/Settings/Members';
 
-// ---- 임시 플래이스홀더들 (파일이 아직 없거나 빈 페이지일 때 대비) ----
+// ---- 임시 플레이스홀더들 (파일이 아직 없거나 빈 페이지일 때 대비) ----
 const Placeholder =
   (title: string) =>
   () =>
@@ -74,10 +74,10 @@ export default function App() {
 
         {/* Prompts */}
         <Route path="prompts" element={<Prompts />} />
-        <Route path="prompts/new" element={<PromptNew />} />
-        <Route path="prompts/:id" element={<PromptDetail />} />
+        <Route path="prompts/new" element={<PromptsNew />} />
+        <Route path="prompts/:id" element={<PromptsDetail />} />
 
-          {/* Playground */}
+        {/* Playground */}
         <Route path="playground" element={<Playground />} />
 
         {/* Scores */}
