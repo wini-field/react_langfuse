@@ -145,9 +145,37 @@
     border-top: 1px solid #2f415d;
 }
 
+:global(.ag-paging-row-summary-panel) {
+    display: none;
+}
+
+:global(.ag-paging-panel) {
+    justify-content: flex-end;
+}
+
+:global(.ag-paging-page-summary-panel) {
+    margin-left: 24px;
+    margin-right: 16px;
+}
+
+:global(.ag-paging-page-summary-panel .ag-paging-number) {
+    border: 1px solid #2f415d;
+    border-radius: 6px;
+    padding: 4px 12px;
+    background-color: #020817;
+    width: 60px;
+    text-align: center;
+}
+
 :global(.ag-theme-alpine .ag-paging-button) {
     cursor: pointer;
     border: 1px solid #444;
+    border-radius: 6px;
+    margin: 0 2px;
+}
+
+:global(.ag-picker-field-wrapper) {
+    border: 1px solid #2f415d;
     border-radius: 6px;
 }
 

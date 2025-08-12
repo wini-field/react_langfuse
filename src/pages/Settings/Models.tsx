@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
+import { ColDef, ICellRendererParams, PaginationChangedEvent, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { ColDef, ICellRendererParams } from 'ag-grid-react';
 import { Plus, GitCommitHorizontal, Menu, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import styles from './Models.module.css';
 
@@ -47,6 +47,7 @@ const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
 };
 
 const Models: React.FC = () => {
+    const gridRef = useRef<AgGridReact>(null);
     const [columnDefs] = useState<ColDef[]>([
         {
             field: 'modelName',
@@ -104,6 +105,24 @@ const Models: React.FC = () => {
         paginationLast: () => <ChevronsRight size={18} />,
     };
 
+     const updateTotalPages = useCallback((event: PaginationChangedEvent) => {
+         const summaryPanel = gridRef.current?.api?.getGridCore().eGridDiv.querySelector('.ag-paging-page-summary-panel');
+         if (summaryPanel) {
+             const totalPages = event.api.paginationGetTotalPages();
+             summaryPanel.setAttribute('data-total-pages', totalPages.toString());
+         }
+    }, []);
+
+    // 그리드가 처음 준비되었을 때 호출되는 함수
+    const onGridReady = useCallback((event: GridReadyEvent) => {
+        updateTotalPages(event.api);
+    }, [updateTotalPages]);
+
+    // 페이지가 변경될 때마다 호출되는 함수
+    const onPaginationChanged = useCallback((event: PaginationChangedEvent) => {
+        updateTotalPages(event.api);
+    }, [updateTotalPages]);
+
     return (
         <div className = { styles.container }>
             <h3>Models</h3>
@@ -123,13 +142,17 @@ const Models: React.FC = () => {
 
             <div className = { `ag-theme-alpine ${styles.gridContainer }` }>
                 <AgGridReact
+                    ref = { gridRef }
                     rowData = { rowData }
                     columnDefs = { columnDefs }
                     pagination = { true }
                     paginationPageSize = { 50 }
+                    paginationPageSizeSelector = { [10, 20, 30, 40, 50] }
                     suppressRowClickSelection = { true }
                     icons = { icons }
                     rowHeight = { 96 }
+                    onGridReady = { onGridReady }
+                    onPaginationChanged = { onPaginationChanged }
                 />
             </div>
         </div>

@@ -2,101 +2,108 @@ import React, { useState } from 'react'
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { ColDef, ICellRendererParams} from 'ag-grid-react';
-import { Plus, GitCommitHorizontal } from 'lucide-react';
+import { ColDef, ICellRendererParams } from 'ag-grid-react';
+import {Plus, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Menu} from 'lucide-react';
 import styles from './Models.module.css';
 
-// Maintainer 아이콘
-const MaintainerRenderer: React.FC<ICellRendererParams> = () => (
-    <div className = { styles.maintainerCell }>
-        <GitCommitHorizontal size = { 16 } color = "#ef444" />
-    </div>
-);
+interface ScoreConfig {
+    id: number;
+    name: string;
+    dataType: 'BOOLEAN' | 'CATEGORICAL' | 'NUMERIC';
+    range: Record<string, any>;
+    description: string;
+    status: 'Active' | 'Archived';
+}
 
-// 가격
-const PricesRenderer: React.FC<ICellRendererParams> = (props) => (
-    <div className = { styles.pricesCell }>
-        <div><span>input</span> ${ props.data.inputPrice.toFixed(4) }</div>
-        <div><span>output</span> ${ props.data.outputPrice.toFixed(4) }</div>
-    </div>
-)
+const DUMMY_SCORES_DATA: ScoreConfig[] = [
+  { id: 1, name: 'tonality_correct', dataType: 'BOOLEAN', range: { '0': 'False', '1': 'True' }, description: '', status: 'Active' },
+  { id: 2, name: 'answer_correct', dataType: 'BOOLEAN', range: { '0': 'False', '1': 'True' }, description: '', status: 'Active' },
+  { id: 3, name: 'test-july44th', dataType: 'CATEGORICAL', range: { '0': 'test1', '1': 'test2', '2': 'test3' }, description: 'To provide context to annotato...', status: 'Active' },
+  { id: 4, name: 'First Pass', dataType: 'CATEGORICAL', range: { '0': 'Good Output', '1': 'Bad Output', '2': 'Saved for Later' }, description: '', status: 'Active' },
+  { id: 5, name: 'is_question', dataType: 'BOOLEAN', range: { '0': 'False', '1': 'True' }, description: 'Is the user message a question?', status: 'Active' },
+];
 
-// Tokenizer 설정
-const TokenizerConfRenderer: React.FC<ICellRendererParams> = (props) => {
+// Range
+const RangeRenderer: React.FC<ICellRendererParams> = (props) => {
+    const rangeData = props.value;
+    let displayValue = '';
+
+    if (typeof rangeData === 'object' && rangeData !== null) {
+        displayValue = JSON.stringify(rangeData);
+    } else if (typeof rangeData === 'string') {
+        displayValue = rangeData;
+    }
+
     return (
-        <pre className = { styles.tokenizerConfCell }>
-            {JSON.stringify(props.data.tokenizerConfig, null, 2)}
-        </pre>
-    );
-};
-
-// Actions 버튼
-const ActionsRederer: React.FC<ICellRendererParams> = (props) => {
-    return (
-        <div className = { styles.cellCenter }>
-            <button className = { styles.cloneButton }>Clone</button>
+        <div className = { styles.simpleTokenizerCell }>
+            {displayValue}
         </div>
     );
 };
 
+const ActionsRenderer: React.FC = () => {
+    return (
+        <div style = { { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' } }>
+            <button style = { { background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' } }>
+                <Trash2 size = { 16 } />
+            </button>
+        </div>
+    )
+}
+
 const Scores: React.FC = () => {
+    const [rowData] = useState<ScoreConfig[]>(DUMMY_SCORES_DATA);
+
     const [columnDefs] = useState<ColDef[]>([
-        { field: 'modelName', headerName: 'Name', flex: 2 },
-        {
-            field: 'maintainer',
-            headerName: 'Maintainer',
-            cellRenderer: MaintainerRenderer,
-            flex: 1
-        },
-        { field: 'matchPattern', headerName: 'Data Type', flex: 3 },
-        {
-            field: 'prices',
-            haederName: 'Prices per unit',
-            cleeRenderer: PricesRenderer,
-            flex: 1.5
-        },
-        { field: 'tokenizer', headerName: 'Range', flex: 1 },
-        {
-            field: 'tokenizerConfig',
-            headerName: 'Description',
-            cellRenderer: TokenizerConfRenderer,
-            flex: 2,
-            autoHeight: true
-        },
-        { field: 'lastUsed', headerName: 'Status', flex: 1 },
+        { field: 'name', headerName: 'Name', flex: 2, resizable: true, sortable: true },
+        { field: 'dataType', headerName: 'Data Type', flex: 1.5, resizeable: true, sortable: true },
+        { field: 'range', header: 'Range', cellRenderer: RangeRenderer, flex: 3, resizable: true, autoHeight: true },
+        { field: 'description', headerName: 'Description', flex: 3, resizable: true },
+        { field: 'status', headerName: 'Status', flex: 1, resizable: true, sortable: true },
         {
             field: 'actions',
             headerName: 'Action',
-            cellRenderer: ActionsRederer,
+            cellRenderer: ActionsRenderer,
             flex: 1,
+            resizable: false,
+            sortable: false,
         },
     ]);
 
-     const [rowData] = useState([
-        { modelName: 'babbage-002', matchPattern: '(?i)^(babbage-002)$', inputPrice: 0.000004, outputPrice: 0.000016, tokenizer: 'openai', tokenizerConfig: { tokenizerModel: "babbage-002" }, lastUsed: '' },
-        { modelName: 'chat-bison', matchPattern: '(?i)^(chat-bison)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: '', tokenizerConfig: {}, lastUsed: '' },
-        { modelName: 'chat-bison-32k', matchPattern: '(?i)^(chat-bison-32k)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: '', tokenizerConfig: {}, lastUsed: '' },
-        { modelName: 'chatgpt-4o-latest', matchPattern: '(?i)^(chatgpt-4o-latest)$', inputPrice: 0.000005, outputPrice: 0.000015, tokenizer: 'openai', tokenizerConfig: { "tokensPerMessage": 1, "tokenizerModel": "gpt-4o" }, lastUsed: '' },
-        { modelName: 'claude-1.1', matchPattern: '(?i)^(claude-1.1)$', inputPrice: 0.000008, outputPrice: 0.000024, tokenizer: 'claude', tokenizerConfig: {}, lastUsed: '' },
-    ]);
-
+     const icons = {
+        paginationFirst: () => <ChevronsLeft size={18} />,
+        paginationPrev: () => <ChevronLeft size={18} />,
+        paginationNext: () => <ChevronRight size={18} />,
+        paginationLast: () => <ChevronsRight size={18} />,
+    };
 
     return (
         <div className = { styles.container }>
-            <h3>Score Configs</h3>
-            <p>Score configs define which scores are available for annotation in your project. Please note that all score configs are immutable.</p>
+            <h3></h3>
+            <p></p>
             <div className = { styles.header }>
-                <button>Column = 6/8</button>
-                <button><Plus size = { 16 } /> Add new score config</button>
+                <button className = { `${ styles.headerButton } ${ styles.columnsButton }`}>
+                    <span>Column</span>
+                    <span className = { styles.count }>6/8</span>
+                </button>
+                <button className = { `${ styles.headerButton } ${ styles.iconButton }` } >
+                    <Menu size = { 16 } />
+                </button>
+                <button className = { `${ styles.headerButton } ${ styles.addButton }` }>
+                    <Plus size = { 16 } /> Add new score config
+                </button>
             </div>
 
-            <div className = { `ag-theme-alpine-dark ${ styles.gridContainer }` }>
+            <div className = { `ag-theme-alpine ${ styles.gridContainer }` }>
                 <AgGridReact
-                    rowData = { rowData }
+                    rowData = {rowData}
                     columnDefs = { columnDefs }
                     pagination = { true }
                     paginationPageSize = { 50 }
+                    paginationPageSizeSelector = { [10, 20, 30, 40, 50] }
                     suppressRowClickSelection = { true }
+                    icons = { icons }
+                    rowHeight = { 96 }
                 />
             </div>
         </div>

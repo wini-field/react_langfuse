@@ -42,7 +42,7 @@ const Placeholder =
 
 //const LLMConnections = Placeholder('LLM Connections');
 //const Scores = Placeholder('Scores (Settings)');
-const Integrations = Placeholder('Integrations');
+//const Integrations = Placeholder('Integrations');
 const Exports = Placeholder('Exports');
 //const AuditLogs = Placeholder('Audit Logs');
 
@@ -106,7 +106,6 @@ export default function App() {
           <Route path="models" element={<Models />} />
           <Route path="scores" element={<Scores />} />
           <Route path="members" element={<Members />} />
-          <Route path="integrations" element={<Integrations />} />
           <Route path="exports" element={<Exports />} />
           <Route path="audit-logs" element={<AuditLogs />} />
         </Route>
