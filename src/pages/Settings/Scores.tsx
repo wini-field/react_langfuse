@@ -1,12 +1,13 @@
 import React, {useCallback, useMemo, useRef, useState} from 'react'
 import { AgGridReact } from 'ag-grid-react';
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css";
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css';
 import { ColDef, ICellRendererParams } from 'ag-grid-react';
 import {Plus, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Menu} from 'lucide-react';
-import styles from './layout/Models.module.css';
-import CustomPagination from "./CustomPagination.tsx";
-import {GridApi, GridReadyEvent} from "ag-grid-community";
+import commonStyles from './layout/SettingsCommon.module.css'
+import gridStyles from './layout/SettingsGrid.module.css'
+import CustomPagination from './CustomPagination.tsx';
+import { GridApi, GridReadyEvent } from 'ag-grid-community';
 
 interface ScoreConfig {
     id: number;
@@ -37,7 +38,7 @@ const RangeRenderer: React.FC<ICellRendererParams> = (props) => {
     }
 
     return (
-        <div className = { styles.simpleTokenizerCell }>
+        <div className = { commonStyles.simpleTokenizerCell }>
             {displayValue}
         </div>
     );
@@ -88,23 +89,23 @@ const Scores: React.FC = () => {
      }, []);
 
     return (
-        <div className = { styles.container }>
+        <div className = { commonStyles.container }>
             <h3>Score Configs</h3>
             <p>Score configs define which scores are available for annotation in your project. Please note that all score configs are immutable.</p>
-            <div className = { styles.header }>
-                <button className = { `${ styles.headerButton } ${ styles.columnsButton }`}>
+            <div className = { gridStyles.header }>
+                <button className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }`}>
                     <span>Column</span>
-                    <span className = { styles.count }>6/8</span>
+                    <span className = { gridStyles.count }>6/8</span>
                 </button>
-                <button className = { `${ styles.headerButton } ${ styles.iconButton }` } >
+                <button className = { `${ gridStyles.headerButton } ${ gridStyles.iconButton }` } >
                     <Menu size = { 16 } />
                 </button>
-                <button className = { `${ styles.headerButton } ${ styles.addButton }` }>
+                <button className = { `${ gridStyles.headerButton } ${ gridStyles.addButton }` }>
                     <Plus size = { 16 } /> Add new score config
                 </button>
             </div>
 
-            <div className = { `ag-theme-alpine ${styles.gridContainer }` }>
+            <div className = { `ag-theme-alpine ${gridStyles.gridContainer }` }>
                 <AgGridReact
                     ref = { gridRef }
                     rowData = { rowData }

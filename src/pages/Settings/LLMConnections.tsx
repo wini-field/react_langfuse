@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from "./layout/Apikeys.module.css";
+import styles from "./layout/SettingsCommon.module.css";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 const DUMMY_LLM_DATA = [
@@ -30,7 +30,7 @@ const LLMConnections: React.FC = () => {
     return (
         <div className = { styles.container }>
             { /* Host Name Section */ }
-            <h3 className = { styles.h3 }>LLM Connections </h3>
+            <h3 className = { styles.title }>LLM Connections </h3>
             <p>Connect your LLM services to enable evaluations and playground features. Your provider will charge based on usage.</p>
 
             <div className = { styles.keyList }>

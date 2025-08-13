@@ -3,9 +3,20 @@ import { ColDef, ICellRendererParams, GridReadyEvent, GridApi } from 'ag-grid-co
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { Plus, GitCommitHorizontal, Menu, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {
+    Plus,
+    GitCommitHorizontal,
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
+    Menu
+} from 'lucide-react';
+import commonStyles from './layout/SettingsCommon.module.css'
+import gridStyles from './layout/SettingsGrid.module.css'
 import styles from './layout/Models.module.css';
 import CustomPagination from './CustomPagination';
+import ColumnMenu from '../../layouts/ColumnMenu'
 
 // Maintainer 아이콘
 const MaintainerRenderer: React.FC<ICellRendererParams> = () => (
@@ -28,7 +39,7 @@ const TokenizerConfRenderer: React.FC<ICellRendererParams> = ({ data }) => {
     const entries = Object.entries(config);
 
     return (
-        <div className = { styles.simpleTokenizerCell }>
+        <div className = { commonStyles.simpleTokenizerCell }>
             { entries.map(([key, value]) => (
                 <div key = { key }>
                     { `{${ key }: "${ value }"` }
@@ -47,11 +58,24 @@ const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
     );
 };
 
+const COLUMN_DEFINITION: (ColDef & { headerName: string; field: string; lockVisible?: boolean})[] = [
+    { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, lockVisible: true },
+    { field: 'maintainer', headerName: 'Maintainer', width: 100, cellRenderer: MaintainerRenderer, lockVisible: true },
+    { field: 'matchPattern', headerName: 'Match Pattern', width: 200, lockVisible: true },
+    { field: 'prices', headerName: 'Prices per unit', width: 150, cellRenderer: PricesRenderer },
+    { field: 'tokenizer', headerName: 'Tokenizer', width: 120 },
+    { field: 'tokenizerConfig', headerName: 'Tokenizer Config', width: 250, cellRenderer: TokenizerConfRenderer, autoHeight: true },
+    { field: 'lastUsed', headerName: 'Last used', width: 120 },
+    { field: 'actions', headerName: 'Actions', width: 100, cellRenderer: ActionsRenderer, sortable: false, resizable: false, lockVisible: true },
+]
+
 const Models: React.FC = () => {
     const gridRef = useRef<AgGridReact>(null);
     const [gridApi, setGridApi] = useState<GridApi | null>(null);
     const pageSizes = useMemo(() => [10, 20, 30, 40, 50], []);
+
     const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+    const columnButtonRef = useRef<HTMLDivElement>(null);
 
     const [columnVisibility, setColumnVisibility] = useState({
         modelName: true,
@@ -64,16 +88,37 @@ const Models: React.FC = () => {
         actions: true,
     });
 
-    const columnDefs = useMemo((): ColDef[] => [
-        { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, hide: !columnVisibility.modelName },
-        { field: 'maintainer', headerName: 'Maintainer', width: 100, cellRenderer: MaintainerRenderer, hide: !columnVisibility.maintainer },
-        { field: 'matchPattern', headerName: 'Match Pattern', width: 200, hide: !columnVisibility.matchPattern },
-        { field: 'prices', headerName: 'Prices per unit', width: 150, cellRenderer: PricesRenderer, hide: !columnVisibility.prices },
-        { field: 'tokenizer', headerName: 'Tokenizer', width: 120, hide: !columnVisibility.tokenizer },
-        { field: 'tokenizerConfig', headerName: 'Tokenizer Config', width: 250, cellRenderer: TokenizerConfRenderer, autoHeight: true, hide: !columnVisibility.tokenizerConfig },
-        { field: 'lastUsed', headerName: 'Last used', width: 120, hide: !columnVisibility.lastUsed },
-        { field: 'actions', headerName: 'Actions', width: 100, cellRenderer: ActionsRenderer, sortable: false, resizable: false, hide: !columnVisibility.actions },
-    ], [columnVisibility]);
+    const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
+        const columnDef = COLUMN_DEFINITION.find(c => c.field === field);
+        if (columnDef?.lockVisible) {
+            return;
+        }
+         setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+     };
+
+    const visibleColumnCount = useMemo(() => {
+        return Object.values(columnVisibility).filter(isVisible => isVisible).length;
+    }, [columnVisibility]);
+
+    const mandatoryFields = useMemo(() =>
+        COLUMN_DEFINITION.filter(c => c.lockVisible).map(c => c.field),
+    []);
+
+    const columnDisplayNames = useMemo(() =>
+        COLUMN_DEFINITION.reduce((acc, col) => {
+            if (col.field) {
+                acc[col.field] = col.headerName;
+            }
+            return acc;
+        }, {} as Record<string, string>),
+    []);
+
+    const columnDefs = useMemo((): ColDef[] =>
+        COLUMN_DEFINITION.map(col => ({
+            ...col,
+            hide: !columnVisibility[col.field as keyof typeof columnVisibility],
+        })),
+    [columnVisibility]);
 
     const defaultColDef = useMemo(() => ({
         minWidth: 50,
@@ -109,61 +154,53 @@ const Models: React.FC = () => {
          setGridApi(event.api);
      }, []);
 
-     const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
-         setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
-     };
-
     return (
-        <div className = { styles.container }>
+        <div className = { commonStyles.container }>
             <h3>Models</h3>
             <p>A model represents a LLM model. It is used to calculate tokens and cost.</p>
-            <div className = { styles.header }>
+            <div className = { gridStyles.header }>
                 {/* ✅ Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
-                <div className={styles.columnButtonWrapper}>
+                <div ref = { columnButtonRef } className = { gridStyles.columnsButtonWrapper } onClick={() => setIsColumnMenuOpen(prev => !prev)}>
                     <button
-                        className = { `${ styles.headerButton } ${ styles.columnsButton }` }
-                        onClick={() => setIsColumnMenuOpen(prev => !prev)}
+                        className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }
                     >
                         <span>Columns</span>
-                        <span className = { styles.count }>8/8</span>
+                        <span className = { gridStyles.count }>{ visibleColumnCount }/{ COLUMN_DEFINITION.length }</span>
                     </button>
-                    {/* ✅ 드롭다운 메뉴 */}
-                    {isColumnMenuOpen && (
-                        <div className={styles.columnMenu}>
-                            {Object.keys(columnVisibility).map(key => (
-                                <div
-                                    key={key}
-                                    className={styles.menuItem}
-                                    onClick={() => toggleColumnVisibility(key as keyof typeof columnVisibility)}
-                                >
-                                    <div className={styles.checkbox}>
-                                        {columnVisibility[key as keyof typeof columnVisibility] && <Check size={14} />}
-                                    </div>
-                                    <span>{key}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    { /* */ }
+                    <ColumnMenu
+                        isOpen = { isColumnMenuOpen }
+                        onClose = { () => setIsColumnMenuOpen(false) }
+                        anchorE1 = { columnButtonRef }
+                        columnVisibility = { columnVisibility }
+                        toggleColumnVisibility = { toggleColumnVisibility }
+                        displayNames = { columnDisplayNames }
+                        mandatoryFields = { mandatoryFields }
+                    />
                 </div>
-                <button className = { `${ styles.headerButton} ${ styles.addButton }` } >
+                <button className = { `${ gridStyles.headerButton } ${ gridStyles.iconButton }` } >
+                    <Menu size = { 16 } />
+                </button>
+                <button className = { `${ gridStyles.headerButton} ${ gridStyles.addButton }` } >
                     <Plus size = { 16 } /> Add model definition
                 </button>
             </div>
 
-            <div className = { `ag-theme-alpine ${styles.gridContainer }` }>
+            <div className = { `ag-theme-alpine ${ gridStyles.gridContainer }` }>
                 <AgGridReact
                     ref = { gridRef }
                     rowData = {rowData}
                     columnDefs = { columnDefs }
-                    defaultColDef={defaultColDef}
+                    defaultColDef = { defaultColDef }
                     pagination = { true }
-                    paginationPageSize={pageSizes[0]}
+                    paginationPageSize = { pageSizes[0] }
                     suppressPaginationPanel = { true }
                     onGridReady = { onGridReady }
+                    icons = { icons }
                     rowHeight = { 96 }
                 />
             </div>
-            {gridApi && <CustomPagination gridApi={gridApi} pageSizes={pageSizes} />}
+            { gridApi && <CustomPagination gridApi={ gridApi } pageSizes={ pageSizes } />}
         </div>
     );
 };
