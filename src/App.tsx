@@ -4,15 +4,16 @@ import Layout from './layouts/Layout';
 
 import Home from './pages/Home/Home';
 
-import Tracing from './pages/Tracing/Tracing';
+import Trace from './pages/Tracing/Tracing';
 import TraceDetail from './pages/Tracing/TraceDetail';
 import SpanDetail from './pages/Tracing/SpanDetail';
 import SessionDetail from './pages/Tracing/SessionDetail';
 
 import Prompts from './pages/Prompts/Prompts';
-import PromptDetail from './pages/Prompts/PromptsDetail';
-import PromptNew from './pages/Prompts/PromptNew';
-import PromptEdit from './pages/Prompts/PromptEdit';
+import PromptsDetail from './pages/Prompts/PromptsDetail';
+import PromptsNew from './pages/Prompts/PromptsNew';
+
+import Playground from './pages/Playground/Playground';
 
 import ScoresList from './pages/Evaluation/Scores/ScoresList';
 import ScoresDetail from './pages/Evaluation/Scores/ScoresDetail';
@@ -21,7 +22,7 @@ import ScoresEdit from './pages/Evaluation/Scores/ScoresEdit';
 
 import JudgePage from './pages/Evaluation/Judge/JudgePage';
 import HumanAnnotationPage from './pages/Evaluation/HumanAnnotation/HumanAnnotationPage';
-import DatasetsList from './pages/Evaluation/DataSets/DatasetsList';
+import DatasetsList from './pages/Evaluation/DataSets/DatasetsPage';
 
 import LLMDashboard from './pages/Dashboard/LLMDashboard';
 
@@ -32,9 +33,8 @@ import LLMConnections from "./pages/Settings/LLMConnections";
 import Models from './pages/Settings/Models';
 import Scores from './pages/Settings/Scores';
 import Members from './pages/Settings/Members';
-import AuditLogs from "./pages/Settings/AuditLogs";
 
-// ---- 임시 플래이스홀더들 (파일이 아직 없거나 빈 페이지일 때 대비) ----
+// ---- 임시 플레이스홀더들 (파일이 아직 없거나 빈 페이지일 때 대비) ----
 const Placeholder =
   (title: string) =>
   () =>
@@ -43,12 +43,11 @@ const Placeholder =
 //const LLMConnections = Placeholder('LLM Connections');
 //const Scores = Placeholder('Scores (Settings)');
 //const Integrations = Placeholder('Integrations');
-const Exports = Placeholder('Exports');
 //const AuditLogs = Placeholder('Audit Logs');
 
 const Sessions = Placeholder('Sessions');  // 사이드바 링크용 (/sessions)
-const Users = Placeholder('Users');        // 사이드바 링크용 (/users)
-const Playground = Placeholder('Playground');  // 사이드바 링크용 (/playground)
+//const Users = Placeholder('Users');        // 사이드바 링크용 (/users)
+//const Playground = Placeholder('Playground');  // 사이드바 링크용 (/playground)
 // const Datasets = Placeholder('Datasets');      // 사이드바 링크용 (/datasets)
 // const LlmAsAJudge = Placeholder('LLM as a Judge'); // 사이드바 링크용 (/llm-as-a-judge)
 // const HumanAnnotation = Placeholder('Human Annotation'); // (/human-annotation)
@@ -62,21 +61,22 @@ export default function App() {
 
         {/* 사이드바 링크 보완용 라우트들 */}
         <Route path="sessions" element={<Sessions />} />
-        <Route path="users" element={<Users />} />
         <Route path="playground" element={<Playground />} />
 
 
         {/* Tracing */}
-        <Route path="tracing" element={<Tracing />} />
+        <Route path="trace" element={<Trace />} />
         <Route path="tracing/:id" element={<TraceDetail />} />
         <Route path="tracing/:traceId/spans/:spanId" element={<SpanDetail />} />
         <Route path="tracing/:traceId/sessions/:sessionId" element={<SessionDetail />} />
 
         {/* Prompts */}
         <Route path="prompts" element={<Prompts />} />
-        <Route path="prompts/new" element={<PromptNew />} />
-        <Route path="prompts/:id" element={<PromptDetail />} />
-        <Route path="prompts/:id/edit" element={<PromptEdit />} />
+        <Route path="prompts/new" element={<PromptsNew />} />
+        <Route path="prompts/:id" element={<PromptsDetail />} />
+
+        {/* Playground */}
+        <Route path="playground" element={<Playground />} />
 
         {/* Scores */}
         <Route path="scores" element={<ScoresList />} />
@@ -106,8 +106,6 @@ export default function App() {
           <Route path="models" element={<Models />} />
           <Route path="scores" element={<Scores />} />
           <Route path="members" element={<Members />} />
-          <Route path="exports" element={<Exports />} />
-          <Route path="audit-logs" element={<AuditLogs />} />
         </Route>
       </Route>
     </Routes>

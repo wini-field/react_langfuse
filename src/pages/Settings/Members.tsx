@@ -1,11 +1,12 @@
-import React, { useState, useRef } from 'react'
+import React, {useState, useRef, useCallback, useMemo} from 'react'
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { ColDef, ICellRendererParams } from 'ag-grid-community';
+import {ColDef, GridApi, GridReadyEvent, ICellRendererParams} from 'ag-grid-community';
 import {Plus, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import styles from './Models.module.css';
-import memberStyles from './Members.module.css';
+import styles from './layout/Models.module.css';
+import memberStyles from './layout/Members.module.css';
+import CustomPagination from "./CustomPagination.tsx";
 
 interface Member {
     id: string;
@@ -16,7 +17,7 @@ interface Member {
 }
 
 const DUMMY_MEMBERS_DATA: Member[] = [
-  { id: 1, name: 'Na Youngseok', email: 'youngseok@naver.com', organizationRole: 'Owner', projectRole: 'N/A on plan' },
+  { id: '1', name: 'Na Youngseok', email: 'youngseok@naver.com', organizationRole: 'Owner', projectRole: 'N/A on plan' },
   // 페이지네이션 테스트를 위해 데이터 추가
   ...Array.from({ length: 30 }, (_, i) => ({
     id: `${i + 2}`,
@@ -58,10 +59,12 @@ const ActionsRenderer: React.FC = () => {
 }
 
 const Members: React.FC = () => {
-    const [rowData] = useState<Member[]>(DUMMY_MEMBERS_DATA);
     const gridRef = useRef<AgGridReact>(null);
+    const [gridApi, setGridApi] = useState<GridApi | null>(null);
+    const pageSizes = useMemo(() => [10, 20, 30, 40, 50], []);
 
-    const[columnDefs] = useState<ColDef[]>([
+    const [rowData] = useState<Member[]>(DUMMY_MEMBERS_DATA);
+    const [columnDefs] = useState<ColDef[]>([
         { field: 'name', headerName: 'Name', cellRenderer: NameRenderer, flex: 2, resizable: true, sortable: true },
         { field: 'email', headerName: 'Email', flex: 3, resizable: true, sortable: true },
         { field: 'organizationRole', headerName: 'Organization Role', cellRenderer: OrganizationRoleRenderer, flex: 2, resizable: true, sortable: true },
@@ -83,10 +86,13 @@ const Members: React.FC = () => {
         paginationLast: () => <ChevronsRight size={18} />,
     };
 
+    const onGridReady = useCallback((event: GridReadyEvent) => {
+         setGridApi(event.api);
+     }, []);
+
     return (
         <div className = { styles.container }>
-            <h3>Members</h3>
-            <p></p>
+            <h3>Project Members</h3>
             <div className = { styles.header }>
                 <button className = { `${ styles.headerButton } ${ styles.columnsButton }`}>
                     <span>Column</span>
@@ -97,21 +103,19 @@ const Members: React.FC = () => {
                 </button>
             </div>
 
-            <div className = { `ag-theme-alpine ${ styles.gridContainer }` }>
+            <div className = { `ag-theme-alpine ${styles.gridContainer }` }>
                 <AgGridReact
                     ref = { gridRef }
-                    rowData = {rowData}
+                    rowData = { rowData }
                     columnDefs = { columnDefs }
                     pagination = { true }
-                    paginationPageSize = { 10 }
-                    paginationPageSizeSelector = { [10, 20, 30, 40, 50] }
+                    paginationPageSize = { pageSizes[0] }
                     suppressRowClickSelection = { true }
                     icons = { icons }
-                    localeText={{
-                        pageSizeSelectorLabel: 'Rows per page'
-                    }}
+                    onGridReady = { onGridReady }
                 />
             </div>
+            { gridApi && <CustomPagination gridApi = { gridApi } pageSizes = { pageSizes } /> }
         </div>
     );
 };

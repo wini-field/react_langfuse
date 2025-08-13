@@ -1,6 +1,5 @@
-import React from 'react';
-//import { Outlet } from 'react-router-dom';
-import styles from './General.module.css'
+import React, { useState, useEffect } from 'react';
+import styles from './layout/General.module.css'
 
 const generalSettingsData = {
   hostName: 'https://cloud.langfuse.com',
@@ -18,7 +17,39 @@ const generalSettingsData = {
 };
 
 const General: React.FC = () => {
-    const [projectName, setProjectName] = React.useState(generalSettingsData.projectName);
+    const [originalProjectName, setOriginalProjectName] = useState(generalSettingsData.projectName);
+    const [projectName, setProjectName] = useState(generalSettingsData.projectName);
+    const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+    const [isPristine, setIsPristine] = useState(true);
+
+    useEffect(() => {
+        setIsSaveDisabled(projectName.trim() === '' || projectName === originalProjectName);
+    }, [projectName, originalProjectName]);
+
+    const handleSave = () => {
+        alert(`Project name changed to: ${ projectName }`);
+        setOriginalProjectName(projectName);
+    }
+
+    const handleFocus = () => {
+        if (isPristine) {
+            setProjectName('');
+        }
+    };
+
+    const handleBlur = () => {
+        if (projectName.trim() === '') {
+            setProjectName(originalProjectName);
+            setIsPristine(true);
+        }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (isPristine) {
+            setIsPristine(false);
+        }
+        setProjectName(e.target.value);
+    };
 
     return (
         <div className = { styles.container }>
@@ -32,14 +63,16 @@ const General: React.FC = () => {
             { /* Project Name Section */ }
             <h3 className = { styles.h3 }>Project Name</h3>
             <section className={ styles.section }>
-                <p className = { styles.p }>Your Project is currently named '{generalSettingsData.projectName}'.</p>
+                <p className = { styles.p }>Your Project is currently '{ originalProjectName }'.</p>
                 <input
                     type = "text"
                     value = { projectName }
-                    onChange = { (e) => setProjectName(e.target.value) }
-                    className = { styles.input }
+                    onChange = { handleChange }
+                    onFocus = { handleFocus }
+                    onBlur = { handleBlur }
+                    className = { `${ styles.input } ${ isPristine ? styles.inputPristine : ''}` }
                 />
-                <button className = { styles.button }>Save</button>
+                <button className = { styles.button } onClick = { handleSave } disabled = { isSaveDisabled }>Save</button>
             </section>
 
             { /* Debug Information Section */ }
