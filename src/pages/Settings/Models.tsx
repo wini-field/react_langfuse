@@ -58,7 +58,7 @@ const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
     );
 };
 
-const COLUMN_DEFINITION: (ColDef & { headerName: string; field: string; lockVisible?: boolean})[] = [
+const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string; lockVisible?: boolean})[] = [
     { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, lockVisible: true },
     { field: 'maintainer', headerName: 'Maintainer', width: 100, cellRenderer: MaintainerRenderer, lockVisible: true },
     { field: 'matchPattern', headerName: 'Match Pattern', width: 200, lockVisible: true },
@@ -89,23 +89,33 @@ const Models: React.FC = () => {
     });
 
     const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
-        const columnDef = COLUMN_DEFINITION.find(c => c.field === field);
+        const columnDef = COLUMN_DEFINITIONS.find(c => c.field === field);
         if (columnDef?.lockVisible) {
             return;
         }
          setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
      };
 
+    const toggleAllColumns = (select: boolean) => {
+        const newVisibility = { ...columnVisibility };
+        COLUMN_DEFINITIONS.forEach(col => {
+            if (!col.lockVisible) {
+                newVisibility[col.field as keyof typeof columnVisibility] = select;
+            }
+        });
+        setColumnVisibility(newVisibility);
+    };
+
     const visibleColumnCount = useMemo(() => {
         return Object.values(columnVisibility).filter(isVisible => isVisible).length;
     }, [columnVisibility]);
 
     const mandatoryFields = useMemo(() =>
-        COLUMN_DEFINITION.filter(c => c.lockVisible).map(c => c.field),
+        COLUMN_DEFINITIONS.filter(c => c.lockVisible).map(c => c.field),
     []);
 
     const columnDisplayNames = useMemo(() =>
-        COLUMN_DEFINITION.reduce((acc, col) => {
+        COLUMN_DEFINITIONS.reduce((acc, col) => {
             if (col.field) {
                 acc[col.field] = col.headerName;
             }
@@ -114,7 +124,7 @@ const Models: React.FC = () => {
     []);
 
     const columnDefs = useMemo((): ColDef[] =>
-        COLUMN_DEFINITION.map(col => ({
+        COLUMN_DEFINITIONS.map(col => ({
             ...col,
             hide: !columnVisibility[col.field as keyof typeof columnVisibility],
         })),
@@ -165,7 +175,7 @@ const Models: React.FC = () => {
                         className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }
                     >
                         <span>Columns</span>
-                        <span className = { gridStyles.count }>{ visibleColumnCount }/{ COLUMN_DEFINITION.length }</span>
+                        <span className = { gridStyles.count }>{ visibleColumnCount }/{ COLUMN_DEFINITIONS.length }</span>
                     </button>
                     { /* */ }
                     <ColumnMenu
@@ -176,6 +186,7 @@ const Models: React.FC = () => {
                         toggleColumnVisibility = { toggleColumnVisibility }
                         displayNames = { columnDisplayNames }
                         mandatoryFields = { mandatoryFields }
+                        onToggleAll = { toggleAllColumns }
                     />
                 </div>
                 <button className = { `${ gridStyles.headerButton } ${ gridStyles.iconButton }` } >
