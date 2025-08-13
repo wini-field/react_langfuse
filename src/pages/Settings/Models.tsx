@@ -3,7 +3,18 @@ import { ColDef, ICellRendererParams, GridReadyEvent, GridApi } from 'ag-grid-co
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import { Plus, GitCommitHorizontal, Menu, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {
+    Plus,
+    GitCommitHorizontal,
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
+    Check,
+    Menu
+} from 'lucide-react';
+import commonStyles from './layout/SettingsCommon.module.css'
+import gridStyles from './layout/SettingsGrid.module.css'
 import styles from './layout/Models.module.css';
 import CustomPagination from './CustomPagination';
 
@@ -28,7 +39,7 @@ const TokenizerConfRenderer: React.FC<ICellRendererParams> = ({ data }) => {
     const entries = Object.entries(config);
 
     return (
-        <div className = { styles.simpleTokenizerCell }>
+        <div className = { commonStyles.simpleTokenizerCell }>
             { entries.map(([key, value]) => (
                 <div key = { key }>
                     { `{${ key }: "${ value }"` }
@@ -114,56 +125,59 @@ const Models: React.FC = () => {
      };
 
     return (
-        <div className = { styles.container }>
+        <div className = { commonStyles.container }>
             <h3>Models</h3>
             <p>A model represents a LLM model. It is used to calculate tokens and cost.</p>
-            <div className = { styles.header }>
+            <div className = { gridStyles.header }>
                 {/* ✅ Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
-                <div className={styles.columnButtonWrapper}>
+                <div className={ gridStyles.columnButtonWrapper }>
                     <button
-                        className = { `${ styles.headerButton } ${ styles.columnsButton }` }
+                        className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }
                         onClick={() => setIsColumnMenuOpen(prev => !prev)}
                     >
                         <span>Columns</span>
-                        <span className = { styles.count }>8/8</span>
+                        <span className = { gridStyles.count }>8/8</span>
                     </button>
                     {/* ✅ 드롭다운 메뉴 */}
-                    {isColumnMenuOpen && (
-                        <div className={styles.columnMenu}>
-                            {Object.keys(columnVisibility).map(key => (
+                    { isColumnMenuOpen && (
+                        <div className={ gridStyles.columnMenu }>
+                            { Object.keys(columnVisibility).map(key => (
                                 <div
-                                    key={key}
-                                    className={styles.menuItem}
+                                    key={ key }
+                                    className={ gridStyles.menuItem }
                                     onClick={() => toggleColumnVisibility(key as keyof typeof columnVisibility)}
                                 >
-                                    <div className={styles.checkbox}>
-                                        {columnVisibility[key as keyof typeof columnVisibility] && <Check size={14} />}
+                                    <div className={ gridStyles.checkbox }>
+                                        { columnVisibility[key as keyof typeof columnVisibility] && <Check size={14} /> }
                                     </div>
-                                    <span>{key}</span>
+                                    <span>{ key }</span>
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
-                <button className = { `${ styles.headerButton} ${ styles.addButton }` } >
+                <button className = { `${ gridStyles.headerButton } ${ gridStyles.iconButton }` } >
+                    <Menu size = { 16 } />
+                </button>
+                <button className = { `${ gridStyles.headerButton} ${ gridStyles.addButton }` } >
                     <Plus size = { 16 } /> Add model definition
                 </button>
             </div>
 
-            <div className = { `ag-theme-alpine ${styles.gridContainer }` }>
+            <div className = { `ag-theme-alpine ${ gridStyles.gridContainer }` }>
                 <AgGridReact
                     ref = { gridRef }
                     rowData = {rowData}
                     columnDefs = { columnDefs }
-                    defaultColDef={defaultColDef}
+                    defaultColDef = { defaultColDef }
                     pagination = { true }
-                    paginationPageSize={pageSizes[0]}
+                    paginationPageSize = { pageSizes[0] }
                     suppressPaginationPanel = { true }
                     onGridReady = { onGridReady }
                     rowHeight = { 96 }
                 />
             </div>
-            {gridApi && <CustomPagination gridApi={gridApi} pageSizes={pageSizes} />}
+            { gridApi && <CustomPagination gridApi={ gridApi } pageSizes={ pageSizes } />}
         </div>
     );
 };

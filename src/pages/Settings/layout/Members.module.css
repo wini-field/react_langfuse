@@ -1,36 +1,38 @@
+/* Members 페이지만 해당 */
+
 .nameCell {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
 }
 
 .avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .roleCell {
-  display: flex;
-  align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .roleSelect {
-  background-color: #020817; /* 배경색 */
-  color: #e2e8f0; /* 글자색 */
-  border: 1px solid #334155; /* 테두리 */
-  border-radius: 6px; /* 둥근 모서리 */
-  padding: 6px 28px 6px 10px; /* 오른쪽 여백 추가 */
-  -webkit-appearance: none; /* 기본 화살표 숨기기 (크롬, 사파리) */
-  -moz-appearance: none; /* 기본 화살표 숨기기 (파이어폭스) */
-  appearance: none; /* 기본 화살표 숨기기 */
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.2em 1.2em;
-  cursor: pointer;
+    background-color: #020817;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    padding: 6px 28px 6px 10px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.2em 1.2em;
+    cursor: pointer;
 }
 
 .roleSelect:hover {
@@ -49,4 +51,8 @@
     border: none;
     cursor: pointer;
     color: #94a3b8;
+}
+
+.actionButton:hover {
+    color: #ff6b6b;
 }
