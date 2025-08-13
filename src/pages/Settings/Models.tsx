@@ -10,13 +10,13 @@ import {
     ChevronRight,
     ChevronsLeft,
     ChevronsRight,
-    Check,
     Menu
 } from 'lucide-react';
 import commonStyles from './layout/SettingsCommon.module.css'
 import gridStyles from './layout/SettingsGrid.module.css'
 import styles from './layout/Models.module.css';
 import CustomPagination from './CustomPagination';
+import ColumnMenu from '../../layouts/ColumnMenu'
 
 // Maintainer 아이콘
 const MaintainerRenderer: React.FC<ICellRendererParams> = () => (
@@ -62,7 +62,9 @@ const Models: React.FC = () => {
     const gridRef = useRef<AgGridReact>(null);
     const [gridApi, setGridApi] = useState<GridApi | null>(null);
     const pageSizes = useMemo(() => [10, 20, 30, 40, 50], []);
+
     const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+    const columnButtonRef = useRef<HTMLDivElement>(null);
 
     const [columnVisibility, setColumnVisibility] = useState({
         modelName: true,
@@ -74,6 +76,10 @@ const Models: React.FC = () => {
         lastUsed: true,
         actions: true,
     });
+
+    const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
+         setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+     };
 
     const columnDefs = useMemo((): ColDef[] => [
         { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, hide: !columnVisibility.modelName },
@@ -120,41 +126,27 @@ const Models: React.FC = () => {
          setGridApi(event.api);
      }, []);
 
-     const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
-         setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
-     };
-
     return (
         <div className = { commonStyles.container }>
             <h3>Models</h3>
             <p>A model represents a LLM model. It is used to calculate tokens and cost.</p>
             <div className = { gridStyles.header }>
                 {/* ✅ Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
-                <div className={ gridStyles.columnButtonWrapper }>
+                <div ref = { columnButtonRef } className = { gridStyles.columnsButtonWrapper } onClick={() => setIsColumnMenuOpen(prev => !prev)}>
                     <button
                         className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }
-                        onClick={() => setIsColumnMenuOpen(prev => !prev)}
                     >
                         <span>Columns</span>
                         <span className = { gridStyles.count }>8/8</span>
                     </button>
-                    {/* ✅ 드롭다운 메뉴 */}
-                    { isColumnMenuOpen && (
-                        <div className={ gridStyles.columnMenu }>
-                            { Object.keys(columnVisibility).map(key => (
-                                <div
-                                    key={ key }
-                                    className={ gridStyles.menuItem }
-                                    onClick={() => toggleColumnVisibility(key as keyof typeof columnVisibility)}
-                                >
-                                    <div className={ gridStyles.checkbox }>
-                                        { columnVisibility[key as keyof typeof columnVisibility] && <Check size={14} /> }
-                                    </div>
-                                    <span>{ key }</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    { /* */ }
+                    <ColumnMenu
+                        isOpen = { isColumnMenuOpen }
+                        onClose = { () => setIsColumnMenuOpen(false) }
+                        anchorE1 = { columnButtonRef }
+                        columnVisibility = { columnVisibility }
+                        toggleColumnVisibility = { toggleColumnVisibility }
+                    />
                 </div>
                 <button className = { `${ gridStyles.headerButton } ${ gridStyles.iconButton }` } >
                     <Menu size = { 16 } />
@@ -174,6 +166,7 @@ const Models: React.FC = () => {
                     paginationPageSize = { pageSizes[0] }
                     suppressPaginationPanel = { true }
                     onGridReady = { onGridReady }
+                    icons = { icons }
                     rowHeight = { 96 }
                 />
             </div>

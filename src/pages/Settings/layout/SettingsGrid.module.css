@@ -20,10 +20,6 @@
     box-sizing: border-box;
 }
 
-.columnButtonWrapper {
-    position: relative;
-}
-
 .columnsButton {
     background-color: #020817;
     color: white;
@@ -62,44 +58,6 @@
     cursor: pointer;
     width: 36px;
     height: 36px;
-}
-
-/* Columns 드롭다운 메뉴 */
-.columnMenu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background-color: #0f172a;
-    border: 1px solid #2f415d;
-    border-radius: 6px;
-    margin-top: 4px;
-    z-index: 10;
-    width: 200px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.menuItem {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-}
-
-.menuItem:hover {
-    background-color: #1e293b;
-}
-
-.checkbox {
-    width: 16px;
-    height: 16px;
-    border: 1px solid #4b5563;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    color: #a78bfa;;
 }
 
 /* AG Gird 컨테이너 및 테마 오버라이드 */
