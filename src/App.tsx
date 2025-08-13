@@ -4,7 +4,7 @@ import Layout from './layouts/Layout';
 
 import Home from './pages/Home/Home';
 
-import Tracing from './pages/Tracing/Tracing';
+import Trace from './pages/Tracing/Tracing';
 import TraceDetail from './pages/Tracing/TraceDetail';
 import SpanDetail from './pages/Tracing/SpanDetail';
 import SessionDetail from './pages/Tracing/SessionDetail';
@@ -33,7 +33,6 @@ import LLMConnections from "./pages/Settings/LLMConnections";
 import Models from './pages/Settings/Models';
 import Scores from './pages/Settings/Scores';
 import Members from './pages/Settings/Members';
-import Exports from "./pages/Settings/Exports";
 
 // ---- 임시 플레이스홀더들 (파일이 아직 없거나 빈 페이지일 때 대비) ----
 const Placeholder =
@@ -44,11 +43,10 @@ const Placeholder =
 //const LLMConnections = Placeholder('LLM Connections');
 //const Scores = Placeholder('Scores (Settings)');
 //const Integrations = Placeholder('Integrations');
-//const Exports = Placeholder('Exports');
 //const AuditLogs = Placeholder('Audit Logs');
 
 const Sessions = Placeholder('Sessions');  // 사이드바 링크용 (/sessions)
-const Users = Placeholder('Users');        // 사이드바 링크용 (/users)
+//const Users = Placeholder('Users');        // 사이드바 링크용 (/users)
 //const Playground = Placeholder('Playground');  // 사이드바 링크용 (/playground)
 // const Datasets = Placeholder('Datasets');      // 사이드바 링크용 (/datasets)
 // const LlmAsAJudge = Placeholder('LLM as a Judge'); // 사이드바 링크용 (/llm-as-a-judge)
@@ -63,12 +61,11 @@ export default function App() {
 
         {/* 사이드바 링크 보완용 라우트들 */}
         <Route path="sessions" element={<Sessions />} />
-        <Route path="users" element={<Users />} />
         <Route path="playground" element={<Playground />} />
 
 
         {/* Tracing */}
-        <Route path="tracing" element={<Tracing />} />
+        <Route path="trace" element={<Trace />} />
         <Route path="tracing/:id" element={<TraceDetail />} />
         <Route path="tracing/:traceId/spans/:spanId" element={<SpanDetail />} />
         <Route path="tracing/:traceId/sessions/:sessionId" element={<SessionDetail />} />
@@ -109,7 +106,6 @@ export default function App() {
           <Route path="models" element={<Models />} />
           <Route path="scores" element={<Scores />} />
           <Route path="members" element={<Members />} />
-          <Route path="exports" element={<Exports />} />
         </Route>
       </Route>
     </Routes>
