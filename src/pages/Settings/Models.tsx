@@ -58,6 +58,17 @@ const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
     );
 };
 
+const COLUMN_DEFINITION: (ColDef & { headerName: string; field: string; lockVisible?: boolean})[] = [
+    { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, lockVisible: true },
+    { field: 'maintainer', headerName: 'Maintainer', width: 100, cellRenderer: MaintainerRenderer, lockVisible: true },
+    { field: 'matchPattern', headerName: 'Match Pattern', width: 200, lockVisible: true },
+    { field: 'prices', headerName: 'Prices per unit', width: 150, cellRenderer: PricesRenderer },
+    { field: 'tokenizer', headerName: 'Tokenizer', width: 120 },
+    { field: 'tokenizerConfig', headerName: 'Tokenizer Config', width: 250, cellRenderer: TokenizerConfRenderer, autoHeight: true },
+    { field: 'lastUsed', headerName: 'Last used', width: 120 },
+    { field: 'actions', headerName: 'Actions', width: 100, cellRenderer: ActionsRenderer, sortable: false, resizable: false, lockVisible: true },
+]
+
 const Models: React.FC = () => {
     const gridRef = useRef<AgGridReact>(null);
     const [gridApi, setGridApi] = useState<GridApi | null>(null);
@@ -78,19 +89,36 @@ const Models: React.FC = () => {
     });
 
     const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
+        const columnDef = COLUMN_DEFINITION.find(c => c.field === field);
+        if (columnDef?.lockVisible) {
+            return;
+        }
          setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
      };
 
-    const columnDefs = useMemo((): ColDef[] => [
-        { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, hide: !columnVisibility.modelName },
-        { field: 'maintainer', headerName: 'Maintainer', width: 100, cellRenderer: MaintainerRenderer, hide: !columnVisibility.maintainer },
-        { field: 'matchPattern', headerName: 'Match Pattern', width: 200, hide: !columnVisibility.matchPattern },
-        { field: 'prices', headerName: 'Prices per unit', width: 150, cellRenderer: PricesRenderer, hide: !columnVisibility.prices },
-        { field: 'tokenizer', headerName: 'Tokenizer', width: 120, hide: !columnVisibility.tokenizer },
-        { field: 'tokenizerConfig', headerName: 'Tokenizer Config', width: 250, cellRenderer: TokenizerConfRenderer, autoHeight: true, hide: !columnVisibility.tokenizerConfig },
-        { field: 'lastUsed', headerName: 'Last used', width: 120, hide: !columnVisibility.lastUsed },
-        { field: 'actions', headerName: 'Actions', width: 100, cellRenderer: ActionsRenderer, sortable: false, resizable: false, hide: !columnVisibility.actions },
-    ], [columnVisibility]);
+    const visibleColumnCount = useMemo(() => {
+        return Object.values(columnVisibility).filter(isVisible => isVisible).length;
+    }, [columnVisibility]);
+
+    const mandatoryFields = useMemo(() =>
+        COLUMN_DEFINITION.filter(c => c.lockVisible).map(c => c.field),
+    []);
+
+    const columnDisplayNames = useMemo(() =>
+        COLUMN_DEFINITION.reduce((acc, col) => {
+            if (col.field) {
+                acc[col.field] = col.headerName;
+            }
+            return acc;
+        }, {} as Record<string, string>),
+    []);
+
+    const columnDefs = useMemo((): ColDef[] =>
+        COLUMN_DEFINITION.map(col => ({
+            ...col,
+            hide: !columnVisibility[col.field as keyof typeof columnVisibility],
+        })),
+    [columnVisibility]);
 
     const defaultColDef = useMemo(() => ({
         minWidth: 50,
@@ -137,7 +165,7 @@ const Models: React.FC = () => {
                         className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }
                     >
                         <span>Columns</span>
-                        <span className = { gridStyles.count }>8/8</span>
+                        <span className = { gridStyles.count }>{ visibleColumnCount }/{ COLUMN_DEFINITION.length }</span>
                     </button>
                     { /* */ }
                     <ColumnMenu
@@ -146,6 +174,8 @@ const Models: React.FC = () => {
                         anchorE1 = { columnButtonRef }
                         columnVisibility = { columnVisibility }
                         toggleColumnVisibility = { toggleColumnVisibility }
+                        displayNames = { columnDisplayNames }
+                        mandatoryFields = { mandatoryFields }
                     />
                 </div>
                 <button className = { `${ gridStyles.headerButton } ${ gridStyles.iconButton }` } >

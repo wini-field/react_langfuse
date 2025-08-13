@@ -2,26 +2,23 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
 import styles from './ColumnMenu.module.css';
 
-// 컬럼 보이기/숨기기
-type ColumnVisibility = {
-    [key: string]: boolean;
-}
-
-interface ColumnMenuProps {
+interface ColumnMenuProps<T extends Record<string, boolean>> {
     isOpen: boolean;
     onClose: () => void;
-    columnVisibility: ColumnVisibility;
-    toggleColumnVisibility: (field: string) => void;
+    columnVisibility: T;
+    toggleColumnVisibility: (field: keyof T) => void;
     anchorE1: React.RefObject<HTMLElement>; // 메뉴를 띄울 기준 요소
+    displayNames: Record<keyof T, string>;
 }
 
-const ColumnMenu: React.FC<ColumnMenuProps> = ({
+const ColumnMenu = <T extends Record<string, boolean>>({
     isOpen,
     onClose,
     columnVisibility,
     toggleColumnVisibility,
     anchorE1,
-}) => {
+    displayNames,
+}: ColumnMenuProps<T>) => {
     const menuRef = useRef<HTMLDivElement>(null);
     const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
 
@@ -61,18 +58,20 @@ const ColumnMenu: React.FC<ColumnMenuProps> = ({
         return null;
     }
 
+    const columnKeys = Object.keys(columnVisibility) as Array<keyof T>;
+
     return (
-        <div ref = { menuRef } className = { styles.columnMenu }>
-            { Object.keys(columnVisibility).map(key => (
+        <div ref = { menuRef } className = { styles.columnMenu } style = { position ? { top: `${ position.top }px`, left: `${ position.left }px` } : {} }>
+            { columnKeys.map(key => (
                 <div
-                key = { key }
+                key = { String(key) }
                 className = { styles.menuItem }
                 onClick = { () => toggleColumnVisibility(key) }
                 >
                     <div className = { styles.checkbox }>
                         { columnVisibility[key] && <Check size = { 14 } />}
                     </div>
-                    <span>{ key }</span>
+                    <span>{ displayNames[key] || String(key) }</span>
                 </div>
             ))}
         </div>
