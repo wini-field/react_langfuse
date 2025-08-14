@@ -60,12 +60,12 @@ const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
 
 const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string; lockVisible?: boolean})[] = [
     { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, lockVisible: true },
-    { field: 'maintainer', headerName: 'Maintainer', width: 100, cellRenderer: MaintainerRenderer, lockVisible: true },
-    { field: 'matchPattern', headerName: 'Match Pattern', width: 200, lockVisible: true },
+    { field: 'maintainer', headerName: 'Maintainer', width: 10, cellRenderer: MaintainerRenderer, lockVisible: true },
+    { field: 'matchPattern', headerName: 'Match Pattern', width: 150, lockVisible: true },
     { field: 'prices', headerName: 'Prices per unit', width: 150, cellRenderer: PricesRenderer },
     { field: 'tokenizer', headerName: 'Tokenizer', width: 120 },
     { field: 'tokenizerConfig', headerName: 'Tokenizer Config', width: 250, cellRenderer: TokenizerConfRenderer, autoHeight: true },
-    { field: 'lastUsed', headerName: 'Last used', width: 120 },
+    { field: 'lastUsed', headerName: 'Last used', width: 100 },
     { field: 'actions', headerName: 'Actions', width: 100, cellRenderer: ActionsRenderer, sortable: false, resizable: false, lockVisible: true },
 ]
 
@@ -177,7 +177,6 @@ const Models: React.FC = () => {
                         <span>Columns</span>
                         <span className = { gridStyles.count }>{ visibleColumnCount }/{ COLUMN_DEFINITIONS.length }</span>
                     </button>
-                    { /* */ }
                     <ColumnMenu
                         isOpen = { isColumnMenuOpen }
                         onClose = { () => setIsColumnMenuOpen(false) }

@@ -1,65 +1,63 @@
-import styles from "./JudgePage.module.css";
+import { useNavigate } from "react-router-dom";
+import styles from "./JudgePage.module.css"; // ← 이 파일이 같은 폴더에 실제로 있어야 합니다.
 
-type JudgeRun = {
-  id: string;
-  prompt: string;
-  model: string;
-  score: number;
-  judgedAt: string; // YYYY-MM-DD
-  comment: string;
-};
+export default function JudgeLanding() {
+  const navigate = useNavigate();
 
-const sample: JudgeRun[] = [
-  { id: "jr-001", prompt: "Translate to French", model: "GPT-4", score: 0.92, judgedAt: "2025-08-06", comment: "Accurate translation." },
-  { id: "jr-002", prompt: "Summarize article",   model: "Claude 2", score: 0.85, judgedAt: "2025-08-07", comment: "Good coverage, minor omissions." },
-];
-
-export default function JudgePage() {
   return (
-    <div className={styles.container}>
-      <div className={styles.headerRow}>
-        <h1 className={styles.title}>⚖️ LLM-as-a-Judge</h1>
-        <button className={styles.primary}>Run Auto Evaluation</button>
-      </div>
+    <div className={styles.page}>
+      <header className={styles.hero}>
+        <h1 className={styles.title}>Get Started with LLM-as-a-Judge Evaluations</h1>
+        <p className={styles.subtitle}>
+          Create evaluation templates and evaluators to automatically score your traces with
+          LLM-as-a-judge. Set up custom evaluation criteria and let AI help you measure the
+          quality of your outputs.
+        </p>
 
-      <div className={styles.card}>
-        <div className={styles.cardTitle}>Judge Settings</div>
-        <div className={styles.grid2}>
-          <label className={styles.field}>
-            <span>Scoring Prompt</span>
-            <textarea placeholder="Explain your judging criteria..." />
-          </label>
-          <label className={styles.field}>
-            <span>Target Models</span>
-            <input placeholder="e.g., gpt-4, claude-3" />
-          </label>
+        <div className={styles.ctaRow}>
+          <button
+            className={styles.primaryWhite}
+            onClick={() => navigate("/llm-as-a-judge/new")}
+          >
+            Create Evaluator
+          </button>
+          <a
+            className={styles.secondary}
+            href="https://langfuse.com/docs"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Learn More
+          </a>
         </div>
-      </div>
+      </header>
 
-      <div className={styles.card}>
-        <div className={styles.cardTitle}>Recent Auto-Eval Results</div>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>ID</th><th>Prompt</th><th>Model</th><th>Score</th><th>Judged At</th><th>Comment</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sample.map(r => (
-              <tr key={r.id}>
-                <td>{r.id}</td>
-                <td className={styles.mono}>{r.prompt}</td>
-                <td><span className={styles.badge}>{r.model}</span></td>
-                <td className={r.score >= 0.88 ? styles.good : r.score >= 0.78 ? styles.ok : styles.bad}>
-                  {(r.score * 100).toFixed(0)}
-                </td>
-                <td>{r.judgedAt}</td>
-                <td className={styles.dim}>{r.comment}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <section className={styles.features}>
+        <article className={styles.card}>
+          <div className={styles.cardTitle}>Automate evaluations</div>
+          <div className={styles.cardDesc}>
+            Use LLM-as-a-judge to automatically evaluate your traces without manual review
+          </div>
+        </article>
+        <article className={styles.card}>
+          <div className={styles.cardTitle}>Measure quality</div>
+          <div className={styles.cardDesc}>
+            Create custom evaluation criteria to measure the quality of your LLM outputs
+          </div>
+        </article>
+        <article className={styles.card}>
+          <div className={styles.cardTitle}>Scale efficiently</div>
+          <div className={styles.cardDesc}>
+            Evaluate thousands of traces automatically with customizable sampling rates
+          </div>
+        </article>
+        <article className={styles.card}>
+          <div className={styles.cardTitle}>Track performance</div>
+          <div className={styles.cardDesc}>
+            Monitor evaluation metrics over time to identify trends and improvements
+          </div>
+        </article>
+      </section>
     </div>
   );
 }

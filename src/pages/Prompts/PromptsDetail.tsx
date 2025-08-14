@@ -15,7 +15,6 @@ import {
 import { langfuse } from 'lib/langfuse';
 import DuplicatePromptModal from './DuplicatePromptModal'; // 모달 컴포넌트 import
 
-
 // --- 타입 정의 ---
 
 type ChatMessage = {
@@ -24,7 +23,6 @@ type ChatMessage = {
 };
 
 type PromptContentType = string | ChatMessage[];
-
 type ConfigContent = Record<string, unknown> | null;
 
 type UseContent = {
@@ -32,18 +30,33 @@ type UseContent = {
   jsTs: string;
 };
 
+// GET /api/public/v2/prompts/{promptName} 응답을 기반으로 한 타입
+interface FetchedPrompt {
+  name: string;
+  prompt: PromptContentType;
+  type: 'chat' | 'text';
+  version: number;
+  config: ConfigContent;
+  tags: string[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  labels: string[];
+}
+
+// 화면에 표시하기 위한 Version 데이터 구조
 interface Version {
   id: number;
   label: string;
-  status: 'latest' | 'production' | null;
-  details: string;
-  author: string;
+  labels: string[];
+  details: string; // updatedAt을 포맷팅하여 사용
+  author: string;  // createdBy 값을 사용
   prompt: {
     system?: string;
     user: string;
   };
   config: ConfigContent;
-  useprompts: UseContent; // UsePrompt 탭에 표시될 코드
+  useprompts: UseContent;
 }
 
 // --- 메인 컴포넌트 ---
@@ -57,9 +70,7 @@ export default function PromptsDetail() {
   const [error, setError] = useState<string | null>(null);
   const [activeDetailTab, setActiveDetailTab] = useState<'Prompt' | 'Config' | 'Generations' | 'Use'>('Prompt');
   const [allPromptNames, setAllPromptNames] = useState<string[]>([]);
-
   const [isDuplicateModalOpen, setDuplicateModalOpen] = useState(false);
-
 
   useEffect(() => {
     if (!id) return;
@@ -73,7 +84,8 @@ export default function PromptsDetail() {
       setError(null);
       try {
         const [latestPrompt, promptListResponse] = await Promise.all([
-          langfuse.getPrompt(id),
+          // langfuse.getPrompt는 내부적으로 GET /api/public/v2/prompts/{promptName} 호출
+          langfuse.getPrompt(id) as unknown as FetchedPrompt,
           langfuse.api.promptsList({})
         ]);
         
@@ -81,7 +93,7 @@ export default function PromptsDetail() {
         setAllPromptNames(promptNames);
 
         // 'Use' 탭에 들어갈 동적 코드 스니펫 생성
-        const pythonCode = `from langfuse import Langfuse
+ const pythonCode = `from langfuse import Langfuse
 
 # Initialize langfuse client
 langfuse = Langfuse()
@@ -96,7 +108,8 @@ prompt = langfuse.get_prompt("${id}", label="latest")
 # Get by version number, usually not recommended as it requires code changes to deploy new prompt versions
 langfuse.get_prompt("${id}", version=${latestPrompt.version})`;
 
-        const jsTsCode = `import { Langfuse } from "langfuse";
+
+ const jsTsCode = `import { Langfuse } from "langfuse";
 
 // Initialize the langfuse client
 const langfuse = new Langfuse();
@@ -112,12 +125,14 @@ const prompt = await langfuse.getPrompt("${id}", { label: "latest" });
 langfuse.getPrompt("${id}", { version: ${latestPrompt.version} });`;
 
 
-        const latestVersion: Version = {
+        const fetchedVersion: Version = {
           id: latestPrompt.version,
           label: `Version ${latestPrompt.version}`,
-          status: 'latest',
-          details: `8/12/2025, 1:45:30 PM`,
-          author: 'Hayoung',
+          labels: latestPrompt.labels,
+          details: latestPrompt.createdAt 
+          ? new Date(latestPrompt.createdAt).toLocaleString()
+          : 'N/A',
+          author: latestPrompt.createdBy,
           prompt: {
             user: isChatPrompt(latestPrompt.prompt)
               ? latestPrompt.prompt.find(p => p.role === 'user')?.content ?? ''
@@ -126,26 +141,12 @@ langfuse.getPrompt("${id}", { version: ${latestPrompt.version} });`;
               ? latestPrompt.prompt.find(p => p.role === 'system')?.content
               : undefined,
           },
-          config: latestPrompt.config as ConfigContent,
-          useprompts: { python: pythonCode, jsTs: jsTsCode }, // 생성된 코드 할당
+          config: latestPrompt.config,
+          useprompts: { python: pythonCode, jsTs: jsTsCode },
         };
 
-        const productionVersion: Version = {
-          ...latestVersion,
-          id: latestPrompt.version - 1,
-          label: 'fix typo in system prompt',
-          status: 'production',
-          details: `8/12/2025, 1:45:07 PM`,
-          prompt: { ...latestVersion.prompt, user: "Older version of the user prompt..." },
-          useprompts: { // 이전 버전용 코드도 업데이트
-             python: pythonCode.replace(`version=${latestPrompt.version}`, `version=${latestPrompt.version-1}`),
-             jsTs: jsTsCode.replace(`version: ${latestPrompt.version}`, `version: ${latestPrompt.version-1}`),
-          }
-        };
-
-        const allVersions = [latestVersion, productionVersion];
-        setVersions(allVersions);
-        setSelectedVersion(latestVersion);
+        setVersions([fetchedVersion]);
+        setSelectedVersion(fetchedVersion);
 
       } catch (err) {
         console.error("Failed to fetch prompt details:", err);
@@ -270,8 +271,8 @@ langfuse.getPrompt("${id}", { version: ${latestPrompt.version} });`;
               >
                 <div className={styles.versionTitle}>
                   <span className={styles.versionLabel}>#{version.id}</span>
-                  {version.status === 'latest' && <span className={styles.statusTagLatest}><GitCommitHorizontal size={12}/> latest</span>}
-                  {version.status === 'production' && <span className={styles.statusTagProd}><GitCommitHorizontal size={12}/> production</span>}
+                  {version.labels.includes('latest') && <span className={styles.statusTagLatest}><GitCommitHorizontal size={12}/> latest</span>}
+                  {version.labels.includes('production') && <span className={styles.statusTagProd}><GitCommitHorizontal size={12}/> production</span>}
                 </div>
                 <div className={styles.versionMeta}>
                     <p>{version.details}</p>

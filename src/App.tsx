@@ -4,10 +4,7 @@ import Layout from './layouts/Layout';
 
 import Home from './pages/Home/Home';
 
-import Trace from './pages/Tracing/Tracing';
-import TraceDetail from './pages/Tracing/TraceDetail';
-import SpanDetail from './pages/Tracing/SpanDetail';
-import SessionDetail from './pages/Tracing/SessionDetail';
+import Sessions from './pages/Tracing/Sessions';
 
 import Prompts from './pages/Prompts/Prompts';
 import PromptsDetail from './pages/Prompts/PromptsDetail';
@@ -15,42 +12,22 @@ import PromptsNew from './pages/Prompts/PromptsNew';
 
 import Playground from './pages/Playground/Playground';
 
-import ScoresList from './pages/Evaluation/Scores/ScoresList';
-import ScoresDetail from './pages/Evaluation/Scores/ScoresDetail';
-import ScoresNew from './pages/Evaluation/Scores/ScoresNew';
-import ScoresEdit from './pages/Evaluation/Scores/ScoresEdit';
-
 import JudgePage from './pages/Evaluation/Judge/JudgePage';
-import HumanAnnotationPage from './pages/Evaluation/HumanAnnotation/HumanAnnotationPage';
+import JudgePageNew from './pages/Evaluation/Judge/JudgePageNew';
 import DatasetsList from './pages/Evaluation/DataSets/DatasetsPage';
 
-import LLMDashboard from './pages/Dashboard/LLMDashboard';
+import Dashboards from './pages/Dashboard/Dashboards';
+import DashboardNew from './pages/Dashboard/DashboardNew';
+import DashboardDetail from './pages/Dashboard/DashboardDetail';
+import WidgetNew from './pages/Dashboard/WidgetNew';
 
 import SettingsPage from './pages/Settings/SettingsPage';
 import General from './pages/Settings/General';
 import ApiKeys from './pages/Settings/ApiKeys';
 import LLMConnections from "./pages/Settings/LLMConnections";
 import Models from './pages/Settings/Models';
-import Scores from './pages/Settings/Scores';
 import Members from './pages/Settings/Members';
-
-// ---- 임시 플레이스홀더들 (파일이 아직 없거나 빈 페이지일 때 대비) ----
-const Placeholder =
-  (title: string) =>
-  () =>
-    <div style={{ color: 'white', padding: 24 }}>{title}</div>;
-
-//const LLMConnections = Placeholder('LLM Connections');
-//const Scores = Placeholder('Scores (Settings)');
-//const Integrations = Placeholder('Integrations');
-//const AuditLogs = Placeholder('Audit Logs');
-
-const Sessions = Placeholder('Sessions');  // 사이드바 링크용 (/sessions)
-//const Users = Placeholder('Users');        // 사이드바 링크용 (/users)
-//const Playground = Placeholder('Playground');  // 사이드바 링크용 (/playground)
-// const Datasets = Placeholder('Datasets');      // 사이드바 링크용 (/datasets)
-// const LlmAsAJudge = Placeholder('LLM as a Judge'); // 사이드바 링크용 (/llm-as-a-judge)
-// const HumanAnnotation = Placeholder('Human Annotation'); // (/human-annotation)
+import Scores from './pages/Settings/Scores';
 
 export default function App() {
   return (
@@ -59,34 +36,20 @@ export default function App() {
         {/* 홈 */}
         <Route index element={<Home />} />
 
-        {/* 사이드바 링크 보완용 라우트들 */}
-        <Route path="sessions" element={<Sessions />} />
-        <Route path="playground" element={<Playground />} />
-
-
         {/* Tracing */}
-        <Route path="trace" element={<Trace />} />
-        <Route path="tracing/:id" element={<TraceDetail />} />
-        <Route path="tracing/:traceId/spans/:spanId" element={<SpanDetail />} />
-        <Route path="tracing/:traceId/sessions/:sessionId" element={<SessionDetail />} />
+        <Route path="sessions" element={<Sessions />} />
 
         {/* Prompts */}
         <Route path="prompts" element={<Prompts />} />
-        <Route path="prompts/new" element={<PromptsNew />} />
         <Route path="prompts/:id" element={<PromptsDetail />} />
+        <Route path="prompts/new" element={<PromptsNew />} />
 
         {/* Playground */}
         <Route path="playground" element={<Playground />} />
 
-        {/* Scores */}
-        <Route path="scores" element={<ScoresList />} />
-        <Route path="scores/new" element={<ScoresNew />} />
-        <Route path="scores/:id" element={<ScoresDetail />} />
-        <Route path="scores/:id/edit" element={<ScoresEdit />} />
-
-        {/* ✅ 실제 페이지로 교체 */}
+        {/* 실제 페이지로 교체 */}
         <Route path="llm-as-a-judge" element={<JudgePage />} />
-        <Route path="human-annotation" element={<HumanAnnotationPage />} />
+        <Route path="llm-as-a-judge/new" element={<JudgePageNew />} />
         <Route path="datasets" element={<DatasetsList />} />
 
         {/* 구 /evaluation 경로 호환 */}
@@ -95,8 +58,11 @@ export default function App() {
         <Route path="evaluation/:id" element={<Navigate to="/scores/:id" replace />} />
         <Route path="evaluation/:id/edit" element={<Navigate to="/scores/:id/edit" replace />} />
 
-        {/* Dashboards */}
-        <Route path="dashboards/llm" element={<LLMDashboard />} />
+          {/* Dashboards */}
+        <Route path="dashboards" element={<Dashboards />} />
+        <Route path="dashboards/new" element={<DashboardNew />} /> {/* '/dashboards/new' 라우트 추가 */}
+        <Route path="dashboards/widgets/new" element={<WidgetNew />} />
+        <Route path="dashboards/:dashboardId" element={<DashboardDetail />} />
 
         {/* Settings (상대 경로로 선언) */}
         <Route path="settings" element={<SettingsPage />}>
