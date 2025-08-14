@@ -1,0 +1,47 @@
+.formContainer {
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 24px;
+    margin-top: 20px;
+    background-color: #202023;
+}
+
+.formTitle {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 18px;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 16px;
+    align-items: center;
+}
+
+.formGrid label {
+     font-weight: 500;
+    text-align: right;
+    color: #a0a0a0;
+}
+
+.formGrid input {
+    width: 100%;
+    padding: 8px 12px;
+    background-color: #18181b;
+    border: 1px solid #555;
+    color: #e0e0e0;
+    transition: border-color 0.2s;
+}
+
+.formGrid input:focus {
+    outline: none;
+    border-color: #4f46e5;
+}
+
+.buttonGroup {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
