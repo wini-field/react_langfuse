@@ -209,6 +209,7 @@ const Models: React.FC = () => {
                     onGridReady = { onGridReady }
                     icons = { icons }
                     rowHeight = { 96 }
+                    domLayout = 'autoHeight'
                 />
             </div>
             { gridApi && <CustomPagination gridApi={ gridApi } pageSizes={ pageSizes } />}

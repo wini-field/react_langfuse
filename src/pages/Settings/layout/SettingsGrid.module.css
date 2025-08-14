@@ -62,7 +62,9 @@
 
 /* AG Gird 컨테이너 및 테마 오버라이드 */
 .gridContainer {
-    height: 600px;
+    max-height: 600px;
+    overflow-y: auto;
+
     border: 1px solid #2f415d;
     border-radius: 6px;
 

@@ -114,6 +114,7 @@ const Scores: React.FC = () => {
                     icons = { icons }
                     rowHeight = { 96 }
                     onGridReady = { onGridReady }
+                    domLayout = 'autoHeight'
                 />
             </div>
             { gridApi && <CustomPagination gridApi = { gridApi } pageSizes = { pageSizes } /> }

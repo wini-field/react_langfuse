@@ -114,6 +114,7 @@ const Members: React.FC = () => {
                     suppressPaginationPanel = { true }
                     onGridReady = { onGridReady }
                     icons = { icons }
+                    domLayout = 'autoHeight'
                 />
             </div>
             { gridApi && <CustomPagination gridApi = { gridApi } pageSizes = { pageSizes } /> }
