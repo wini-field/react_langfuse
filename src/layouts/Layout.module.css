@@ -219,3 +219,21 @@
   background-color: #020817;
   /* padding: 24px; */
 }
+
+/* 헤더에 올라가는 흰색 버튼 */
+.headerActionPrimary {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #0f172a;          /* slate-900 */
+  border: 1px solid #cbd5e1; /* slate-300 */
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 1px 0 rgba(255,255,255,.04) inset;
+}
+.headerActionPrimary:hover {
+  filter: brightness(0.98);
+}

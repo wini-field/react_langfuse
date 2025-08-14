@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate, useOutletContext } from "react-router-dom";
 import styles from "./DatasetsPage.module.css";
+
+/* ===== Outlet context: Layout에서 내려주는 전역 헤더 세터 ===== */
+type HeaderSetterCtx = {
+  setHeader: (cfg: { title?: React.ReactNode; rightActions?: React.ReactNode }) => void;
+};
 
 /* =========================================================
    Types & Utilities
@@ -16,24 +22,17 @@ type Dataset = {
   metadata?: string;
 };
 
-const cx = (...xs: (string | false | null | undefined)[]) =>
-  xs.filter(Boolean).join(" ");
+const cx = (...xs: (string | false | null | undefined)[]) => xs.filter(Boolean).join(" ");
 
 /* =========================================================
-   Small Icons (stroke-only; matches screenshots)
+   Small Icons
 ========================================================= */
 
 function PencilIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" {...props}>
       <rect x="3" y="3" width="18" height="18" rx="3.5" stroke="currentColor" strokeWidth="1.6" />
-      <path
-        d="M9 15l-1.5 4.5L12 18l6.5-6.5a1.9 1.9 0 10-2.7-2.7L9 15z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        fill="none"
-        strokeLinejoin="round"
-      />
+      <path d="M9 15l-1.5 4.5L12 18l6.5-6.5a1.9 1.9 0 10-2.7-2.7L9 15z" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinejoin="round"/>
       <path d="M14.5 7.5l2 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>
   );
@@ -51,12 +50,11 @@ function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-
 /* =========================================================
    CSV Import Mapping Modal
 ========================================================= */
 
-type CsvType = 'string' | 'number';
+type CsvType = "string" | "number";
 
 interface ImportCsvModalProps {
   open: boolean;
@@ -67,22 +65,34 @@ interface ImportCsvModalProps {
   onImport: (items: any[]) => void;
 }
 
-function ImportCsvModal({ open, headers, rows, fileName, onCancel, onImport }: ImportCsvModalProps) {
-  const [inputCol, setInputCol] = useState<string>('');
-  const [inputType, setInputType] = useState<CsvType>('number');
-  const [expectedCol, setExpectedCol] = useState<string>('');
-  const [expectedType, setExpectedType] = useState<CsvType>('string');
-  const [metaCol, setMetaCol] = useState<string>('');
-  const [metaType, setMetaType] = useState<CsvType>('number');
+function ImportCsvModal({
+  open,
+  headers,
+  rows,
+  fileName,
+  onCancel,
+  onImport,
+}: ImportCsvModalProps) {
+  const [inputCol, setInputCol] = useState<string>("");
+  const [inputType, setInputType] = useState<CsvType>("number");
+  const [expectedCol, setExpectedCol] = useState<string>("");
+  const [expectedType, setExpectedType] = useState<CsvType>("string");
+  const [metaCol, setMetaCol] = useState<string>("");
+  const [metaType, setMetaType] = useState<CsvType>("number");
 
-  // auto-map columns & infer types when modal opens or CSV changes
   useEffect(() => {
     if (!open || !headers.length) return;
-    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, '');
+    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, "");
 
-    let guessedInput = headers.find(h => ['input','prompt','question','id'].includes(norm(h)));
-    let guessedExpected = headers.find(h => ['expected','output','answer','label','name'].includes(norm(h)));
-    let guessedMeta = headers.find(h => ['metadata','meta','value','score','cost','tokens'].includes(norm(h)));
+    let guessedInput = headers.find((h) =>
+      ["input", "prompt", "question", "id"].includes(norm(h))
+    );
+    let guessedExpected = headers.find((h) =>
+      ["expected", "output", "answer", "label", "name"].includes(norm(h))
+    );
+    let guessedMeta = headers.find((h) =>
+      ["metadata", "meta", "value", "score", "cost", "tokens"].includes(norm(h))
+    );
 
     if (!guessedInput) guessedInput = headers[0];
     if (!guessedExpected) guessedExpected = headers[1] ?? headers[0];
@@ -94,10 +104,11 @@ function ImportCsvModal({ open, headers, rows, fileName, onCancel, onImport }: I
 
     const inferType = (col: string): CsvType => {
       const idx = headers.indexOf(col);
-      if (idx < 0) return 'string';
-      const vals = rows.slice(0, 50).map(r => r[idx] ?? '');
-      const allNums = vals.length>0 && vals.every(v => v !== '' && !Number.isNaN(Number(v)));
-      return allNums ? 'number' : 'string';
+      if (idx < 0) return "string";
+      const vals = rows.slice(0, 50).map((r) => r[idx] ?? "");
+      const allNums =
+        vals.length > 0 && vals.every((v) => v !== "" && !Number.isNaN(Number(v)));
+      return allNums ? "number" : "string";
     };
     setInputType(inferType(guessedInput));
     setExpectedType(inferType(guessedExpected));
@@ -107,19 +118,18 @@ function ImportCsvModal({ open, headers, rows, fileName, onCancel, onImport }: I
   if (!open) return null;
 
   const cast = (val: string, t: CsvType) => {
-    if (t === 'number') {
+    if (t === "number") {
       const n = Number(val);
       return Number.isFinite(n) ? n : null;
     }
-    return val ?? '';
+    return val ?? "";
   };
 
   const doImport = () => {
-    // Build items including only mapped columns
-    const items = rows.map(r => {
+    const items = rows.map((r) => {
       const obj: any = {};
       headers.forEach((h, idx) => {
-        const v = r[idx] ?? '';
+        const v = r[idx] ?? "";
         if (h === inputCol) obj[h] = cast(v, inputType);
         else if (h === expectedCol) obj[h] = cast(v, expectedType);
         else if (h === metaCol) obj[h] = cast(v, metaType);
@@ -130,24 +140,46 @@ function ImportCsvModal({ open, headers, rows, fileName, onCancel, onImport }: I
   };
 
   const used = new Set([inputCol, expectedCol, metaCol].filter(Boolean));
-  const unmapped = headers.filter(h => !used.has(h));
+  const unmapped = headers.filter((h) => !used.has(h));
 
   const Select = ({
-    value, onChange, options, placeholder
-  }: { value: string; onChange: (v: string)=>void; options: string[]; placeholder: string }) => (
+    value,
+    onChange,
+    options,
+    placeholder,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+    options: string[];
+    placeholder: string;
+  }) => (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
       className={styles.select}
-      style={{ width: '100%' }}
+      style={{ width: "100%" }}
     >
       <option value="">{placeholder}</option>
-      {options.map(o => <option key={o} value={o}>{o}</option>)}
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
     </select>
   );
 
-  const TypeSelect = ({ value, onChange }: { value: CsvType; onChange: (v: CsvType)=>void }) => (
-    <select value={value} onChange={(e)=>onChange(e.target.value as CsvType)} className={styles.select}>
+  const TypeSelect = ({
+    value,
+    onChange,
+  }: {
+    value: CsvType;
+    onChange: (v: CsvType) => void;
+  }) => (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value as CsvType)}
+      className={styles.select}
+    >
       <option value="string">string</option>
       <option value="number">number</option>
     </select>
@@ -155,19 +187,27 @@ function ImportCsvModal({ open, headers, rows, fileName, onCancel, onImport }: I
 
   return (
     <div className={styles.modalBackdrop} role="dialog" aria-modal>
-      <div className={styles.modal} style={{width: 'min(1200px, calc(100% - 24px))'}}>
+      <div className={styles.modal} style={{ width: "min(1200px, calc(100% - 24px))" }}>
         <div className={styles.modalHeader}>
-          <h3>Import {fileName ? fileName : 'CSV'}</h3>
-          <button className={styles.iconBtn} aria-label="Close" onClick={onCancel}><span className={styles.iconClose}>×</span></button>
+          <h3>Import {fileName ? fileName : "CSV"}</h3>
+          <button className={styles.iconBtn} aria-label="Close" onClick={onCancel}>
+            <span className={styles.iconClose}>×</span>
+          </button>
         </div>
         <div className={styles.modalBody}>
           <div className={styles.importHint}>
-            Map your CSV columns to dataset fields. The CSV file must have column headers in the first row.
+            Map your CSV columns to dataset fields. The CSV file must have column headers in the
+            first row.
           </div>
           <div className={styles.importGrid}>
             <div className={styles.importCard}>
               <div className={styles.importCardTitle}>Input</div>
-              <Select value={inputCol} onChange={setInputCol} options={headers} placeholder="Select column"/>
+              <Select
+                value={inputCol}
+                onChange={setInputCol}
+                options={headers}
+                placeholder="Select column"
+              />
               <div className={styles.importTypeRow}>
                 <span>type</span>
                 <TypeSelect value={inputType} onChange={setInputType} />
@@ -175,7 +215,12 @@ function ImportCsvModal({ open, headers, rows, fileName, onCancel, onImport }: I
             </div>
             <div className={styles.importCard}>
               <div className={styles.importCardTitle}>Expected Output</div>
-              <Select value={expectedCol} onChange={setExpectedCol} options={headers} placeholder="Select column"/>
+              <Select
+                value={expectedCol}
+                onChange={setExpectedCol}
+                options={headers}
+                placeholder="Select column"
+              />
               <div className={styles.importTypeRow}>
                 <span>type</span>
                 <TypeSelect value={expectedType} onChange={setExpectedType} />
@@ -183,7 +228,12 @@ function ImportCsvModal({ open, headers, rows, fileName, onCancel, onImport }: I
             </div>
             <div className={styles.importCard}>
               <div className={styles.importCardTitle}>Metadata</div>
-              <Select value={metaCol} onChange={setMetaCol} options={headers} placeholder="Select column"/>
+              <Select
+                value={metaCol}
+                onChange={setMetaCol}
+                options={headers}
+                placeholder="Select column"
+              />
               <div className={styles.importTypeRow}>
                 <span>type</span>
                 <TypeSelect value={metaType} onChange={setMetaType} />
@@ -192,14 +242,20 @@ function ImportCsvModal({ open, headers, rows, fileName, onCancel, onImport }: I
             <div className={styles.importCard}>
               <div className={styles.importCardTitle}>Not mapped</div>
               <div className={styles.unmappedBox}>
-                {unmapped.length ? unmapped.join(', ') : <span className={styles.muted}>—</span>}
+                {unmapped.length ? unmapped.join(", ") : <span className={styles.muted}>—</span>}
               </div>
             </div>
           </div>
         </div>
         <div className={styles.modalFooter}>
-          <button className={cx(styles.btn, styles.btnGhost)} onClick={onCancel}>Cancel</button>
-          <button className={cx(styles.btn, styles.btnCreateDataset)} onClick={doImport} disabled={!(inputCol || expectedCol || metaCol)}>
+          <button className={cx(styles.btn, styles.btnGhost)} onClick={onCancel}>
+            Cancel
+          </button>
+          <button
+            className={cx(styles.btn, styles.btnCreateDataset)}
+            onClick={doImport}
+            disabled={!(inputCol || expectedCol || metaCol)}
+          >
             Import
           </button>
         </div>
@@ -207,6 +263,7 @@ function ImportCsvModal({ open, headers, rows, fileName, onCancel, onImport }: I
     </div>
   );
 }
+
 /* =========================================================
    Create / Edit Modal
 ========================================================= */
@@ -241,7 +298,6 @@ function CreateDatasetModal({
   const [nameError, setNameError] = useState<string | null>(null);
   const [metaError, setMetaError] = useState<string | null>(null);
 
-  // ---- validation helpers
   const isDupName = (val: string) =>
     existingNames.some((n) => n.trim().toLowerCase() === val.trim().toLowerCase());
 
@@ -261,7 +317,6 @@ function CreateDatasetModal({
     }
   };
 
-  // ---- open/cleanup/focus
   useEffect(() => {
     if (!open) return;
     setName(initial?.name ?? "");
@@ -307,7 +362,6 @@ function CreateDatasetModal({
       aria-labelledby="dataset-modal-title"
     >
       <div className={styles.modal}>
-        {/* header */}
         <div className={styles.modalHeader}>
           <h3 id="dataset-modal-title">{mode === "edit" ? "Edit dataset" : "Create new dataset"}</h3>
           <button className={styles.iconBtn} aria-label="Close" onClick={onClose}>
@@ -315,7 +369,6 @@ function CreateDatasetModal({
           </button>
         </div>
 
-        {/* body */}
         <div className={styles.modalBody}>
           <label className={cx(styles.label, nameError && styles.labelError)}>
             <span>Name</span>
@@ -358,7 +411,6 @@ function CreateDatasetModal({
           </label>
         </div>
 
-        {/* footer */}
         <div className={styles.modalFooter}>
           <button className={cx(styles.btn, styles.btnCreateDataset)} onClick={submit}>
             {mode === "edit" ? "Save" : "Create dataset"}
@@ -416,7 +468,7 @@ function RowActions({ open, onClose, onEdit, onDelete }: RowActionsProps) {
 }
 
 /* =========================================================
-   Empty State (first landing)
+   Empty State
 ========================================================= */
 
 function DatasetsEmpty({ onClickNew }: { onClickNew: () => void }) {
@@ -424,33 +476,49 @@ function DatasetsEmpty({ onClickNew }: { onClickNew: () => void }) {
     <div className={styles.emptyWrap}>
       <h2 className={styles.emptyTitle}>Get Started with Datasets</h2>
       <p className={styles.emptyDesc}>
-        Datasets in Langfuse are collections of inputs (and expected outputs) for your LLM application. You can for
-        example use them to benchmark new releases before deployment to production.
+        Datasets in Langfuse are collections of inputs (and expected outputs) for your LLM
+        application. You can for example use them to benchmark new releases before deployment to
+        production.
       </p>
 
       <div className={styles.emptyActions}>
         <button className={cx(styles.btn, styles.btnNewDataset)} onClick={onClickNew}>
           + New dataset
         </button>
-        <button className={cx(styles.btn, styles.btnGhost)}>Learn More</button>
+        
+        <a className={cx(styles.btn, styles.btnGhost)}
+        href="https://langfuse.com/docs"
+        target="_blank"
+        rel="noreferrer"
+        >
+          Learn More
+        </a>
       </div>
 
       <div className={styles.emptyGrid}>
         <div className={styles.card}>
           <div className={styles.cardTitle}>⚡ Continuous improvement</div>
-          <div className={styles.cardDesc}>Create datasets from production edge cases to improve your application</div>
+          <div className={styles.cardDesc}>
+            Create datasets from production edge cases to improve your application
+          </div>
         </div>
         <div className={styles.card}>
           <div className={styles.cardTitle}>🧪 Pre-deployment testing</div>
-          <div className={styles.cardDesc}>Benchmark new releases before deploying to production</div>
+          <div className={styles.cardDesc}>
+            Benchmark new releases before deploying to production
+          </div>
         </div>
         <div className={styles.card}>
           <div className={styles.cardTitle}>📄 Structured testing</div>
-          <div className={styles.cardDesc}>Run experiments on collections of inputs and expected outputs</div>
+          <div className={styles.cardDesc}>
+            Run experiments on collections of inputs and expected outputs
+          </div>
         </div>
         <div className={styles.card}>
           <div className={styles.cardTitle}>&lt;/&gt; Custom workflows</div>
-          <div className={styles.cardDesc}>Build custom workflows around your datasets via the API and SDKs</div>
+          <div className={styles.cardDesc}>
+            Build custom workflows around your datasets via the API and SDKs
+          </div>
         </div>
       </div>
     </div>
@@ -467,47 +535,64 @@ interface DatasetDetailProps {
 }
 
 function DatasetDetail({ dataset, onBack }: DatasetDetailProps) {
+  const { setHeader } = useOutletContext<HeaderSetterCtx>(); // ★ 전역 헤더 세터
   const [tab, setTab] = useState<"runs" | "items">("runs");
 
-  // Items state & pagination
   const [items, setItems] = useState<any[]>([]);
   const [importOpen, setImportOpen] = useState(false);
   const [importHeaders, setImportHeaders] = useState<string[]>([]);
   const [importRows, setImportRows] = useState<string[][]>([]);
-  const [lastFileName, setLastFileName] = useState<string>('');
+  const [lastFileName, setLastFileName] = useState<string>("");
   const [itemsPage, setItemsPage] = useState(1);
   const [itemsRowsPerPage, setItemsRowsPerPage] = useState(50);
   const hasItems = items.length > 0;
   const [isDragging, setIsDragging] = useState(false);
   const [itemsError, setItemsError] = useState<string | null>(null);
 
-  const onDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-  const onDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
+  // ★ 전역 헤더 구성: 왼쪽 타이틀 + 탭별 우측 액션
+  useEffect(() => {
+    const left = (
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <button className={styles.breadcrumbChip} onClick={onBack}>Dataset</button>
+        <span className={styles.datasetChip}>{dataset.name}</span>
+        <span className={styles.infoDot} aria-hidden>○</span>
+      </div>
+    );
+
+    const right =
+      tab === "items" ? (
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button className={cx(styles.btn, styles.newItemBtn)}>+ New item</button>
+          <button className={styles.iconBtn} aria-label="More">⋯</button>
+        </div>
+      ) : (
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button className={cx(styles.btn, styles.btnNewExperiment)}>New experiment</button>
+          <button className={cx(styles.btn, styles.btnGhost)}>Select evaluators ▾</button>
+          <button className={cx(styles.btn, styles.btnGhost)}>Charts <span className={styles.badge}>2</span></button>
+          <button className={styles.iconBtn} aria-label="More">⋯</button>
+        </div>
+      );
+
+    setHeader({ title: left, rightActions: right });
+    return () => setHeader({ title: undefined, rightActions: undefined });
+  }, [dataset.name, onBack, setHeader, tab]);
+
+  const onDragOver = (e: React.DragEvent<HTMLLabelElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const onDragLeave = (e: React.DragEvent<HTMLLabelElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
   const onDrop = (e: React.DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    readCsvFile(file);
+    e.preventDefault(); e.stopPropagation(); setIsDragging(false);
+    const file = e.dataTransfer.files?.[0]; if (!file) return; readCsvFile(file);
   };
 
-  // CSV parser (handles quotes and commas)
+  // CSV parser
   const parseCSV = (text: string): { headers: string[]; rows: string[][] } => {
     const rows: string[][] = [];
     let row: string[] = [];
-    let current = '';
+    let current = "";
     let inQuotes = false;
 
-    const pushCell = () => { row.push(current); current = ''; };
+    const pushCell = () => { row.push(current); current = ""; };
     const pushRow = () => { rows.push(row); row = []; };
 
     for (let i = 0; i < text.length; i++) {
@@ -521,44 +606,43 @@ function DatasetDetail({ dataset, onBack }: DatasetDetailProps) {
         }
       } else {
         if (c === '"') inQuotes = true;
-        else if (c === ',') pushCell();
-        else if (c === '\n') { pushCell(); pushRow(); }
-        else if (c === '\r') { /* ignore CR */ }
+        else if (c === ",") pushCell();
+        else if (c === "\n") { pushCell(); pushRow(); }
+        else if (c === "\r") { /* ignore */ }
         else current += c;
       }
     }
     pushCell();
-    if (row.length > 1 || row[0] !== '') pushRow();
+    if (row.length > 1 || row[0] !== "") pushRow();
 
-    while (rows.length && rows[rows.length - 1].every((x) => x === '')) rows.pop();
+    while (rows.length && rows[rows.length - 1].every((x) => x === "")) rows.pop();
 
     const headers = rows.shift() ?? [];
     return { headers, rows };
   };
 
-  // File input & drop area handlers
   const readCsvFile = (file: File) => {
     setItemsError(null);
-    if (!/\.csv($|\b)/i.test(file.name) && file.type !== 'text/csv') {
-      setItemsError('Please upload a .csv file.');
+    if (!/\.csv($|\b)/i.test(file.name) && file.type !== "text/csv") {
+      setItemsError("Please upload a .csv file.");
       return;
     }
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const text = String(reader.result || '');
+        const text = String(reader.result || "");
         const parsed = parseCSV(text);
-        if (!parsed.headers.length) { setItemsError('CSV has no header row.'); return; }
-        if (parsed.rows.length === 0) { setItemsError('No rows found in the CSV.'); return; }
+        if (!parsed.headers.length) { setItemsError("CSV has no header row."); return; }
+        if (parsed.rows.length === 0) { setItemsError("No rows found in the CSV."); return; }
         setImportHeaders(parsed.headers);
         setImportRows(parsed.rows);
         setLastFileName(file.name);
         setImportOpen(true);
-      } catch (err) {
-        setItemsError('Failed to parse CSV. Please check the format.');
+      } catch {
+        setItemsError("Failed to parse CSV. Please check the format.");
       }
     };
-    reader.onerror = () => setItemsError('Failed to read the file.');
+    reader.onerror = () => setItemsError("Failed to read the file.");
     reader.readAsText(file);
   };
 
@@ -570,98 +654,54 @@ function DatasetDetail({ dataset, onBack }: DatasetDetailProps) {
 
   return (
     <div className={styles.detailPage}>
-      {/* top bar */}
-      <div className={styles.detailTopBar}>
-        <div className={styles.detailLeft}>
-          <button className={styles.breadcrumbChip} onClick={onBack}>
-            Dataset
-          </button>
-          <span className={styles.datasetChip}>{dataset.name}</span>
-          <span className={styles.infoDot} aria-hidden>
-            ○
-          </span>
-        </div>
-
-        {tab === "items" ? (
-          <div className={styles.detailRight}>
-            <button className={cx(styles.btn, styles.newItemBtn)}>+ New item</button>
-            <button className={styles.iconBtn} aria-label="More">
-              ⋯
-            </button>
-          </div>
-        ) : (
-          <div className={styles.detailRight}>
-            <button className={cx(styles.btn, styles.btnNewExperiment)}>New experiment</button>
-            <button className={cx(styles.btn, styles.btnGhost)}>Select evaluators ▾</button>
-            <button className={cx(styles.btn, styles.btnGhost)}>
-              Charts <span className={styles.badge}>2</span>
-            </button>
-            <button className={styles.iconBtn}>⋯</button>
-          </div>
-        )}
-      </div>
+      {/* ⛔️ 기존 detailTopBar는 전역 헤더로 올렸으므로 제거 */}
 
       {/* tabs */}
       <div className={styles.detailTabs}>
-        <button className={cx(styles.tabBtn, tab === "runs" && styles.tabBtnActive)} onClick={() => setTab("runs")}>
-          Runs
-        </button>
-        <button className={cx(styles.tabBtn, tab === "items" && styles.tabBtnActive)} onClick={() => setTab("items")}>
-          Items
-        </button>
+        <button className={cx(styles.tabBtn, tab === "runs" && styles.tabBtnActive)} onClick={() => setTab("runs")}>Runs</button>
+        <button className={cx(styles.tabBtn, tab === "items" && styles.tabBtnActive)} onClick={() => setTab("items")}>Items</button>
       </div>
 
       {/* Runs tab */}
       {tab === "runs" ? (
         <>
-          {/* columns toolbar */}
           <div className={styles.tableToolbarRightOnly}>
             <button className={cx(styles.btn, styles.btnGhost)}>
               Columns <span className={styles.badge}>9/10</span>
             </button>
-            <button className={styles.iconBtn} aria-label="Layout">
-              ☰
-            </button>
+            <button className={styles.iconBtn} aria-label="Layout">☰</button>
           </div>
 
           <table className={styles.detailTable}>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Run Items</th>
-                <th>Latency (avg)</th>
-                <th>Total Cost (avg)</th>
-                <th>Run-level Scores</th>
-                <th>Aggregated Run Items…</th>
-                <th>Created</th>
-                <th>Metadata</th>
-                <th className={styles.thActions}>Actions</th>
+                <th>Name</th><th>Description</th><th>Run Items</th><th>Latency (avg)</th>
+                <th>Total Cost (avg)</th><th>Run-level Scores</th><th>Aggregated Run Items…</th>
+                <th>Created</th><th>Metadata</th><th className={styles.thActions}>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className={styles.emptyCellDetail} colSpan={10}>
-                  No results.
-                </td>
-              </tr>
+              <tr><td className={styles.emptyCellDetail} colSpan={10}>No results.</td></tr>
             </tbody>
           </table>
 
-          {/* bottom pagination */}
           <div className={styles.bottomBar}>
             <div className={styles.bottomRight}>
               <div className={styles.rowsPerPage}>
                 Rows per page
-                <select className={styles.select} value={itemsRowsPerPage} onChange={(e)=>{ setItemsRowsPerPage(parseInt(e.target.value,10)); setItemsPage(1); }}>
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
+                <select
+                  className={styles.select}
+                  value={itemsRowsPerPage}
+                  onChange={(e) => { setItemsRowsPerPage(parseInt(e.target.value, 10)); setItemsPage(1); }}
+                >
+                  <option value={10}>10</option><option value={25}>25</option>
+                  <option value={50}>50</option><option value={100}>100</option>
                 </select>
               </div>
               <div className={styles.pageInfo}>
-                Page <input className={styles.pageInput} value={itemsPage} onChange={(e)=>{ const n = parseInt(e.target.value||"1",10); if(!Number.isNaN(n)) setItemsPage(n); }} /> <span>of {Math.max(1, Math.ceil(items.length / itemsRowsPerPage))}</span>
+                Page <input className={styles.pageInput} value={itemsPage}
+                  onChange={(e)=>{ const n = parseInt(e.target.value||"1",10); if(!Number.isNaN(n)) setItemsPage(n); }} />
+                <span>of {Math.max(1, Math.ceil(items.length / itemsRowsPerPage))}</span>
               </div>
               <div className={styles.pagerBtns}>
                 <button className={styles.pageBtn} onClick={()=>setItemsPage(1)}>«</button>
@@ -679,107 +719,91 @@ function DatasetDetail({ dataset, onBack }: DatasetDetailProps) {
             <button className={cx(styles.btn, styles.btnGhost)}>
               Columns <span className={styles.badge}>8/8</span>
             </button>
-            <button className={styles.iconBtn} title="List">
-              ☰
-            </button>
-            <button className={styles.iconBtn} title="Download">
-              ⇩
-            </button>
+            <button className={styles.iconBtn} title="List">☰</button>
+            <button className={styles.iconBtn} title="Download">⇩</button>
           </div>
 
-
-          {/* RENDER ITEMS TABLE WHEN HAS ITEMS */}
           {hasItems && (
-            <>
-              <table className={styles.detailTable}>
-                <thead>
-                  <tr>
-                    {(items.length ? Object.keys(items[0]) : []).map((col) => (
-                      <th key={col}>{col}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(() => {
-                    const pageCount = Math.max(1, Math.ceil(items.length / itemsRowsPerPage));
-                    const safePage = Math.min(Math.max(1, itemsPage), pageCount);
-                    const start = (safePage - 1) * itemsRowsPerPage;
-                    const visible = items.slice(start, start + itemsRowsPerPage);
-                    return visible.map((row, idx) => (
-                      <tr key={idx}>
-                        {Object.keys(items[0]).map((col) => (
-                          <td key={col + idx}>{String(row[col] ?? '')}</td>
-                        ))}
-                      </tr>
-                    ));
-                  })()}
-                </tbody>
-              </table>
-            </>
+            <table className={styles.detailTable}>
+              <thead>
+                <tr>{(items.length ? Object.keys(items[0]) : []).map((col) => (<th key={col}>{col}</th>))}</tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  const pageCount = Math.max(1, Math.ceil(items.length / itemsRowsPerPage));
+                  const safePage = Math.min(Math.max(1, itemsPage), pageCount);
+                  const start = (safePage - 1) * itemsRowsPerPage;
+                  const visible = items.slice(start, start + itemsRowsPerPage);
+                  return visible.map((row, idx) => (
+                    <tr key={idx}>{Object.keys(items[0]).map((col) => (<td key={col + idx}>{String(row[col] ?? "")}</td>))}</tr>
+                  ));
+                })()}
+              </tbody>
+            </table>
           )}
-              {!hasItems && (
+
+          {!hasItems && (
             <div className={styles.itemsDropzoneWrap}>
               <div className={styles.itemsDropzone}>
                 <div className={styles.dropTitle}>Add items to dataset</div>
                 <div className={styles.dropSubtitle}>
                   Add items to dataset by uploading a file, add items manually or via our SDKs/API
                 </div>
-                {/* Dropzone: full-width and clickable */}
-<input
-  id="csvFileInput"
-  type="file"
-  accept=".csv,text/csv"
-  className={styles.fileInputHidden}
-  onChange={handleFileSelect}
-/>
-<label
-  htmlFor="csvFileInput"
-  className={cx(styles.dropArea, styles.dropAreaWide, isDragging && styles.dropAreaActive)}
-  onDragOver={onDragOver}
-  onDragLeave={onDragLeave}
-  onDrop={onDrop}
->
-  <div className={styles.dropIcon}>⬆</div>
-  <div className={styles.dropText}>Click to select a CSV file</div>
-</label>
+                <input id="csvFileInput" type="file" accept=".csv,text/csv" className={styles.fileInputHidden} onChange={handleFileSelect}/>
+                <label
+                  htmlFor="csvFileInput"
+                  className={cx(styles.dropArea, styles.dropAreaWide, isDragging && styles.dropAreaActive)}
+                  onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                >
+                  <div className={styles.dropIcon}>⬆</div>
+                  <div className={styles.dropText}>Click to select a CSV file</div>
+                </label>
               </div>
               {itemsError && <div className={styles.dropError}>{itemsError}</div>}
             </div>
           )}
 
-          {hasItems && (<div className={styles.bottomBar}>
-            <div className={styles.bottomRight}>
-              <div className={styles.rowsPerPage}>
-                Rows per page
-                <select className={styles.select} value={itemsRowsPerPage} onChange={(e)=>{ setItemsRowsPerPage(parseInt(e.target.value,10)); setItemsPage(1); }}>
-                  <option value={10}>10</option>
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-              </div>
-              <div className={styles.pageInfo}>
-                Page <input className={styles.pageInput} value={itemsPage} onChange={(e)=>{ const n = parseInt(e.target.value||"1",10); if(!Number.isNaN(n)) setItemsPage(n); }} /> <span>of {Math.max(1, Math.ceil(items.length / itemsRowsPerPage))}</span>
-              </div>
-              <div className={styles.pagerBtns}>
-                <button className={styles.pageBtn} onClick={()=>setItemsPage(1)}>«</button>
-                <button className={styles.pageBtn} onClick={()=>setItemsPage(Math.max(1, itemsPage-1))}>‹</button>
-                <button className={styles.pageBtn} onClick={()=>setItemsPage(Math.min(Math.max(1, Math.ceil(items.length/itemsRowsPerPage)), itemsPage+1))}>›</button>
-                <button className={styles.pageBtn} onClick={()=>setItemsPage(Math.max(1, Math.ceil(items.length/itemsRowsPerPage)))}>»</button>
+          {hasItems && (
+            <div className={styles.bottomBar}>
+              <div className={styles.bottomRight}>
+                <div className={styles.rowsPerPage}>
+                  Rows per page
+                  <select className={styles.select} value={itemsRowsPerPage}
+                    onChange={(e)=>{ setItemsRowsPerPage(parseInt(e.target.value,10)); setItemsPage(1); }}>
+                    <option value={10}>10</option><option value={25}>25</option>
+                    <option value={50}>50</option><option value={100}>100</option>
+                  </select>
+                </div>
+                <div className={styles.pageInfo}>
+                  Page <input className={styles.pageInput} value={itemsPage}
+                    onChange={(e)=>{ const n = parseInt(e.target.value||"1",10); if(!Number.isNaN(n)) setItemsPage(n); }} />
+                  <span>of {Math.max(1, Math.ceil(items.length / itemsRowsPerPage))}</span>
+                </div>
+                <div className={styles.pagerBtns}>
+                  <button className={styles.pageBtn} onClick={()=>setItemsPage(1)}>«</button>
+                  <button className={styles.pageBtn} onClick={()=>setItemsPage(Math.max(1, itemsPage-1))}>‹</button>
+                  <button className={styles.pageBtn} onClick={()=>setItemsPage(Math.min(Math.max(1, Math.ceil(items.length/itemsRowsPerPage)), itemsPage+1))}>›</button>
+                  <button className={styles.pageBtn} onClick={()=>setItemsPage(Math.max(1, Math.ceil(items.length/itemsRowsPerPage)))}>»</button>
+                </div>
               </div>
             </div>
-          </div>) }
-        </>  
+          )}
+        </>
       )}
-      
-      {/* Import mapping modal (ONLY HERE — owns the state) */}
+
+      {/* Import mapping modal */}
       <ImportCsvModal
         open={importOpen}
         headers={importHeaders}
         rows={importRows}
         fileName={lastFileName}
-        onCancel={()=> setImportOpen(false)}
-        onImport={(newItems)=>{ setItems(newItems); setItemsPage(1); setImportOpen(false); setTab('items'); }}
+        onCancel={() => setImportOpen(false)}
+        onImport={(newItems) => {
+          setItems(newItems);
+          setItemsPage(1);
+          setImportOpen(false);
+          setTab("items");
+        }}
       />
     </div>
   );
@@ -816,7 +840,6 @@ function DatasetsTable({
 }: DatasetsTableProps) {
   const [menuRow, setMenuRow] = useState<string | null>(null);
 
-  // filter + pagination
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q ? data.filter((d) => d.name.toLowerCase().includes(q)) : data;
@@ -853,9 +876,7 @@ function DatasetsTable({
           <button className={cx(styles.btn, styles.btnGhost)}>
             Columns <span className={styles.badge}>8/8</span>
           </button>
-          <button className={styles.iconBtn} aria-label="Layout">
-            ☰
-          </button>
+          <button className={styles.iconBtn} aria-label="Layout">☰</button>
         </div>
       </div>
 
@@ -923,59 +944,45 @@ function DatasetsTable({
       </table>
 
       {/* bottom bar */}
-      {filtered.length > 0 && (<div className={styles.bottomBar}>
-        <div className={styles.bottomRight}>
-          <div className={styles.rowsPerPage}>
-            Rows per page
-            <select
-              className={styles.select}
-              value={rowsPerPage}
-              onChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
-            >
-              <option value={10}>10</option>
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-          </div>
+      {filtered.length > 0 && (
+        <div className={styles.bottomBar}>
+          <div className={styles.bottomRight}>
+            <div className={styles.rowsPerPage}>
+              Rows per page
+              <select
+                className={styles.select}
+                value={rowsPerPage}
+                onChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
 
-          <div className={styles.pageInfo}>
-            Page
-            <input
-              className={styles.pageInput}
-              value={safePage}
-              onChange={(e) => {
-                const n = parseInt(e.target.value || "1", 10);
-                if (!Number.isNaN(n)) setPage(n);
-              }}
-            />
-            <span>of {pageCount}</span>
-          </div>
+            <div className={styles.pageInfo}>
+              Page
+              <input
+                className={styles.pageInput}
+                value={safePage}
+                onChange={(e) => {
+                  const n = parseInt(e.target.value || "1", 10);
+                  if (!Number.isNaN(n)) setPage(n);
+                }}
+              />
+              <span>of {pageCount}</span>
+            </div>
 
-          <div className={styles.pagerBtns}>
-            <button className={styles.pageBtn} onClick={() => setPage(1)} aria-label="First">
-              «
-            </button>
-            <button
-              className={styles.pageBtn}
-              onClick={() => setPage(Math.max(1, safePage - 1))}
-              aria-label="Prev"
-            >
-              ‹
-            </button>
-            <button
-              className={styles.pageBtn}
-              onClick={() => setPage(Math.min(pageCount, safePage + 1))}
-              aria-label="Next"
-            >
-              ›
-            </button>
-            <button className={styles.pageBtn} onClick={() => setPage(pageCount)} aria-label="Last">
-              »
-            </button>
+            <div className={styles.pagerBtns}>
+              <button className={styles.pageBtn} onClick={() => setPage(1)} aria-label="First">«</button>
+              <button className={styles.pageBtn} onClick={() => setPage(Math.max(1, safePage - 1))} aria-label="Prev">‹</button>
+              <button className={styles.pageBtn} onClick={() => setPage(Math.min(pageCount, safePage + 1))} aria-label="Next">›</button>
+              <button className={styles.pageBtn} onClick={() => setPage(pageCount)} aria-label="Last">»</button>
+            </div>
           </div>
         </div>
-      </div>)}
+      )}
     </>
   );
 }
@@ -985,6 +992,7 @@ function DatasetsTable({
 ========================================================= */
 
 export default function DatasetsPage() {
+  const { setHeader } = useOutletContext<HeaderSetterCtx>(); // ★ 목록 헤더도 여기서 설정
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [editTarget, setEditTarget] = useState<Dataset | null>(null);
@@ -994,6 +1002,9 @@ export default function DatasetsPage() {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const hasData = datasets.length > 0;
 
   const fmt = (d: Date) =>
@@ -1001,6 +1012,19 @@ export default function DatasetsPage() {
       .toISOString()
       .slice(0, 19)
       .replace("T", " ");
+
+  // ✅ /datasets?new=1 이면 모달 오픈
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("new") === "1") setOpenCreate(true);
+  }, [location.search]);
+
+  // ✅ 모달 닫을 때 쿼리 제거
+  const closeCreate = () => {
+    setOpenCreate(false);
+    const params = new URLSearchParams(location.search);
+    if (params.get("new") === "1") navigate("/datasets", { replace: true });
+  };
 
   const handleCreate = (form: { name: string; description?: string; metadata?: string }) => {
     const item: Dataset = {
@@ -1015,6 +1039,9 @@ export default function DatasetsPage() {
     };
     setDatasets((prev) => [item, ...prev]);
     setOpenCreate(false);
+    // 헤더 버튼으로 들어온 경우 쿼리 제거
+    const params = new URLSearchParams(location.search);
+    if (params.get("new") === "1") navigate("/datasets", { replace: true });
   };
 
   const handleEditSave = (form: { name: string; description?: string; metadata?: string }) => {
@@ -1034,6 +1061,25 @@ export default function DatasetsPage() {
     setDatasets((prev) => prev.filter((d) => d.id !== row.id));
   };
 
+  /* --- 목록 화면 전역 헤더: Datasets · + New dataset --- */
+  useEffect(() => {
+    if (!opened) {
+      setHeader({
+        title: "Datasets",
+        rightActions: (
+          <button
+            className={cx(styles.btn, styles.btnCreateDataset)}
+            onClick={() => setOpenCreate(true)}
+            style={{ cursor: "pointer" }}
+          >
+            + New dataset
+          </button>
+        ),
+      });
+      return () => setHeader({ title: undefined, rightActions: undefined });
+    }
+  }, [opened, setHeader]);
+
   // ---- detail (opened) view
   if (opened) {
     return (
@@ -1047,26 +1093,14 @@ export default function DatasetsPage() {
           open={openCreate}
           mode="create"
           existingNames={datasets.map((d) => d.name)}
-          onClose={() => setOpenCreate(false)}
+          onClose={closeCreate}
           onSubmit={handleCreate}
         />
         <CreateDatasetModal
           open={!!editTarget}
           mode="edit"
-          initial={
-            editTarget
-              ? {
-                  name: editTarget.name,
-                  description: editTarget.description,
-                  metadata: editTarget.metadata,
-                }
-              : undefined
-          }
-          existingNames={
-            editTarget
-              ? datasets.filter((d) => d.id !== editTarget.id).map((d) => d.name)
-              : datasets.map((d) => d.name)
-          }
+          initial={editTarget ? { name: editTarget.name, description: editTarget.description, metadata: editTarget.metadata } : undefined}
+          existingNames={editTarget ? datasets.filter((d) => d.id !== editTarget.id).map((d) => d.name) : datasets.map((d) => d.name)}
           onClose={() => setEditTarget(null)}
           onSubmit={handleEditSave}
         />
@@ -1077,15 +1111,7 @@ export default function DatasetsPage() {
   // ---- list (index) view
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.titleRow}>
-          <h1 className={styles.title}>Datasets</h1>
-          <button className={cx(styles.btn, styles.btnNewDataset)} onClick={() => setOpenCreate(true)}>
-            + New dataset
-          </button>
-        </div>
-      </header>
-
+      {/* ⛔️ 로컬 헤더는 제거 — PageHeader가 타이틀/헤더 버튼 담당 */}
       <main className={styles.main}>
         {!hasData ? (
           <DatasetsEmpty onClickNew={() => setOpenCreate(true)} />
@@ -1093,17 +1119,11 @@ export default function DatasetsPage() {
           <DatasetsTable
             data={datasets}
             search={search}
-            setSearch={(s) => {
-              setSearch(s);
-              setPage(1);
-            }}
+            setSearch={(s) => { setSearch(s); setPage(1); }}
             page={page}
             setPage={setPage}
             rowsPerPage={rowsPerPage}
-            setRowsPerPage={(n) => {
-              setRowsPerPage(n);
-              setPage(1);
-            }}
+            setRowsPerPage={(n) => { setRowsPerPage(n); setPage(1); }}
             onEdit={(row) => setEditTarget(row)}
             onDelete={handleDelete}
             onOpen={(row) => setOpened(row)}
@@ -1116,22 +1136,14 @@ export default function DatasetsPage() {
         open={openCreate}
         mode="create"
         existingNames={datasets.map((d) => d.name)}
-        onClose={() => setOpenCreate(false)}
+        onClose={closeCreate}
         onSubmit={handleCreate}
       />
       <CreateDatasetModal
         open={!!editTarget}
         mode="edit"
-        initial={
-          editTarget
-            ? { name: editTarget.name, description: editTarget.description, metadata: editTarget.metadata }
-            : undefined
-        }
-        existingNames={
-          editTarget
-            ? datasets.filter((d) => d.id !== editTarget.id).map((d) => d.name)
-            : datasets.map((d) => d.name)
-        }
+        initial={editTarget ? { name: editTarget.name, description: editTarget.description, metadata: editTarget.metadata } : undefined}
+        existingNames={editTarget ? datasets.filter((d) => d.id !== editTarget.id).map((d) => d.name) : datasets.map((d) => d.name)}
         onClose={() => setEditTarget(null)}
         onSubmit={handleEditSave}
       />

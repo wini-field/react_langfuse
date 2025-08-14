@@ -4,8 +4,9 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import {ColDef, GridApi, GridReadyEvent, ICellRendererParams} from 'ag-grid-community';
 import {Plus, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import styles from './layout/Models.module.css';
-import memberStyles from './layout/Members.module.css';
+import commonStyles from './layout/SettingsCommon.module.css'
+import gridStyles from './layout/SettingsGrid.module.css'
+import styles from './layout/Members.module.css'
 import CustomPagination from "./CustomPagination.tsx";
 
 interface Member {
@@ -30,15 +31,15 @@ const DUMMY_MEMBERS_DATA: Member[] = [
 
 // Name
 const NameRenderer: React.FC<ICellRendererParams> = (props) => (
-    <div className = { memberStyles.nameCell }>
-        <span>{props.value}</span>
+    <div className = { styles.nameCell }>
+        <span>{ props.value }</span>
     </div>
 )
 
 // Organization Role
 const OrganizationRoleRenderer: React.FC<ICellRendererParams> = (props) => (
-    <div className = { memberStyles.roleCell }>
-        <select defaultValue ={ props.value } className = { memberStyles.roleSelect }>
+    <div className = { styles.roleCell }>
+        <select defaultValue ={ props.value } className = { styles.roleSelect }>
             <option>Owner</option>
             <option>Admin</option>
             <option>Member</option>
@@ -50,8 +51,8 @@ const OrganizationRoleRenderer: React.FC<ICellRendererParams> = (props) => (
 
 const ActionsRenderer: React.FC = () => {
     return (
-        <div className = { memberStyles.actionRenderer }>
-            <button className = { memberStyles.actionButton }>
+        <div className = { styles.actionRenderer }>
+            <button className = { styles.actionButton }>
                 <Trash2 size = { 16 } />
             </button>
         </div>
@@ -91,28 +92,29 @@ const Members: React.FC = () => {
      }, []);
 
     return (
-        <div className = { styles.container }>
+        <div className = { commonStyles.container }>
             <h3>Project Members</h3>
-            <div className = { styles.header }>
-                <button className = { `${ styles.headerButton } ${ styles.columnsButton }`}>
+            <div className = { gridStyles.header }>
+                <button className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }`}>
                     <span>Column</span>
-                    <span className = { styles.count }>5/6</span>
+                    <span className = { gridStyles.count }>5/6</span>
                 </button>
-                <button className = { `${ styles.headerButton } ${ styles.addButton }` }>
+                <button className = { `${ gridStyles.headerButton } ${ gridStyles.addButton }` }>
                     <Plus size = { 16 } /> Add new member
                 </button>
             </div>
 
-            <div className = { `ag-theme-alpine ${styles.gridContainer }` }>
+            <div className = { `ag-theme-alpine ${ gridStyles.gridContainer }` }>
                 <AgGridReact
                     ref = { gridRef }
                     rowData = { rowData }
                     columnDefs = { columnDefs }
                     pagination = { true }
                     paginationPageSize = { pageSizes[0] }
-                    suppressRowClickSelection = { true }
-                    icons = { icons }
+                    suppressPaginationPanel = { true }
                     onGridReady = { onGridReady }
+                    icons = { icons }
+                    domLayout = 'autoHeight'
                 />
             </div>
             { gridApi && <CustomPagination gridApi = { gridApi } pageSizes = { pageSizes } /> }
