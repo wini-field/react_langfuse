@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Modal from '../../'
+import Modal from '../../components/Modal/Modal'
 import NewLLMConnectionForm from "./form/NewLLMConnectionsForm";
 import styles from "./layout/SettingsCommon.module.css";
 import llmstyles from './layout/LLMConnections.module.css';
@@ -49,7 +49,7 @@ const LLMConnections = () => {
     const [newConnectionData, setNewConnectionData] = useState(initialFormState);
 
     const handleOpenModal = () => {
-        setNewConnectionData(initialFormState);
+        setNewConnectionData(initialFormState); // 모달 열 때 폼 초기화
         setIsModalOpen(true);
     };
 
@@ -79,8 +79,8 @@ const LLMConnections = () => {
             <h3 className = { styles.title }>LLM Connections </h3>
             <p>Connect your LLM services to enable evaluations and playground features. Your provider will charge based on usage.</p>
 
-            <div className = { llmstyles.table }>
-                <div className = { llmstyles.tableHeader }>
+            <div className = { styles.keyList }>
+                <div className = { `${ styles.keyRow } ${ styles.keyHeader }` }>
                     <span>Provider</span>
                     <span>Adapter</span>
                     <span>Base URL</span>
@@ -88,7 +88,7 @@ const LLMConnections = () => {
                     <span style = {{ textAlign: 'center' }}>Actions</span>
                 </div>
                 { connections.map((conn) => (
-                    <div key = { conn.id } className = { llmstyles.tableRow }>
+                    <div key = { conn.id } className = { styles.keyRow }>
                         <span>{ conn.provider }</span>
                         <span>{ conn.adapter }</span>
                         <span>{ conn.baseUrl }</span>
@@ -101,16 +101,22 @@ const LLMConnections = () => {
                 ))}
             </div>
 
-            { !isAdding ? (
-                <button onClick = { () => setIsAdding(true) } className = { styles.createButton}>
-                    <Plus size = { 16 } /> Add LLM Connection
-                </button>
-            ) : (
+            <button onClick = { handleOpenModal } className = { styles.createButton }>
+                <Plus size = { 16 } /> Add LLM Connection
+            </button>
+
+            <Modal
+                title = "Add new LLM Connection"
+                isOpen = { isModalOpen }
+                onClose = { handleOpenModal }
+                onConfirm = { handleSaveConnection }
+                confirmText = "Save"
+            >
                 <NewLLMConnectionForm
-                    onSave = { handleAddConnection }
-                    onCancel = { () => setIsAdding(false) }
+                    data = { newConnectionData }
+                    setData = { setNewConnectionData}
                 />
-            )}
+            </Modal>
         </div>
     );
 };

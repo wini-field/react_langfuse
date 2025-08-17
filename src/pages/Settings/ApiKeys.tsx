@@ -32,7 +32,7 @@ const ApiKeys: React.FC = () => {
         <div className = { commonStyles.container }>
             { /* Host Name Section */ }
             <h3 className = { commonStyles.title }>
-                Project API Keys <Info size = { 16 } />
+                Project API Keys <Info size = { 12 } />
             </h3>
 
             <div className = { commonStyles.keyList }>

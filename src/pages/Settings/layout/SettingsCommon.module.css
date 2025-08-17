@@ -20,9 +20,9 @@
 
 /* 기본 섹션 */
 .section {
-    border: 1px solid #333;
+    border: 1px solid #2f415d;
     border-radius: 8px;
-    padding: 24px;
+    padding: 12px;
     margin-bottom: 24px;
     background-color: #020817;
 }
@@ -32,7 +32,7 @@ input {
     width: 100%;
     padding: 8px 12px;
     background-color: #020817;
-    border: 1px solid #333;
+    border: 1px solid #2f415d;
     border-radius: 4px;
     color: #fff;
     box-sizing: border-box;
@@ -85,7 +85,7 @@ input:focus {
 
  /* 테이블 형태 리스트 (API Keys, LLM Connections 등) */
 .keyList {
-    border: 1px solid #333;
+    border: 1px solid #2f415d;
     border-radius: 8px;
     overflow: hidden;
 }
