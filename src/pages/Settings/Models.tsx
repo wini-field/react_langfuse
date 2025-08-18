@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react'
+import React, {useState, useCallback, useRef, useMemo, useEffect} from 'react'
 import { ColDef, ICellRendererParams, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
@@ -17,6 +17,8 @@ import gridStyles from './layout/SettingsGrid.module.css'
 import styles from './layout/Models.module.css';
 import CustomPagination from './CustomPagination';
 import ColumnMenu from '../../layouts/ColumnMenu'
+import SidePanel from "../../components/SidePanel/SidePanel";
+import NewModelForm from './form/NewModelForm'
 
 // Maintainer 아이콘
 const MaintainerRenderer: React.FC<ICellRendererParams> = () => (
@@ -58,6 +60,23 @@ const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
     );
 };
 
+const DUMMY_MODEL_MODELS = [
+    { modelName: 'babbage-002', matchPattern: '(?i)^(babbage-002)$', inputPrice: 0.000004, outputPrice: 0.000016, tokenizer: 'openai', tokenizerConfig: { tokenizerModel: "babbage-002" }, lastUsed: '2025-08-10' },
+    { modelName: 'chat-bison', matchPattern: '(?i)^(chat-bison)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: 'google', tokenizerConfig: {}, lastUsed: '2025-08-11' },
+    { modelName: 'chat-bison-32k', matchPattern: '(?i)^(chat-bison-32k)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: 'google', tokenizerConfig: {}, lastUsed: '2025-08-11' },
+    { modelName: 'chatgpt-4o-latest', matchPattern: '(?i)^(chatgpt-4o-latest)$', inputPrice: 0.000005, outputPrice: 0.000015, tokenizer: 'openai', tokenizerConfig: { "tokensPerMessage": 1, "tokenizerModel": "gpt-4o" }, lastUsed: '2025-08-12' },
+    { modelName: 'claude-1.1', matchPattern: '(?i)^(claude-1.1)$', inputPrice: 0.000008, outputPrice: 0.000024, tokenizer: 'claude', tokenizerConfig: {}, lastUsed: '2025-08-09' },
+    ...Array.from({ length: 15 }, (_, i) => ({
+        modelName: `test-model-${i + 1}`,
+        matchPattern: `(?i)^(test-model-${i + 1})$`,
+        inputPrice: 0.00001 + i * 0.000001,
+        outputPrice: 0.00002 + i * 0.000002,
+        tokenizer: ['openai', 'claude', 'google'][i % 3],
+        tokenizerConfig: { model: `test-${i}`},
+        lastUsed: `2025-07-${15 + i}`
+    }))
+];
+
 const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string; lockVisible?: boolean})[] = [
     { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, lockVisible: true },
     { field: 'maintainer', headerName: 'Maintainer', width: 10, cellRenderer: MaintainerRenderer, lockVisible: true },
@@ -76,6 +95,18 @@ const Models: React.FC = () => {
 
     const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
     const columnButtonRef = useRef<HTMLDivElement>(null);
+
+    const [rowData, setRowData] = useState<any[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        setRowData(DUMMY_MODEL_MODELS);
+    }, []);
+
+    const handleSaveModel = (newModelData: any) => {
+        setRowData(prevData => [...prevData, newModelData]);
+        setIsModalOpen(false);
+    };
 
     const [columnVisibility, setColumnVisibility] = useState({
         modelName: true,
@@ -136,23 +167,6 @@ const Models: React.FC = () => {
         sortable: true,
     }), []);
 
-     const [rowData] = useState([
-        { modelName: 'babbage-002', matchPattern: '(?i)^(babbage-002)$', inputPrice: 0.000004, outputPrice: 0.000016, tokenizer: 'openai', tokenizerConfig: { tokenizerModel: "babbage-002" }, lastUsed: '2025-08-10' },
-        { modelName: 'chat-bison', matchPattern: '(?i)^(chat-bison)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: 'google', tokenizerConfig: {}, lastUsed: '2025-08-11' },
-        { modelName: 'chat-bison-32k', matchPattern: '(?i)^(chat-bison-32k)(@[a-za-Z0-9_-]+)?$', inputPrice: 0.00000025, outputPrice: 0.00000050, tokenizer: 'google', tokenizerConfig: {}, lastUsed: '2025-08-11' },
-        { modelName: 'chatgpt-4o-latest', matchPattern: '(?i)^(chatgpt-4o-latest)$', inputPrice: 0.000005, outputPrice: 0.000015, tokenizer: 'openai', tokenizerConfig: { "tokensPerMessage": 1, "tokenizerModel": "gpt-4o" }, lastUsed: '2025-08-12' },
-        { modelName: 'claude-1.1', matchPattern: '(?i)^(claude-1.1)$', inputPrice: 0.000008, outputPrice: 0.000024, tokenizer: 'claude', tokenizerConfig: {}, lastUsed: '2025-08-09' },
-        ...Array.from({ length: 15 }, (_, i) => ({
-            modelName: `test-model-${i + 1}`,
-            matchPattern: `(?i)^(test-model-${i + 1})$`,
-            inputPrice: 0.00001 + i * 0.000001,
-            outputPrice: 0.00002 + i * 0.000002,
-            tokenizer: ['openai', 'claude', 'google'][i % 3],
-            tokenizerConfig: { model: `test-${i}`},
-            lastUsed: `2025-07-${15 + i}`
-        }))
-    ]);
-
      const icons = {
         paginationFirst: () => <ChevronsLeft size={18} />,
         paginationPrev: () => <ChevronLeft size={18} />,
@@ -188,10 +202,7 @@ const Models: React.FC = () => {
                         onToggleAll = { toggleAllColumns }
                     />
                 </div>
-                <button className = { `${ gridStyles.headerButton } ${ gridStyles.iconButton }` } >
-                    <Menu size = { 16 } />
-                </button>
-                <button className = { `${ gridStyles.headerButton} ${ gridStyles.addButton }` } >
+                <button onClick = { () => setIsModalOpen(true) } className = { `${ gridStyles.headerButton} ${ gridStyles.addButton }` } >
                     <Plus size = { 16 } /> Add model definition
                 </button>
             </div>
@@ -211,6 +222,16 @@ const Models: React.FC = () => {
                     domLayout = 'autoHeight'
                 />
             </div>
+
+            <SidePanel
+                isOpen = { isModalOpen }
+                onClose = { () => setIsModalOpen(false) }
+            >
+                <NewModelForm
+                    onSave = { handleSaveModel }
+                    onCancel = { () => setIsModalOpen(false) }
+                />
+            </SidePanel>
             { gridApi && <CustomPagination gridApi={ gridApi } pageSizes={ pageSizes } />}
         </div>
     );

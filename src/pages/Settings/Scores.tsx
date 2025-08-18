@@ -97,9 +97,6 @@ const Scores: React.FC = () => {
                     <span>Column</span>
                     <span className = { gridStyles.count }>6/8</span>
                 </button>
-                <button className = { `${ gridStyles.headerButton } ${ gridStyles.iconButton }` } >
-                    <Menu size = { 16 } />
-                </button>
                 <button className = { `${ gridStyles.headerButton } ${ gridStyles.addButton }` }>
                     <Plus size = { 16 } /> Add new score config
                 </button>

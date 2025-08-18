@@ -13,13 +13,6 @@ interface Connection {
     apiKey: string;
 }
 
-const initialFormState = {
-    provider: '',
-    adapter: '',
-    baseUrl: '',
-    apiKey: '',
-};
-
 const LLMConnections = () => {
 
     const [connections, setConnections] = useState<Connection[]>([
@@ -46,32 +39,23 @@ const LLMConnections = () => {
         },
     ]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newConnectionData, setNewConnectionData] = useState(initialFormState);
 
-    const handleOpenModal = () => {
-        setNewConnectionData(initialFormState); // 모달 열 때 폼 초기화
-        setIsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-    };
-
-    const handleSaveConnection = () => {
-        const { provider, apiKey } = newConnectionData;
-        if (!provider || !apiKey) {
-            alert('Provider와 API Key는 필수 항목입니다.');
-            return;
-        }
-
+    const handleSaveConnection = (newConnectionData: {
+        adapter: string;
+        provider: string;
+        apiKey: string;
+        baseUrl?: string;
+    }) => {
         const connectionWithId = {
-            ...newConnectionData,
             id: crypto.randomUUID(),
-            apiKey: `...${ apiKey.slice(-3) }`,
+            provider: newConnectionData.provider,
+            adapter: newConnectionData.adapter,
+            baseUrl: newConnectionData.baseUrl || 'default',
+            apiKey: `...${ newConnectionData.apiKey.slice(-3) }`,
         };
         setConnections([...connections, connectionWithId]);
-        handleCloseModal();
-    };
+        setIsModalOpen(false);
+    }
 
     return (
         <div className = { styles.container }>
@@ -101,20 +85,18 @@ const LLMConnections = () => {
                 ))}
             </div>
 
-            <button onClick = { handleOpenModal } className = { styles.createButton }>
+            <button onClick = { () => setIsModalOpen(true) } className = { styles.createButton }>
                 <Plus size = { 16 } /> Add LLM Connection
             </button>
 
             <Modal
-                title = "Add new LLM Connection"
+                title = "New LLM Connection"
                 isOpen = { isModalOpen }
-                onClose = { handleOpenModal }
-                onConfirm = { handleSaveConnection }
-                confirmText = "Save"
+                onClose = { () => setIsModalOpen(false) }
             >
                 <NewLLMConnectionForm
-                    data = { newConnectionData }
-                    setData = { setNewConnectionData}
+                    onSave = { handleSaveConnection }
+                    onCancel = { () => setIsModalOpen(false)}
                 />
             </Modal>
         </div>

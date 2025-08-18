@@ -173,7 +173,7 @@ const NewLLMConnectionForm = ({ onSave, onCancel}: NewLLMConnectionFormProps) =>
 
             { /* --- Footer --- */}
             <div className = { styles.footer }>
-                <button onClick = { handleSave } className = "btn-primary">
+                <button onClick = { handleSave } className = { styles.createButton }>
                     Create connection
                 </button>
             </div>

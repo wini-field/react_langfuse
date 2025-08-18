@@ -15,11 +15,11 @@
 
 /* 모달 실제 내용 컨테이너 */
 .content {
-    background-color: #2a2a2a;
+    background-color: #020817;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     min-width: 550px;
-    max-width: 90%;
+    max-width: 550px;
     display: flex;
     flex-direction: column;
     animation: slideIn 0.3s ease-out;
