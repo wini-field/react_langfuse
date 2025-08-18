@@ -14,16 +14,18 @@ interface ScoreConfig {
     name: string;
     dataType: 'BOOLEAN' | 'CATEGORICAL' | 'NUMERIC';
     range: Record<string, any>;
+    configID: string;
+    createdAt: string;
     description: string;
     status: 'Active' | 'Archived';
 }
 
 const DUMMY_SCORES_DATA: ScoreConfig[] = [
-  { id: 1, name: 'tonality_correct', dataType: 'BOOLEAN', range: { '0': 'False', '1': 'True' }, description: '', status: 'Active' },
-  { id: 2, name: 'answer_correct', dataType: 'BOOLEAN', range: { '0': 'False', '1': 'True' }, description: '', status: 'Active' },
-  { id: 3, name: 'test-july44th', dataType: 'CATEGORICAL', range: { '0': 'test1', '1': 'test2', '2': 'test3' }, description: 'To provide context to annotato...', status: 'Active' },
-  { id: 4, name: 'First Pass', dataType: 'CATEGORICAL', range: { '0': 'Good Output', '1': 'Bad Output', '2': 'Saved for Later' }, description: '', status: 'Active' },
-  { id: 5, name: 'is_question', dataType: 'BOOLEAN', range: { '0': 'False', '1': 'True' }, description: 'Is the user message a question?', status: 'Active' },
+  { id: 1, name: 'tonality_correct', dataType: 'BOOLEAN', range: { '0': 'False', '1': 'True' }, description: '', configID: 'cme6tgxo0006pad07qehe7noo', createdAt: '2025-08-01', status: 'Active' },
+  { id: 2, name: 'answer_correct', dataType: 'BOOLEAN', range: { '0': 'False', '1': 'True' }, description: '', configID: 'cme6tgxo0006pad07qehe7noo', createdAt: '2025-08-01', status: 'Active' },
+  { id: 3, name: 'test-july44th', dataType: 'CATEGORICAL', range: { '0': 'test1', '1': 'test2', '2': 'test3' }, description: 'To provide context to annotato...', configID: 'cme6tgxo0006pad07qehe7noo', createdAt: '2025-08-01', status: 'Active' },
+  { id: 4, name: 'First Pass', dataType: 'CATEGORICAL', range: { '0': 'Good Output', '1': 'Bad Output', '2': 'Saved for Later' }, description: '', configID: 'cme6tgxo0006pad07qehe7noo', createdAt: '2025-08-01', status: 'Active' },
+  { id: 5, name: 'is_question', dataType: 'BOOLEAN', range: { '0': 'False', '1': 'True' }, description: 'Is the user message a question?', configID: 'cme6tgxo0006pad07qehe7noo', createdAt: '2025-08-01', status: 'Active' },
 ];
 
 // Range
@@ -66,6 +68,8 @@ const Scores: React.FC = () => {
         { field: 'dataType', headerName: 'Data Type', flex: 1.5, resizeable: true, sortable: true },
         { field: 'range', header: 'Range', cellRenderer: RangeRenderer, flex: 3, resizable: true, autoHeight: true },
         { field: 'description', headerName: 'Description', flex: 3, resizable: true },
+        { field: 'configID', headerName: 'Config ID', flex: 3, resizable: true },
+        { field: 'createdAt', headerName: 'Created At', flex: 1, resizable: true },
         { field: 'status', headerName: 'Status', flex: 1, resizable: true, sortable: true },
         {
             field: 'actions',

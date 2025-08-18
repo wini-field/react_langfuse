@@ -65,6 +65,7 @@
     max-height: 600px;
     overflow-y: auto;
     position: relative;
+    height: 65vh;
 
     border: 1px solid #2f415d;
     border-radius: 6px;
