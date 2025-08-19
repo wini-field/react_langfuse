@@ -1,19 +1,21 @@
-import React, {useCallback, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import { ColDef, ICellRendererParams } from 'ag-grid-react';
-import {Plus, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Menu} from 'lucide-react';
+import { ColDef, ICellRendererParams, GridApi, GridReadyEvent } from 'ag-grid-community';
+import { Plus, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import commonStyles from './layout/SettingsCommon.module.css'
 import gridStyles from './layout/SettingsGrid.module.css'
 import CustomPagination from './CustomPagination.tsx';
-import { GridApi, GridReadyEvent } from 'ag-grid-community';
+import ColumnMenu from "../../layouts/ColumnMenu.tsx";
+import Modal from '../../components/Modal/Modal'
+import NewScoreForm from './form/NewScoreForm'
 
 interface ScoreConfig {
     id: number;
     name: string;
     dataType: 'BOOLEAN' | 'CATEGORICAL' | 'NUMERIC';
-    range: Record<string, any>;
+    range: Record<string, string>;
     configID: string;
     createdAt: string;
     description: string;
@@ -56,52 +58,121 @@ const ActionsRenderer: React.FC = () => {
     )
 }
 
+const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string })[] = [
+    { field: 'name', headerName: 'Name', flex: 2, resizable: true, sortable: true },
+    { field: 'dataType', headerName: 'Data Type', flex: 1.5, resizable: true, sortable: true },
+    { field: 'range', headerName: 'Range', cellRenderer: RangeRenderer, flex: 3, resizable: true, autoHeight: true },
+    { field: 'description', headerName: 'Description', flex: 3, resizable: true },
+    { field: 'configID', headerName: 'Config ID', flex: 3, resizable: true },
+    { field: 'createdAt', headerName: 'Created At', flex: 1, resizable: true },
+    { field: 'status', headerName: 'Status', flex: 1, resizable: true, sortable: true },
+    { field: 'actions', headerName: 'Action', cellRenderer: ActionsRenderer, flex: 1, resizable: false, sortable: false, },
+]
+
 const Scores: React.FC = () => {
     const gridRef = useRef<AgGridReact>(null);
     const [gridApi, setGridApi] = useState<GridApi | null>(null);
     const pageSizes = useMemo(() => [10, 20, 30, 40, 50], []);
 
-    const [rowData] = useState<ScoreConfig[]>(DUMMY_SCORES_DATA);
+    const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+    const columnButtonRef = useRef<HTMLDivElement>(null);
 
-    const [columnDefs] = useState<ColDef[]>([
-        { field: 'name', headerName: 'Name', flex: 2, resizable: true, sortable: true },
-        { field: 'dataType', headerName: 'Data Type', flex: 1.5, resizeable: true, sortable: true },
-        { field: 'range', header: 'Range', cellRenderer: RangeRenderer, flex: 3, resizable: true, autoHeight: true },
-        { field: 'description', headerName: 'Description', flex: 3, resizable: true },
-        { field: 'configID', headerName: 'Config ID', flex: 3, resizable: true },
-        { field: 'createdAt', headerName: 'Created At', flex: 1, resizable: true },
-        { field: 'status', headerName: 'Status', flex: 1, resizable: true, sortable: true },
-        {
-            field: 'actions',
-            headerName: 'Action',
-            cellRenderer: ActionsRenderer,
-            flex: 1,
-            resizable: false,
-            sortable: false,
-        },
-    ]);
+    const [rowData, setRowData] = useState<any[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-     const icons = {
-        paginationFirst: () => <ChevronsLeft size={18} />,
-        paginationPrev: () => <ChevronLeft size={18} />,
-        paginationNext: () => <ChevronRight size={18} />,
-        paginationLast: () => <ChevronsRight size={18} />,
+    useEffect(() => {
+        setRowData(DUMMY_SCORES_DATA);
+    }, []);
+
+    const [columnVisibility, setColumnVisibility] = useState({
+        name: true,
+        dataType: true,
+        range: true,
+        description: true,
+        configID: true,
+        createdAt: true,
+        status: true,
+        actions: true,
+    });
+
+    const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
+        const columnDef = COLUMN_DEFINITIONS.find(c => c.field === field);
+        if (columnDef?.lockVisible) {
+            return;
+        }
+         setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+     };
+
+    const toggleAllColumns = (select: boolean) => {
+        const newVisibility = { ...columnVisibility };
+        COLUMN_DEFINITIONS.forEach(col => {
+            if (!col.lockVisible) {
+                newVisibility[col.field as keyof typeof columnVisibility] = select;
+            }
+        });
+        setColumnVisibility(newVisibility);
     };
 
-     const onGridReady = useCallback((event: GridReadyEvent) => {
-         setGridApi(event.api);
-     }, []);
+    const visibleColumnCount = useMemo(() => {
+        return Object.values(columnVisibility).filter(isVisible => isVisible).length;
+    }, [columnVisibility]);
+
+    const mandatoryFields = useMemo(() =>
+        COLUMN_DEFINITIONS.filter(c => c.lockVisible).map(c => c.field),
+    []);
+
+    const columnDisplayNames = useMemo(() =>
+        COLUMN_DEFINITIONS.reduce((acc, col) => {
+            if (col.field) {
+                acc[col.field] = col.headerName;
+            }
+            return acc;
+        }, {} as Record<string, string>),
+    []);
+
+    const columnDefs = useMemo((): ColDef[] =>
+        COLUMN_DEFINITIONS.map(col => ({
+            ...col,
+            hide: !columnVisibility[col.field as keyof typeof columnVisibility],
+        })),
+    [columnVisibility]);
+
+    const icons = {
+       paginationFirst: () => <ChevronsLeft size={18} />,
+       paginationPrev: () => <ChevronLeft size={18} />,
+       paginationNext: () => <ChevronRight size={18} />,
+       paginationLast: () => <ChevronsRight size={18} />,
+   };
+
+    const onGridReady = useCallback((event: GridReadyEvent) => {
+        setGridApi(event.api);
+    }, []);
 
     return (
         <div className = { commonStyles.container }>
             <h3>Score Configs</h3>
             <p>Score configs define which scores are available for annotation in your project. Please note that all score configs are immutable.</p>
             <div className = { gridStyles.header }>
-                <button className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }`}>
-                    <span>Column</span>
-                    <span className = { gridStyles.count }>6/8</span>
-                </button>
-                <button className = { `${ gridStyles.headerButton } ${ gridStyles.addButton }` }>
+                {/* ✅ Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
+                <div ref = { columnButtonRef } className = { gridStyles.columnsButtonWrapper } onClick={() => setIsColumnMenuOpen(prev => !prev)}>
+                    <button
+                        className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }
+                    >
+                        <span>Columns</span>
+                        <span className = { gridStyles.count }>{ visibleColumnCount }/{ COLUMN_DEFINITIONS.length }</span>
+                    </button>
+                    <ColumnMenu
+                        isOpen = { isColumnMenuOpen }
+                        onClose = { () => setIsColumnMenuOpen(false) }
+                        anchorE1 = { columnButtonRef }
+                        columnVisibility = { columnVisibility }
+                        toggleColumnVisibility = { toggleColumnVisibility }
+                        displayNames = { columnDisplayNames }
+                        mandatoryFields = { mandatoryFields }
+                        onToggleAll = { toggleAllColumns }
+                    />
+                </div>
+                <button onClick = { () => setIsModalOpen(true) } className = { `${ gridStyles.headerButton} ${ gridStyles.addButton }` } >
                     <Plus size = { 16 } /> Add new score config
                 </button>
             </div>
@@ -118,6 +189,14 @@ const Scores: React.FC = () => {
                     domLayout = 'autoHeight'
                 />
             </div>
+
+            <Modal
+                title = "Add new score config"
+                isOpen = { isModalOpen }
+                onClose = { () => setIsModalOpen(false) }
+            >
+                <NewScoreForm onClose = { () => setIsModalOpen(false) } />
+            </Modal>
             { gridApi && <CustomPagination gridApi = { gridApi } pageSizes = { pageSizes } /> }
         </div>
     );

@@ -93,7 +93,7 @@ input:focus {
 .keyRow {
     display: grid;
     /* 컬럼 수는 각 페이지에서 오버라이드 */
-    grid-template-columns: 1fr 2fr 3fr 2fr 0.5fr;
+    grid-template-columns: 1fr 2fr 3fr 1.5fr 1fr;
     align-items: center;
     gap: 16px;
     padding: 12px 16px;
@@ -101,7 +101,7 @@ input:focus {
     font-size: 13px;
 }
 
-.keyRow:last-child {
+.keyList > *:last-child {
     border-bottom: none;
 }
 
@@ -109,35 +109,4 @@ input:focus {
     background-color: #020817;
     color: #aaa;
     font-weight: 500;
-}
-
-.simpleTokenizerCell {
-    font-family: 'D2Coding', monospace;
-    font-size: 12px;
-    line-height: 1.5;
-    color: #c7d2fe;
-    padding: 4px;
-}
-
-.actionIcons {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-}
-
-.iconButton {
-    background: none;
-    border: none;
-    color: #94a3b8;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-    border-radius: 4px;
-}
-
-.iconButton:hover {
-    color: #e2e8f0;
-    background-color: #334155;
 }

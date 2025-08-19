@@ -9,8 +9,7 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronsLeft,
-    ChevronsRight,
-    Menu
+    ChevronsRight
 } from 'lucide-react';
 import commonStyles from './layout/SettingsCommon.module.css'
 import gridStyles from './layout/SettingsGrid.module.css'
@@ -185,9 +184,7 @@ const Models: React.FC = () => {
             <div className = { gridStyles.header }>
                 {/* ✅ Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
                 <div ref = { columnButtonRef } className = { gridStyles.columnsButtonWrapper } onClick={() => setIsColumnMenuOpen(prev => !prev)}>
-                    <button
-                        className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }
-                    >
+                    <button className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }>
                         <span>Columns</span>
                         <span className = { gridStyles.count }>{ visibleColumnCount }/{ COLUMN_DEFINITIONS.length }</span>
                     </button>
