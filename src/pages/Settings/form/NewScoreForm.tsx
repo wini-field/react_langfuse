@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import commonStyles from '../layout/SettingsCommon.module.css';
-import formStyles from './NewScoreForm.module.css';
+import formStyles from './Form.module.css';
 
 interface NewScoreFormProps {
     onClose: () => void;

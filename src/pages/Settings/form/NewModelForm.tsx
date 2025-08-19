@@ -1,10 +1,11 @@
 import React from 'react';
-import { CircleMinus , CirclePlus } from 'lucide-react'
-import styles from './NewModelForm.module.css'
+import { CircleMinus , CirclePlus } from 'lucide-react';
+import formStyles from './Form.module.css'; // 공통 스타일
+import styles from './NewModelForm.module.css'; // 전용 스타일
 
 // 부모 컴포넌트로부터 받을 props 타입 정의
 interface NewModelFormProps {
-    onSave: (modelData: any) => void;
+    onSave: (modelData: ModelData) => void;
     onCancel: () => void;
 }
 
@@ -13,6 +14,13 @@ interface PriceItem {
     id: string;
     usageType: string;
     price: string;
+}
+
+interface ModelData {
+    modelName: string;
+    matchPattern: string;
+    prices: Record<string, number>;
+    tokenizer: string;
 }
 
 const NewModelForm = ({ onSave, onCancel }: NewModelFormProps) => {
@@ -76,23 +84,23 @@ const NewModelForm = ({ onSave, onCancel }: NewModelFormProps) => {
                 </div>
 
                 { /* --- Model Name --- */}
-                <div className={styles.formGroup}>
-                    <label htmlFor="model-name">Model Name</label>
-                    <p className={styles.description}>The name of the model. This will be used to reference the model in the API.</p>
+                <div className={formStyles.formGroup}>
+                    <label htmlFor="model-name" className = { formStyles.formLabel }>Model Name</label>
+                    <p className={formStyles.description}>The name of the model. This will be used to reference the model in the API.</p>
                     <input id="model-name" type="text" value={modelName} onChange={(e) => setModelName(e.target.value)} className={styles.input}/>
                 </div>
 
                 { /* --- Match Pattern --- */}
-                <div className={styles.formGroup}>
-                    <label htmlFor="match-pattern">Match pattern</label>
-                    <p className={styles.description}>Regular expression (Postgres syntax)) to match ingested generations.</p>
+                <div className={formStyles.formGroup}>
+                    <label htmlFor="match-pattern" className = { formStyles.formLabel }>Match pattern</label>
+                    <p className={formStyles.description}>Regular expression (Postgres syntax)) to match ingested generations.</p>
                     <input id="match-pattern" type="text" value={matchPattern} onChange={(e) => setMatchPattern(e.target.value)} className={styles.input}/>
                 </div>
 
                 { /* --- Prices --- */}
-                <div className={styles.formGroup}>
-                    <label>Prices</label>
-                    <p className={styles.description}>Set prices per usage type for this model.</p>
+                <div className={formStyles.formGroup}>
+                    <label className = { formStyles.formLabel }>Prices</label>
+                    <p className={formStyles.description}>Set prices per usage type for this model.</p>
                     <div className={styles.templateButtons}>
                         <span>Prefill usage types from template:</span>
                         <button onClick={() => prefillTemplate('openai')} className={styles.templateButton}>OpenAI</button>
@@ -104,7 +112,7 @@ const NewModelForm = ({ onSave, onCancel }: NewModelFormProps) => {
                         <label>Price</label>
                     </div>
 
-                    {prices.map((p, index) => (
+                    {prices.map((p) => (
                         <div key={p.id} className={styles.priceRow}>
                             <input type="text" value={ p.usageType } onChange={e => handlePriceChange(p.id, 'usageType', e.target.value)} placeholder="Usage type" className={styles.input}/>
                             <input type="text" value={p.price} onChange={e => handlePriceChange(p.id, 'price', e.target.value)} placeholder="Price" className={styles.input}/>
@@ -131,8 +139,8 @@ const NewModelForm = ({ onSave, onCancel }: NewModelFormProps) => {
                 </div>
 
                 { /* --- Tokenizer --- */}
-                <div className={styles.formGroup}>
-                    <label htmlFor="tokenizer">Tokenizer</label>
+                <div className={formStyles.formGroup}>
+                    <label htmlFor="tokenizer" className = { formStyles.formLabel }>Tokenizer</label>
                     <select id="tokenzier" value={tokenizer} onChange={(e) => setTokenizer(e.target.value)} className={styles.select}>
                         <option value="none">None</option>
                         <option value="openai">openai</option>
@@ -143,7 +151,7 @@ const NewModelForm = ({ onSave, onCancel }: NewModelFormProps) => {
             </div>
 
             { /* --- Footer --- */}
-            <div className={styles.formGroup}>
+            <div className={styles.footer}>
                 <button onClick={onCancel} className = { styles.cancelButton }>Cancel</button>
                 <button onClick={handleSave} className= { styles.submitButton }>Submit</button>
             </div>

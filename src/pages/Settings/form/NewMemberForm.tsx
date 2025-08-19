@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import formStyles from './NewMemberForm.module.css';
+import formStyles from './Form.module.css';
 
 interface NewMemberFormProps {
     onClose: () => void;
