@@ -81,7 +81,7 @@ const Members: React.FC = () => {
     const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
     const columnButtonRef = useRef<HTMLDivElement>(null);
 
-    const [rowData, setRowData] = useState<any[]>([]);
+    const [rowData, setRowData] = useState<Member[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
@@ -91,7 +91,7 @@ const Members: React.FC = () => {
     const [columnVisibility, setColumnVisibility] = useState({
         name: true,
         email: true,
-        organization: true,
+        organizationRole: true,
         projectRole: true,
         memberSince: true,
         actions: true,
@@ -196,7 +196,7 @@ const Members: React.FC = () => {
                 isOpen = { isModalOpen }
                 onClose = { () => setIsModalOpen(false) }
             >
-                <NewScoreForm onClose = { () => setIsModalOpen(false) } />
+                <NewMemberForm onClose = { () => setIsModalOpen(false) } />
             </Modal>
             { gridApi && <CustomPagination gridApi = { gridApi } pageSizes = { pageSizes } /> }
         </div>

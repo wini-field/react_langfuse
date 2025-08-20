@@ -15,7 +15,7 @@ interface ScoreConfig {
     id: number;
     name: string;
     dataType: 'BOOLEAN' | 'CATEGORICAL' | 'NUMERIC';
-    range: Record<string, string>;
+    range: Record<string, string> | string;
     configID: string;
     createdAt: string;
     description: string;
@@ -31,7 +31,7 @@ const DUMMY_SCORES_DATA: ScoreConfig[] = [
 ];
 
 // Range
-const RangeRenderer: React.FC<ICellRendererParams> = (props) => {
+const RangeRenderer: React.FC<ICellRendererParams<ScoreConfig, ScoreConfig['range']>> = (props) => {
     const rangeData = props.value;
     let displayValue = '';
 
@@ -77,7 +77,7 @@ const Scores: React.FC = () => {
     const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
     const columnButtonRef = useRef<HTMLDivElement>(null);
 
-    const [rowData, setRowData] = useState<any[]>([]);
+    const [rowData, setRowData] = useState<ScoreConfig[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {

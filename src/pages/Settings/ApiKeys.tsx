@@ -1,45 +1,73 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import { Info, Plus, Clipboard, Trash2, Copy, X } from 'lucide-react';
+import { langfuseApi } from '../../lib/langfuse';
 import commonStyles from "./layout/SettingsCommon.module.css"
 import apiKeyStyles from "./layout/Apikeys.module.css";
 import { getCodeSnippets } from './codeSnippets'
 
+// API 응답에 기반한 타입 정의
 type ApiKey = {
     id: string;
     createdAt: string;
     note: string;
     publicKey: string;
-    secretKey: string;
+    secretKey: string; // 전체 시크릿 키
+    displaySecretKey: string; // 마스킹된 시크릿 키
 };
 
-const Button = (props: React.ComponentPropsWithoutRef<"button">) => {
-    return <button className = { commonStyles.button } { ...props } />
-};
+type ApiKeyListResponse = {
+    data: ApiKey[];
+}
+
+// 새로 생성된 키 정보를 담을 타입 (시크릿 키 마스킹 X)
+type NewApiKeyResponse = Omit<ApiKey, 'displaySecretKey'>;
 
 const ApiKeys: React.FC = () => {
+    const { projectId } = useParams<{ projectId: string }>();
+
     const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-    const [newPublicKey, setNewPublicKey] = useState<string | null>(null);
-    const [newSecretKey, setNewSecretKey] = useState<string | null>(null);
+    const [newKeyDetails, setNewKeyDetails] = useState<NewApiKeyResponse | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('Python');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const host = "http://localhost:3000";
+    // env 파일에서 환경변수 가져오기
+    const host = import.meta.env.VITE_LANGFUSE_BASE_URL || "http://localhost:3000";
+
+    const fetchApiKeys = useCallback(async (currentProjectId: string) => {
+        try {
+            setError(null);
+            setIsLoading(true);
+            const response = await langfuseApi.get<ApiKeyListResponse>(`/api/public/projects/${ currentProjectId }/api-keys`);
+            setApiKeys(response.data);
+        } catch (err) {
+            console.error("Failed to fetch API keys:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (projectId) {
+            fetchApiKeys(projectId);
+        } else {
+            setError('Project ID is not available from URL.');
+            setIsLoading(false);
+        }
+    }, [projectId, fetchApiKeys]);
 
     const codeSnippets = useMemo(() => {
-        if (!newPublicKey || !newSecretKey) return {};
+        if (!newKeyDetails) return {};
 
         return getCodeSnippets({
-            publicKey: newPublicKey,
-            secretKey: newSecretKey,
+            publicKey: newKeyDetails.publicKey,
+            secretKey: newKeyDetails.secretKey,
             host: host,
         });
-    }, [newPublicKey, newSecretKey, host]);
-
-    const generateSecureRandomString = (length: number = 36): string => {
-        const array = new Uint8Array(length);
-        window.crypto.getRandomValues(array);
-        return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-    };
+    }, [newKeyDetails, host]);
 
     const copyToClipboard = (text: string | null) => {
         if (!text) return;
@@ -48,46 +76,59 @@ const ApiKeys: React.FC = () => {
         });
     };
 
-    const maskSecretKey = (key: string) => {
-        return `${ key.slice(0, 9) } ...${ key.slice(-4) }`;
+    const handleCreateNewKey = async () => {
+        if (!projectId) {
+            alert('Proejct ID가 아직 로드되지 않았습니다.');
+            return;
+        }
+        setIsCreating(true);
+        try {
+            const newKey = await langfuseApi.post<NewApiKeyResponse>(`/api/public/projects/${ projectId }/api-keys`, { note: null });
+            setNewKeyDetails(newKey);
+            setIsModalOpen(true);
+            await fetchApiKeys(projectId);
+        } catch (error) {
+            console.error('Failed to create API key:', error);
+            alert(`API 키 생성에 실패했습니다.: ${ error instanceof Error ? error.message : String(error) }`);
+        } finally {
+            setIsCreating(false);
+        }
     };
 
-    const handleCreateNewKey = () => {
-        const sk = `sk-lf-${ generateSecureRandomString(4) }-${ generateSecureRandomString(2) }-${ generateSecureRandomString(2) }-${ generateSecureRandomString(2) }-${ generateSecureRandomString(6) }`;
-        const pk = `pk-lf-${ generateSecureRandomString(4) }-${ generateSecureRandomString(2) }-${ generateSecureRandomString(2) }-${ generateSecureRandomString(2) }-${ generateSecureRandomString(6) }`;
-
-        const newKey: ApiKey = {
-            id: crypto.randomUUID(),
-            createdAt: new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'numeric', day: 'numeric' }).replace(/\. /g, '.').slice(0, -1),
-            note: "Click to add note",
-            publicKey: pk,
-            secretKey: sk,
-        };
-
-        setApiKeys(prevKeys => [newKey, ...prevKeys]);
-        setNewPublicKey(pk);
-        setNewSecretKey(sk);
-        setIsModalOpen(true);
-    };
-
-    const handleDeleteKey = ( idToDelete: string ) => {
+    const handleDeleteKey = async (publicKeyToDelete: string) => {
         if (window.confirm("정말로 이 API 키를 삭제하시겠습니까?")) {
-            setApiKeys(prevKeys => prevKeys.filter(key => key.id !== idToDelete));
+            if (!projectId) return;
+            try {
+                await langfuseApi.delete(`/api/public/api-keys`, { publicKey: publicKeyToDelete });
+                alert('API 키가 삭제되었습니다.');
+                await fetchApiKeys(projectId);
+            } catch (error) {
+                console.error('Failed to delete API key:', error);
+                alert(`API 키 삭제에 실패했습니다: ${ error instanceof Error ? error.message : String(error) }`);
+            }
         }
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setNewPublicKey(null);
+        setNewKeyDetails(null);
     };
+
+    if (isLoading) {
+        return <div className = { commonStyles.container }>Loading API Keys...</div>;
+    }
+
+    if (error) {
+        return <div className = { commonStyles.container } style = {{ color: 'red' }}>Error: {error}</div>;
+    }
 
     return (
         <div className = { commonStyles.container }>
             { /* Host Name Section */ }
             <header className = { commonStyles.header }>
-                <h1 className = { commonStyles.title }>
+                <h3 className = { commonStyles.title }>
                     Project API Keys <Info size = { 12 } />
-                </h1>
+                </h3>
             </header>
 
             <main className = { commonStyles.content }>
@@ -102,8 +143,8 @@ const ApiKeys: React.FC = () => {
 
                     { apiKeys.map(key => (
                         <div key = { key.id } className = { commonStyles.keyRow }>
-                            <div>{ key.createdAt }</div>
-                            <div className = { apiKeyStyles.note }>{ key.note }</div>
+                            <div>{ new Date(key.createdAt).toLocaleDateString() }</div>
+                            <div className = { apiKeyStyles.note }>{ key.note || 'Click to add note' }</div>
                             <div>
                                 <div className = { apiKeyStyles.publicKeyCell }>
                                     <span>{ key.publicKey }</span>
@@ -112,9 +153,9 @@ const ApiKeys: React.FC = () => {
                                     </button>
                                 </div>
                             </div>
-                            <div className = { apiKeyStyles.secreatKeyCell }>{ maskSecretKey(key.secretKey) }</div>
+                            <div className = { apiKeyStyles.secreatKeyCell }>{ key.displaySecretKey }</div>
                             <div>
-                                <button onClick = { () => handleDeleteKey(key.id) } className = { apiKeyStyles.deleteButton }>
+                                <button onClick = { () => handleDeleteKey(key.publicKey) } className = { apiKeyStyles.deleteButton }>
                                     <Trash2 size = { 14 } />
                                 </button>
                             </div>
@@ -122,11 +163,11 @@ const ApiKeys: React.FC = () => {
                     ))}
                 </div>
             </main>
-            <button onClick = { handleCreateNewKey } className = { commonStyles.createButton }>
-                <Plus size = { 16 } /> Create new API keys
+            <button onClick = { handleCreateNewKey } className = { commonStyles.createButton } disabled = { isCreating || !projectId }>
+                { isCreating ? 'Creating...' : <><Plus size = { 16 } /> Create new API keys</> }
             </button>
 
-            {isModalOpen && (
+            {isModalOpen && newKeyDetails && (
                 <div className = { apiKeyStyles.modalOverlay }>
                     <div className = { apiKeyStyles.modalContent }>
                         <div className = { apiKeyStyles.modalHeader }>
@@ -134,22 +175,20 @@ const ApiKeys: React.FC = () => {
                             <button onClick = { handleCloseModal } className = { apiKeyStyles.closeButton }><X size = { 20 } /></button>
                         </div>
 
-                        { newSecretKey && (
-                            <div className = { apiKeyStyles.section } >
-                                <h3 className = { apiKeyStyles.sectionTitle }>Secret Key</h3>
-                                <p className = { apiKeyStyles.sectionDescription }>This key can only be viewed once. You can always create new keys in the project settings.</p>
-                                <div className = { apiKeyStyles.inputWrapper }>
-                                    <input value = { newSecretKey } readOnly className = { apiKeyStyles.input } />
-                                    <button onClick = { () => copyToClipboard(newSecretKey) } className = { apiKeyStyles.copyButtonInInput }><Copy size = { 16 } /></button>
-                                </div>
+                        <div className = { apiKeyStyles.section }>
+                            <h3 className = { apiKeyStyles.sectionTitle }>Secret Key</h3>
+                            <p className = { apiKeyStyles.sectionDescription }>This key can only be viewed once. You can always create new keys in the project settings.</p>
+                            <div className = { apiKeyStyles.inputWrapper }>
+                                <input value = { newKeyDetails.secretKey } readOnly className = { apiKeyStyles.input } />
+                                <button onClick = { () => copyToClipboard(newKeyDetails.secretKey) } className = { apiKeyStyles.copyButtonInInput }><Copy size = { 16 } /></button>
                             </div>
-                        )}
+                        </div>
 
-                        <div className = { apiKeyStyles.setion }>
+                        <div className = { apiKeyStyles.section }>
                             <h3 className = { apiKeyStyles.sectionTitle }>Public Key</h3>
                             <div className = { apiKeyStyles.inputWrapper }>
-                                <input value = { newPublicKey ?? ""} readOnly className = { apiKeyStyles.input } />
-                                <button onClick = { () => copyToClipboard(newPublicKey) } className = { apiKeyStyles.copyButtonInInput }><Copy size = { 16 } /></button>
+                                <input value = { newKeyDetails.publicKey } readOnly className = { apiKeyStyles.input } />
+                                <button onClick = { () => copyToClipboard(newKeyDetails.publicKey) } className = { apiKeyStyles.copyButtonInInput }><Copy size = { 16 } /></button>
                             </div>
                         </div>
 

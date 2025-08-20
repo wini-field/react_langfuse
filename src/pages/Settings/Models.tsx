@@ -17,7 +17,20 @@ import styles from './layout/Models.module.css';
 import CustomPagination from './CustomPagination';
 import ColumnMenu from '../../layouts/ColumnMenu'
 import SidePanel from "../../components/SidePanel/SidePanel";
-import NewModelForm from './form/NewModelForm'
+import NewModelForm, { ModelData } from './form/NewModelForm'
+
+interface ModelDefinition {
+    modelName: string;
+    matchPattern: string;
+    pries: {
+        input?: number;
+        output?: number;
+        [key: string]: number | undefined;
+    };
+    tokenizer: string;
+    tokenizerConfig: Record<string, string>;
+    lastUsed?: string;
+}
 
 // Maintainer 아이콘
 const MaintainerRenderer: React.FC<ICellRendererParams> = () => (
@@ -102,8 +115,13 @@ const Models: React.FC = () => {
         setRowData(DUMMY_MODEL_MODELS);
     }, []);
 
-    const handleSaveModel = (newModelData: any) => {
-        setRowData(prevData => [...prevData, newModelData]);
+    const handleSaveModel = (newModelData: ModelData) => {
+        const newModel: ModelDefinition = {
+            ...newModelData,
+            tokenizerConfig: {}, // 기본값 또는 폼에서 추가된 값
+            lastUsed: new Date().toISOString().split('T'[0]),
+        };
+        setRowData(prevData => [...prevData, newModel]);
         setIsModalOpen(false);
     };
 

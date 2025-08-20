@@ -65,7 +65,7 @@ export default function App() {
         <Route path="dashboards/:dashboardId" element={<DashboardDetail />} />
 
         {/* Settings (상대 경로로 선언) */}
-        <Route path="settings" element={<SettingsPage />}>
+        <Route path = "projects/:projectId/settings" element = { <SettingsPage /> }>
           <Route index element={<General />} />
           <Route path="api-keys" element={<ApiKeys />} />
           <Route path="llm-connections" element={<LLMConnections />} />
@@ -73,6 +73,8 @@ export default function App() {
           <Route path="scores" element={<Scores />} />
           <Route path="members" element={<Members />} />
         </Route>
+          
+          <Route path = "settings/*" element = { <Navigate to = "/projects/your-default-project-id/settings" replace /> } />
       </Route>
     </Routes>
   );

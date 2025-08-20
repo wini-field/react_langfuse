@@ -96,7 +96,6 @@ const LLMConnections = () => {
             >
                 <NewLLMConnectionForm
                     onSave = { handleSaveConnection }
-                    onCancel = { () => setIsModalOpen(false)}
                 />
             </Modal>
         </div>
