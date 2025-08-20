@@ -1,4 +1,5 @@
 // src/App.tsx
+import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './layouts/Layout';
 
@@ -29,53 +30,90 @@ import Models from './pages/Settings/Models';
 import Members from './pages/Settings/Members';
 import Scores from './pages/Settings/Scores';
 
+import { getProjects } from './services/api';
+
 export default function App() {
-  return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        {/* 홈 */}
-        <Route index element={<Home />} />
 
-        {/* Tracing */}
-        <Route path="sessions" element={<Sessions />} />
+    const [defaultProjectId, setDefaultProjectId] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
-        {/* Prompts */}
-        <Route path="prompts" element={<Prompts />} />
-        <Route path="prompts/:id" element={<PromptsDetail />} />
-        <Route path="prompts/new" element={<PromptsNew />} />
+    useEffect(() => {
+        const fetchDefaultProject = async () => {
+            try {
+                const projects = await getProjects();
+                if (projects && projects.length > 0) {
+                    const sortedProjects = projects.sort((a, b) =>
+                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                    );
+                    setDefaultProjectId(sortedProjects[0].id);
+                } else {
+                    console.error("No projects found for this user.");
+                    setDefaultProjectId('no-projects-found');
+                }
+            } catch (error) {
+                    console.error('Failed to fetch projects:', error);
+                    setDefaultProjectId('error-fetching-projects');
+            } finally {
+                    setIsLoading(false);
+            }
+        };
 
-        {/* Playground */}
-        <Route path="playground" element={<Playground />} />
+        fetchDefaultProject();
+    }, []);
 
-        {/* 실제 페이지로 교체 */}
-        <Route path="llm-as-a-judge" element={<JudgePage />} />
-        <Route path="llm-as-a-judge/new" element={<JudgePageNew />} />
-        <Route path="datasets" element={<DatasetsList />} />
+    if (isLoading) {
+        return <div>Loading project...</div>;
+    }
 
-        {/* 구 /evaluation 경로 호환 */}
-        <Route path="evaluation" element={<Navigate to="/scores" replace />} />
-        <Route path="evaluation/new" element={<Navigate to="/scores/new" replace />} />
-        <Route path="evaluation/:id" element={<Navigate to="/scores/:id" replace />} />
-        <Route path="evaluation/:id/edit" element={<Navigate to="/scores/:id/edit" replace />} />
+    return (
+        <Routes>
+            <Route path="/" element={<Layout/>}>
+                {/* 홈 */}
+                <Route index element={<Home/>}/>
 
-          {/* Dashboards */}
-        <Route path="dashboards" element={<Dashboards />} />
-        <Route path="dashboards/new" element={<DashboardNew />} /> {/* '/dashboards/new' 라우트 추가 */}
-        <Route path="dashboards/widgets/new" element={<WidgetNew />} />
-        <Route path="dashboards/:dashboardId" element={<DashboardDetail />} />
+                {/* Tracing */}
+                <Route path="sessions" element={<Sessions/>}/>
 
-        {/* Settings (상대 경로로 선언) */}
-        <Route path = "projects/:projectId/settings" element = { <SettingsPage /> }>
-          <Route index element={<General />} />
-          <Route path="api-keys" element={<ApiKeys />} />
-          <Route path="llm-connections" element={<LLMConnections />} />
-          <Route path="models" element={<Models />} />
-          <Route path="scores" element={<Scores />} />
-          <Route path="members" element={<Members />} />
-        </Route>
-          
-          <Route path = "settings/*" element = { <Navigate to = "/projects/your-default-project-id/settings" replace /> } />
-      </Route>
-    </Routes>
-  );
+                {/* Prompts */}
+                <Route path="prompts" element={<Prompts/>}/>
+                <Route path="prompts/:id" element={<PromptsDetail/>}/>
+                <Route path="prompts/new" element={<PromptsNew/>}/>
+
+                {/* Playground */}
+                <Route path="playground" element={<Playground/>}/>
+
+                {/* 실제 페이지로 교체 */}
+                <Route path="llm-as-a-judge" element={<JudgePage/>}/>
+                <Route path="llm-as-a-judge/new" element={<JudgePageNew/>}/>
+                <Route path="datasets" element={<DatasetsList/>}/>
+
+                {/* 구 /evaluation 경로 호환 */}
+                <Route path="evaluation" element={<Navigate to="/scores" replace/>}/>
+                <Route path="evaluation/new" element={<Navigate to="/scores/new" replace/>}/>
+                <Route path="evaluation/:id" element={<Navigate to="/scores/:id" replace/>}/>
+                <Route path="evaluation/:id/edit" element={<Navigate to="/scores/:id/edit" replace/>}/>
+
+                {/* Dashboards */}
+                <Route path="dashboards" element={<Dashboards/>}/>
+                <Route path="dashboards/new" element={<DashboardNew/>}/> {/* '/dashboards/new' 라우트 추가 */}
+                <Route path="dashboards/widgets/new" element={<WidgetNew/>}/>
+                <Route path="dashboards/:dashboardId" element={<DashboardDetail/>}/>
+
+                {/* Settings (상대 경로로 선언) */}
+                <Route path="projects/:projectId/settings" element={<SettingsPage/>}>
+                    <Route index element={<General/>}/>
+                    <Route path="api-keys" element={<ApiKeys/>}/>
+                    <Route path="llm-connections" element={<LLMConnections/>}/>
+                    <Route path="models" element={<Models/>}/>
+                    <Route path="scores" element={<Scores/>}/>
+                    <Route path="members" element={<Members/>}/>
+                </Route>
+
+                <Route
+                    path="settings/*"
+                    element={<Navigate to={`/projects/${defaultProjectId}/settings`} replace/>}
+                />
+            </Route>
+        </Routes>
+    );
 }

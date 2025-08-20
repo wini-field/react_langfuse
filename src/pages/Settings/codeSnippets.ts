@@ -1,17 +1,18 @@
 interface ApiKeyDetails {
     publicKey: string;
-    secretKey: string;
+    secretKey: string | undefined;
     host: string;
 }
 
 export const getCodeSnippets = ({ publicKey, secretKey, host }: ApiKeyDetails): Record<string, string> => {
+    const sk = secretKey ?? 'YOUR_SECRET_KEY';
     return {
     Python: `pip install langfuse
 
              from langfuse import Langfuse
 
              langfuse = Langfuse(
-             secret_key="${secretKey}",
+             secret_key="${sk}",
              public_key="${publicKey}",
              host="${host}"
              )`,
@@ -20,7 +21,7 @@ export const getCodeSnippets = ({ publicKey, secretKey, host }: ApiKeyDetails): 
              import { Langfuse } from "langfuse";
             
              const langfuse = new Langfuse({
-               secretKey: "${secretKey}",
+               secretKey: "${sk}",
                publicKey: "${publicKey}",
                baseUrl: "${host}"
              });`,
@@ -30,7 +31,7 @@ export const getCodeSnippets = ({ publicKey, secretKey, host }: ApiKeyDetails): 
              
              .env
              
-             LANGFUSE_SECRET_KEY=${secretKey}
+             LANGFUSE_SECRET_KEY=${sk}
              LANGFUSE_PUBLIC_KEY=${publicKey}
              LANGFUSE_HOST=${host}
              
@@ -45,7 +46,7 @@ export const getCodeSnippets = ({ publicKey, secretKey, host }: ApiKeyDetails): 
                 
                 langfuse = langfuse(
                     public_key="${publicKey}",
-                    secret_key="${secretKey}",
+                    secret_key="${sk}",
                     host="${host}"
                 )
                 
@@ -64,7 +65,7 @@ export const getCodeSnippets = ({ publicKey, secretKey, host }: ApiKeyDetails): 
                      // Initialize Langfuse callback handler
                      const langfuseHandler = new CallbackHandler({
                        publicKey: "${publicKey}",
-                       secretKey: "${secretKey}",
+                       secretKey: "${sk}",
                        baseUrl: "${host}"
                      });
                      

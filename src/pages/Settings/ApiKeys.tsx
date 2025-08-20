@@ -1,33 +1,16 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Info, Plus, Clipboard, Trash2, Copy, X } from 'lucide-react';
-import { langfuseApi } from '../../lib/langfuse';
+import { getApiKeys, createApiKey, deleteApiKey, ApiKey } from '../../services/api';
 import commonStyles from "./layout/SettingsCommon.module.css"
 import apiKeyStyles from "./layout/Apikeys.module.css";
 import { getCodeSnippets } from './codeSnippets'
-
-// API 응답에 기반한 타입 정의
-type ApiKey = {
-    id: string;
-    createdAt: string;
-    note: string;
-    publicKey: string;
-    secretKey: string; // 전체 시크릿 키
-    displaySecretKey: string; // 마스킹된 시크릿 키
-};
-
-type ApiKeyListResponse = {
-    data: ApiKey[];
-}
-
-// 새로 생성된 키 정보를 담을 타입 (시크릿 키 마스킹 X)
-type NewApiKeyResponse = Omit<ApiKey, 'displaySecretKey'>;
 
 const ApiKeys: React.FC = () => {
     const { projectId } = useParams<{ projectId: string }>();
 
     const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-    const [newKeyDetails, setNewKeyDetails] = useState<NewApiKeyResponse | null>(null);
+    const [newKeyDetails, setNewKeyDetails] = useState<ApiKey | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('Python');
     const [isLoading, setIsLoading] = useState(false);
@@ -38,13 +21,15 @@ const ApiKeys: React.FC = () => {
     const host = import.meta.env.VITE_LANGFUSE_BASE_URL || "http://localhost:3000";
 
     const fetchApiKeys = useCallback(async (currentProjectId: string) => {
+        if (!currentProjectId) return;
         try {
             setError(null);
             setIsLoading(true);
-            const response = await langfuseApi.get<ApiKeyListResponse>(`/api/public/projects/${ currentProjectId }/api-keys`);
-            setApiKeys(response.data);
+            const fetchedKeys = await getApiKeys(currentProjectId);
+            setApiKeys(fetchedKeys);
         } catch (err) {
-            console.error("Failed to fetch API keys:", err);
+            console.error('Failed to fetch API keys:', err);
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setIsLoading(false);
         }
@@ -60,7 +45,9 @@ const ApiKeys: React.FC = () => {
     }, [projectId, fetchApiKeys]);
 
     const codeSnippets = useMemo(() => {
-        if (!newKeyDetails) return {};
+        if (!newKeyDetails || newKeyDetails.secretKey) {
+            return {};
+        }
 
         return getCodeSnippets({
             publicKey: newKeyDetails.publicKey,
@@ -78,12 +65,12 @@ const ApiKeys: React.FC = () => {
 
     const handleCreateNewKey = async () => {
         if (!projectId) {
-            alert('Proejct ID가 아직 로드되지 않았습니다.');
+            alert('Project ID가 아직 로드되지 않았습니다.');
             return;
         }
         setIsCreating(true);
         try {
-            const newKey = await langfuseApi.post<NewApiKeyResponse>(`/api/public/projects/${ projectId }/api-keys`, { note: null });
+            const newKey = await createApiKey(projectId, null);
             setNewKeyDetails(newKey);
             setIsModalOpen(true);
             await fetchApiKeys(projectId);
@@ -99,7 +86,7 @@ const ApiKeys: React.FC = () => {
         if (window.confirm("정말로 이 API 키를 삭제하시겠습니까?")) {
             if (!projectId) return;
             try {
-                await langfuseApi.delete(`/api/public/api-keys`, { publicKey: publicKeyToDelete });
+                await deleteApiKey(projectId, publicKeyToDelete);
                 alert('API 키가 삭제되었습니다.');
                 await fetchApiKeys(projectId);
             } catch (error) {
@@ -179,7 +166,7 @@ const ApiKeys: React.FC = () => {
                             <h3 className = { apiKeyStyles.sectionTitle }>Secret Key</h3>
                             <p className = { apiKeyStyles.sectionDescription }>This key can only be viewed once. You can always create new keys in the project settings.</p>
                             <div className = { apiKeyStyles.inputWrapper }>
-                                <input value = { newKeyDetails.secretKey } readOnly className = { apiKeyStyles.input } />
+                                <input value = { newKeyDetails.secretKey || '' } readOnly className = { apiKeyStyles.input } />
                                 <button onClick = { () => copyToClipboard(newKeyDetails.secretKey) } className = { apiKeyStyles.copyButtonInInput }><Copy size = { 16 } /></button>
                             </div>
                         </div>

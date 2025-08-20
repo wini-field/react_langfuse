@@ -7,7 +7,7 @@ const SettingsSidebar: React.FC = () => {
 
     const getPath = (path: string) => {
         if (!projectId) return `/settings/${ path }`;
-        return `/projects/${ projectId }/settings/${ path }`;
+        return `/project/${ projectId }/settings/${ path }`;
     }
 
     return (
