@@ -42,10 +42,7 @@ export default function App() {
             try {
                 const projects = await getProjects();
                 if (projects && projects.length > 0) {
-                    const sortedProjects = projects.sort((a, b) =>
-                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-                    );
-                    setDefaultProjectId(sortedProjects[0].id);
+                    setDefaultProjectId(projects[0].id);
                 } else {
                     console.error("No projects found for this user.");
                     setDefaultProjectId('no-projects-found');

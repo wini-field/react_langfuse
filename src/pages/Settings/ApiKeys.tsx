@@ -167,7 +167,7 @@ const ApiKeys: React.FC = () => {
                             <p className = { apiKeyStyles.sectionDescription }>This key can only be viewed once. You can always create new keys in the project settings.</p>
                             <div className = { apiKeyStyles.inputWrapper }>
                                 <input value = { newKeyDetails.secretKey || '' } readOnly className = { apiKeyStyles.input } />
-                                <button onClick = { () => copyToClipboard(newKeyDetails.secretKey) } className = { apiKeyStyles.copyButtonInInput }><Copy size = { 16 } /></button>
+                                <button onClick = { () => copyToClipboard(newKeyDetails.secretKey ?? null) } className = { apiKeyStyles.copyButtonInInput }><Copy size = { 16 } /></button>
                             </div>
                         </div>
 

@@ -3,50 +3,36 @@ import { langfuse } from '../lib/langfuse'
 export interface Project {
     id: string;
     name: string;
-    createdAt: string;
 }
-
-interface ProjectsResponse {
-    data: Project[];
-}
-
 export interface ApiKey {
     id: string;
     createdAt: string;
-    note: string | null;
+    expiresAt?: string | null;
+    lastUsedAt?: string | null;
+    note?: string | null;
     publicKey: string;
-    secretKey?: string;
     displaySecretKey: string;
+    secretKey?: string;
 }
-
-interface ApiKeysListResponse {
-    data: ApiKey[];
-}
-
-interface LangfuseApiMethods {
-    projectsList(): Promise<ProjectsResponse>;
-    apiKeysList(args: { projectId: string }): Promise<ApiKeysListResponse>;
-    apiKeysCreate(args: { projectId: string; note: string | null }): Promise<ApiKey>;
-    apiKeysDelete(args: { projectId: string; publicKey: string }): Promise<void>;
-}
-
-const api = langfuse.api as unknown as LangfuseApiMethods;
 
 export const getProjects = async (): Promise<Project[]> => {
-    const response = await api.projectsList();
+    const response = await langfuse.api.projectsGet();
     return response.data;
 };
 
+interface ApiKeyListResponse {
+    apiKeys: ApiKey[];
+}
+
 export const getApiKeys = async (projectId: string): Promise<ApiKey[]> => {
-    const response = await api.apiKeysList({ projectId });
-    return response.data;
+    const response = await langfuse.api.projectsGetApiKeys(projectId);
+    return (response as unknown as ApiKeyListResponse).apiKeys;
 };
 
 export const createApiKey = async (projectId: string, note: string | null = null): Promise<ApiKey> => {
-    const response = await api.apiKeysCreate({ projectId, note });
-    return response;
+    return langfuse.api.projectsCreateApiKey(projectId, { note });
 }
 
 export const deleteApiKey = async (projectId: string, publicKey: string): Promise<void> => {
-    await api.apiKeysDelete({ projectId, publicKey });
+    await langfuse.api.projectsDeleteApiKey(projectId, publicKey);
 }
