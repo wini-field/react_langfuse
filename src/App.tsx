@@ -1,5 +1,4 @@
 // src/App.tsx
-import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './layouts/Layout';
 
@@ -30,37 +29,7 @@ import Models from './pages/Settings/Models';
 import Members from './pages/Settings/Members';
 import Scores from './pages/Settings/Scores';
 
-import { getProjects } from './services/api';
-
 export default function App() {
-
-    const [defaultProjectId, setDefaultProjectId] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchDefaultProject = async () => {
-            try {
-                const projects = await getProjects();
-                if (projects && projects.length > 0) {
-                    setDefaultProjectId(projects[0].id);
-                } else {
-                    console.error("No projects found for this user.");
-                    setDefaultProjectId('no-projects-found');
-                }
-            } catch (error) {
-                    console.error('Failed to fetch projects:', error);
-                    setDefaultProjectId('error-fetching-projects');
-            } finally {
-                    setIsLoading(false);
-            }
-        };
-
-        fetchDefaultProject();
-    }, []);
-
-    if (isLoading) {
-        return <div>Loading project...</div>;
-    }
 
     return (
         <Routes>
@@ -97,7 +66,7 @@ export default function App() {
                 <Route path="dashboards/:dashboardId" element={<DashboardDetail/>}/>
 
                 {/* Settings (상대 경로로 선언) */}
-                <Route path="projects/:projectId/settings" element={<SettingsPage/>}>
+                <Route path="settings" element={<SettingsPage/>}>
                     <Route index element={<General/>}/>
                     <Route path="api-keys" element={<ApiKeys/>}/>
                     <Route path="llm-connections" element={<LLMConnections/>}/>
@@ -105,11 +74,6 @@ export default function App() {
                     <Route path="scores" element={<Scores/>}/>
                     <Route path="members" element={<Members/>}/>
                 </Route>
-
-                <Route
-                    path="settings/*"
-                    element={<Navigate to={`/projects/${defaultProjectId}/settings`} replace/>}
-                />
             </Route>
         </Routes>
     );

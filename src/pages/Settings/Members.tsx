@@ -64,12 +64,12 @@ const ActionsRenderer: React.FC = () => {
     )
 }
 
-const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string; lockVisible?: boolean })[] = [
+const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string; lockVisible?: boolean, initialHide?: boolean })[] = [
     { field: 'name', headerName: 'Name', cellRenderer: NameRenderer, flex: 2, resizable: true, sortable: true, lockVisible: true },
     { field: 'email', headerName: 'Email', flex: 3, resizable: true, sortable: true, lockVisible: true },
     { field: 'organizationRole', headerName: 'Organization Role', cellRenderer: OrganizationRoleRenderer, flex: 2, resizable: true, sortable: true, lockVisible: true },
     { field: 'projectRole', headerName: 'Project Role', flex: 2, resizable: true, sortable: true, lockVisible: true },
-    { field: 'memberSince', headerName: 'Member Since', flex: 1, resizable: true, sortable: true },
+    { field: 'memberSince', headerName: 'Member Since', flex: 1, resizable: true, sortable: true, initialHide: true },
     { field: 'actions', headerName: 'Actions', cellRenderer: ActionsRenderer, flex: 1, resizable: false, sortable: false, lockVisible: true },
 ]
 
@@ -88,13 +88,14 @@ const Members: React.FC = () => {
         setRowData(DUMMY_MEMBERS_DATA);
     }, []);
 
-    const [columnVisibility, setColumnVisibility] = useState({
-        name: true,
-        email: true,
-        organizationRole: true,
-        projectRole: true,
-        memberSince: true,
-        actions: true,
+    const [columnVisibility, setColumnVisibility] = useState(() =>{
+        const initialVisibility: { [key: string]: boolean } = {};
+        COLUMN_DEFINITIONS.forEach(col => {
+            if (col.field) {
+                initialVisibility[col.field] = !col.initialHide;
+            }
+        });
+        return initialVisibility;
     });
 
     const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
@@ -172,7 +173,7 @@ const Members: React.FC = () => {
                         onToggleAll = { toggleAllColumns }
                     />
                 </div>
-                <button className = { `${ gridStyles.headerButton } ${ gridStyles.addButton }` }>
+                <button onClick = { () => setIsModalOpen(true) } className = { `${ gridStyles.headerButton} ${ gridStyles.addButton }` } >
                     <Plus size = { 16 } /> Add new member
                 </button>
             </div>

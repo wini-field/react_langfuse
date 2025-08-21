@@ -58,13 +58,13 @@ const ActionsRenderer: React.FC = () => {
     )
 }
 
-const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string })[] = [
+const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string, initialHide?: boolean })[] = [
     { field: 'name', headerName: 'Name', flex: 2, resizable: true, sortable: true },
     { field: 'dataType', headerName: 'Data Type', flex: 1.5, resizable: true, sortable: true },
     { field: 'range', headerName: 'Range', cellRenderer: RangeRenderer, flex: 3, resizable: true, autoHeight: true },
     { field: 'description', headerName: 'Description', flex: 3, resizable: true },
-    { field: 'configID', headerName: 'Config ID', flex: 3, resizable: true },
-    { field: 'createdAt', headerName: 'Created At', flex: 1, resizable: true },
+    { field: 'configID', headerName: 'Config ID', flex: 3, resizable: true, initialHide: true },
+    { field: 'createdAt', headerName: 'Created At', flex: 1, resizable: true, initialHide: true },
     { field: 'status', headerName: 'Status', flex: 1, resizable: true, sortable: true },
     { field: 'actions', headerName: 'Action', cellRenderer: ActionsRenderer, flex: 1, resizable: false, sortable: false, },
 ]
@@ -84,15 +84,14 @@ const Scores: React.FC = () => {
         setRowData(DUMMY_SCORES_DATA);
     }, []);
 
-    const [columnVisibility, setColumnVisibility] = useState({
-        name: true,
-        dataType: true,
-        range: true,
-        description: true,
-        configID: true,
-        createdAt: true,
-        status: true,
-        actions: true,
+    const [columnVisibility, setColumnVisibility] = useState(() =>{
+        const initialVisibility: { [key: string]: boolean } = {};
+        COLUMN_DEFINITIONS.forEach(col => {
+            if (col.field) {
+                initialVisibility[col.field] = !col.initialHide;
+            }
+        });
+        return initialVisibility;
     });
 
     const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
