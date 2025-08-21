@@ -16,7 +16,7 @@ interface PriceItem {
     price: string;
 }
 
-interface ModelData {
+export interface ModelData {
     modelName: string;
     matchPattern: string;
     prices: Record<string, number>;

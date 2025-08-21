@@ -22,14 +22,11 @@ import NewModelForm, { ModelData } from './form/NewModelForm'
 interface ModelDefinition {
     modelName: string;
     matchPattern: string;
-    pries: {
-        input?: number;
-        output?: number;
-        [key: string]: number | undefined;
-    };
+    inputPrice: number;  // prices 객체 대신 직접 추가
+    outputPrice: number; // prices 객체 대신 직접 추가
     tokenizer: string;
     tokenizerConfig: Record<string, string>;
-    lastUsed?: string;
+    lastUsed?: string[];
 }
 
 // Maintainer 아이콘
@@ -89,7 +86,15 @@ const DUMMY_MODEL_MODELS = [
     }))
 ];
 
-const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string; lockVisible?: boolean})[] = [
+//컬럼 필드 이름을 상수로 만들어서 타입을 명확하게 합니다.
+const COLUMN_FIELDS = [
+    'modelName', 'maintainer', 'matchPattern', 'prices', 'tokenizer', 'tokenizerConfig', 'lastUsed', 'actions'
+] as const;
+
+// 위 상수를 기반으로 컬럼 필드의 타입을 정의합니다.
+type ModelColumnField = typeof COLUMN_FIELDS[number];
+
+const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: ModelColumnField; lockVisible?: boolean, initialHide?: boolean })[] = [
     { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, lockVisible: true },
     { field: 'maintainer', headerName: 'Maintainer', width: 10, cellRenderer: MaintainerRenderer, lockVisible: true },
     { field: 'matchPattern', headerName: 'Match Pattern', width: 150, lockVisible: true },
@@ -108,12 +113,30 @@ const Models: React.FC = () => {
     const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
     const columnButtonRef = useRef<HTMLDivElement>(null);
 
-    const [rowData, setRowData] = useState<any[]>([]);
+    const [rowData, setRowData] = useState<ModelDefinition[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    // 페이지네이션 상태 추가
+    const [paginationMeta, setPaginationMeta] = useState<{ page: number; limit: number; totalItems: number; totalPages: number; } | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit, setLimit] = useState(pageSizes[0]);
+
+    // 더미 데이터를 페이지에 맞게 잘라서 보여주는 로직으로 수정
     useEffect(() => {
-        setRowData(DUMMY_MODEL_MODELS);
-    }, []);
+        const totalItems = DUMMY_MODEL_MODELS.length;
+        const totalPages = Math.ceil(totalItems / limit);
+        const start = (currentPage - 1) * limit;
+        const end = start + limit;
+        const paginatedData = DUMMY_MODEL_MODELS.slice(start, end);
+
+        setRowData(paginatedData);
+        setPaginationMeta({
+            page: currentPage,
+            limit: limit,
+            totalItems: totalItems,
+            totalPages: totalPages,
+        });
+    }, [currentPage, limit]);
 
     const handleSaveModel = (newModelData: ModelData) => {
         const newModel: ModelDefinition = {
@@ -125,7 +148,7 @@ const Models: React.FC = () => {
         setIsModalOpen(false);
     };
 
-    const [columnVisibility, setColumnVisibility] = useState({
+    const [columnVisibility, setColumnVisibility] = useState<Record<ModelColumnField, boolean>>({
         modelName: true,
         maintainer: true,
         matchPattern: true,
@@ -247,7 +270,19 @@ const Models: React.FC = () => {
                     onCancel = { () => setIsModalOpen(false) }
                 />
             </SidePanel>
-            { gridApi && <CustomPagination gridApi={ gridApi } pageSizes={ pageSizes } />}
+            {paginationMeta && (
+                <CustomPagination
+                    pageSizes={pageSizes}
+                    currentPage={paginationMeta.page}
+                    totalPages={paginationMeta.totalPages}
+                    totalItems={paginationMeta.totalItems}
+                    onPageChange={(page) => setCurrentPage(page)}
+                    onLimitChange={(newLimit) => {
+                        setLimit(newLimit);
+                        setCurrentPage(1);
+                    }}
+                />
+            )}
         </div>
     );
 };

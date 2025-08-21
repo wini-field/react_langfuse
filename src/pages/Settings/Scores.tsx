@@ -65,7 +65,7 @@ const transformApiToGridData = (apiData: ApiScoreConfig[]): GridScoreConfig[] =>
         let range: Record<string, string> | string = '';
 
         if (item.dataType === 'NUMERIC') {
-            range = `Min: ${item.minValue ?? 'N/A'}, Max: ${item.maxValue ?? 'N/A'}`;
+            range = `{"Minimum": "${item.minValue ?? '-∞'}", "Maximum": "${item.maxValue ?? '∞'}"`;
         } else if (item.dataType === 'CATEGORICAL' && item.categories) {
             range = item.categories.reduce((acc, cat) => {
                 acc[cat.value.toString()] = cat.label;
@@ -135,13 +135,13 @@ const ActionsRenderer: React.FC<ActionsRendererProps> = (props) => {
 
 const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string, initialHide?: boolean })[] = [
     { field: 'name', headerName: 'Name', flex: 2, resizable: true, sortable: true },
-    { field: 'dataType', headerName: 'Data Type', flex: 1.5, resizable: true, sortable: true },
-    { field: 'range', headerName: 'Range', cellRenderer: RangeRenderer, flex: 3, resizable: true, autoHeight: true },
-    { field: 'description', headerName: 'Description', flex: 3, resizable: true },
+    { field: 'dataType', headerName: 'Data Type', flex: 3, resizable: true, sortable: true },
+    { field: 'range', headerName: 'Range', cellRenderer: RangeRenderer, flex: 10, resizable: true, autoHeight: true },
+    { field: 'description', headerName: 'Description', flex: 5, resizable: true },
     { field: 'configID', headerName: 'Config ID', flex: 3, resizable: true, initialHide: true },
-    { field: 'createdAt', headerName: 'Created At', flex: 1, resizable: true, initialHide: true },
-    { field: 'status', headerName: 'Status', flex: 1, resizable: true, sortable: true },
-    { field: 'actions', headerName: 'Action', cellRenderer: ActionsRenderer, flex: 1, resizable: false, sortable: false, },
+    { field: 'createdAt', headerName: 'Created At', flex: 3, resizable: true, initialHide: true },
+    { field: 'status', headerName: 'Status', flex: 2, resizable: true, sortable: true },
+    { field: 'actions', headerName: 'Action', cellRenderer: ActionsRenderer, flex: 2, resizable: false, sortable: false, },
 ]
 
 const Scores: React.FC = () => {
@@ -389,7 +389,6 @@ const Scores: React.FC = () => {
 
             {gridApi && paginationMeta && (
                 <CustomPagination
-                    gridApi={gridApi}
                     pageSizes={pageSizes}
                     currentPage={paginationMeta.page}
                     totalPages={paginationMeta.totalPages}

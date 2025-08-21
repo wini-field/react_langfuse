@@ -1,42 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { GridApi } from 'ag-grid-community';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import styles from './layout/CustomPagination.module.css';
 
 interface CustomPaginationProps {
-  gridApi: GridApi;
-  pageSizes: number[]; // 페이지 크기 옵션을 prop으로 받음
+  pageSizes: number[];
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  onPageChange: (page: number) => void;
+  onLimitChange: (newLimit: number) => void;
 }
 
-const CustomPagination: React.FC<CustomPaginationProps> = ({ gridApi, pageSizes }) => {
-    const [totalPages, setTotalPages] = useState(0);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [inputValue, setInputValue] = useState('1');
-    const [pageSize, setPageSize] = useState(pageSizes[0] || 10); // 페이지 크기 state 추가
+const CustomPagination: React.FC<CustomPaginationProps> = ({
+                                                               pageSizes,
+                                                               currentPage,
+                                                               totalPages,
+                                                               totalItems,
+                                                               onPageChange,
+                                                               onLimitChange,
+                                                           }) => {
+
+    const [inputValue, setInputValue] = useState(currentPage.toString());
+    const [pageSize, setPageSize] = useState(pageSizes[0] || 10);
 
     useEffect(() => {
-        if (gridApi) {
-            const onPaginationChanged = () => {
-                if (!gridApi || gridApi.isDestroyed()) {
-                    return;
-                }
-                setTotalPages(gridApi.paginationGetTotalPages());
-                const newCurrentPage = gridApi.paginationGetCurrentPage() + 1;
-                setCurrentPage(newCurrentPage);
-                setInputValue(newCurrentPage.toString());
-                setPageSize(gridApi.paginationGetPageSize());
-            };
-
-            gridApi.addEventListener('paginationChanged', onPaginationChanged);;
-            onPaginationChanged();
-
-            return () => {
-                if (gridApi && !gridApi.isDestroyed()) {
-                    gridApi.removeEventListener('paginationChanged', onPaginationChanged);
-                }
-            };
-        }
-    }, [gridApi]);
+        setInputValue(currentPage.toString());
+    }, [currentPage]);
 
     const onPageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.target.value);
@@ -46,33 +35,31 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({ gridApi, pageSizes 
         if (e.key === 'Enter') {
             const page = parseInt(inputValue, 10);
             if (!isNaN(page) && page > 0 && page <= totalPages) {
-                gridApi.paginationGoToPage(page - 1);
+                onPageChange(page); // 부모에게 페이지 변경 알림
             } else {
                 setInputValue(currentPage.toString());
             }
         }
     };
 
-  // ✅ 페이지 크기 변경 핸들러 추가
+    // ✅ 페이지 크기 변경 핸들러 추가
     const onPageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newSize = Number(e.target.value);
-        // ✅ setPageSize(newSize); // 이 줄은 paginationChanged 이벤트가 처리하므로 중복임
-        // ✅ Deprecated된 paginationSetPageSize 대신 setGridOption 사용
-        gridApi.setGridOption('paginationPageSize', newSize);
+        setPageSize(newSize);
+        onLimitChange(newSize); // 부모에게 페이지 크기 변경 알림
     };
 
-    const onBtFirst = () => gridApi.paginationGoToFirstPage();
-    const onBtPrev = () => gridApi.paginationGoToPreviousPage();
-    const onBtNext = () => gridApi.paginationGoToNextPage();
-    const onBtLast = () => gridApi.paginationGoToLastPage();
+    const onBtFirst = () => onPageChange(1);
+    const onBtPrev = () => onPageChange(currentPage - 1);
+    const onBtNext = () => onPageChange(currentPage + 1);
+    const onBtLast = () => onPageChange(totalPages);
 
-    if (!gridApi || totalPages == 0) {
+    if (totalPages === 0) {
         return null;
     }
 
     return (
         <div className={styles.paginationContainer}>
-        {/* ✅ 페이지 크기 선택기 추가 */}
             <div className={styles.pageSizeSelector}>
                 <span>Rows per page</span>
                 <select value={pageSize} onChange={onPageSizeChange} className={styles.pageSizeSelect}>
