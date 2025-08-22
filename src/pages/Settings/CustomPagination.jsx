@@ -1,24 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import React, {useState, useEffect} from 'react';
+import {ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight} from 'lucide-react';
 import styles from './layout/CustomPagination.module.css';
 
-interface CustomPaginationProps {
-  pageSizes: number[];
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  onPageChange: (page: number) => void;
-  onLimitChange: (newLimit: number) => void;
-}
-
-const CustomPagination: React.FC<CustomPaginationProps> = ({
-                                                               pageSizes,
-                                                               currentPage,
-                                                               totalPages,
-                                                               totalItems,
-                                                               onPageChange,
-                                                               onLimitChange,
-                                                           }) => {
+const CustomPagination = ({
+                              pageSizes,
+                              currentPage,
+                              totalPages,
+                              totalItems,
+                              onPageChange,
+                              onLimitChange,
+                          }) => {
 
     const [inputValue, setInputValue] = useState(currentPage.toString());
     const [pageSize, setPageSize] = useState(pageSizes[0] || 10);
@@ -27,11 +18,11 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
         setInputValue(currentPage.toString());
     }, [currentPage]);
 
-    const onPageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onPageInputChange = (e) => {
         setInputValue(e.target.value);
     };
 
-    const onPageInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const onPageInputKeyDown = (e) => {
         if (e.key === 'Enter') {
             const page = parseInt(inputValue, 10);
             if (!isNaN(page) && page > 0 && page <= totalPages) {
@@ -42,8 +33,8 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
         }
     };
 
-    // ✅ 페이지 크기 변경 핸들러 추가
-    const onPageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // 페이지 크기 변경 핸들러 추가
+    const onPageSizeChange = (e) => {
         const newSize = Number(e.target.value);
         setPageSize(newSize);
         onLimitChange(newSize); // 부모에게 페이지 크기 변경 알림
@@ -86,16 +77,16 @@ const CustomPagination: React.FC<CustomPaginationProps> = ({
                 </div>
                 <div className={styles.buttonGroup}>
                     <button onClick={onBtFirst} disabled={currentPage === 1} className={styles.button}>
-                        <ChevronsLeft size={18} />
+                        <ChevronsLeft size={18}/>
                     </button>
                     <button onClick={onBtPrev} disabled={currentPage === 1} className={styles.button}>
-                        <ChevronLeft size={18} />
+                        <ChevronLeft size={18}/>
                     </button>
                     <button onClick={onBtNext} disabled={currentPage === totalPages} className={styles.button}>
-                        <ChevronRight size={18} />
+                        <ChevronRight size={18}/>
                     </button>
                     <button onClick={onBtLast} disabled={currentPage === totalPages} className={styles.button}>
-                        <ChevronsRight size={18} />
+                        <ChevronsRight size={18}/>
                     </button>
                 </div>
             </div>

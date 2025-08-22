@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import SettingsSidebar from '../../layouts/SettingsSidebar.tsx';
 import styles from './layout/SettingsPage.module.css';
 
-const SettingsPage: React.FC = () => {
+const SettingsPage = () => {
     return (
         <div>
             <div className = { styles.headerWrapper }>

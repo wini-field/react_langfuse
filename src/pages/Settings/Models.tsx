@@ -22,11 +22,13 @@ import NewModelForm, { ModelData } from './form/NewModelForm'
 interface ModelDefinition {
     modelName: string;
     matchPattern: string;
-    inputPrice: number;  // prices 객체 대신 직접 추가
-    outputPrice: number; // prices 객체 대신 직접 추가
+    prices: {
+        inputPrice: number;
+        outputPrice: number;
+    };
     tokenizer: string;
     tokenizerConfig: Record<string, string>;
-    lastUsed?: string[];
+    lastUsed?: string;
 }
 
 // Maintainer 아이콘
@@ -46,7 +48,7 @@ const PricesRenderer: React.FC<ICellRendererParams> = (props) => (
 
 // Tokenizer 설정
 const TokenizerConfRenderer: React.FC<ICellRendererParams> = ({ data }) => {
-    const config = data.tokenizerConfig;
+    const config = data.tokenizerConfig ?? {};
     const entries = Object.entries(config);
 
     return (
@@ -140,11 +142,31 @@ const Models: React.FC = () => {
 
     const handleSaveModel = (newModelData: ModelData) => {
         const newModel: ModelDefinition = {
-            ...newModelData,
-            tokenizerConfig: {}, // 기본값 또는 폼에서 추가된 값
-            lastUsed: new Date().toISOString().split('T'[0]),
+            modelName: newModelData.modelName,
+            matchPattern: newModelData.matchPattern,
+            prices: {
+                inputPrice: newModelData.inputPrice,
+                outputPrice: newModelData.outputPrice,
+            },
+            tokenizer: newModelData.tokenizer,
+            tokenizerConfig: {},
+            lastUsed: new Date().toISOString().split('T')[0],
         };
-        setRowData(prevData => [...prevData, newModel]);
+        // 전체 데이터에 새 모델을 추가하고 페이지네이션을 다시 계산해야 하지만,
+        // 이 예제에서는 간단하게 현재 보이는 rowData에만 추가합니다.
+        const updatedDummyData = [...DUMMY_MODEL_MODELS, newModel];
+        const totalItems = updatedDummyData.length;
+        const totalPages = Math.ceil(totalItems / limit);
+
+        // 마지막 페이지로 이동해서 새 항목을 보여주는 로직 (선택적)
+        const newCurrentPage = totalPages;
+        const start = (newCurrentPage - 1) * limit;
+        const end = start + limit;
+        const paginatedData = updatedDummyData.slice(start, end);
+
+        setRowData(paginatedData);
+        setPaginationMeta({ page: newCurrentPage, limit, totalItems, totalPages });
+        setCurrentPage(newCurrentPage);
         setIsModalOpen(false);
     };
 
@@ -187,11 +209,9 @@ const Models: React.FC = () => {
 
     const columnDisplayNames = useMemo(() =>
         COLUMN_DEFINITIONS.reduce((acc, col) => {
-            if (col.field) {
-                acc[col.field] = col.headerName;
-            }
+            acc[col.field] = col.headerName;
             return acc;
-        }, {} as Record<string, string>),
+        }, {} as Record<ModelColumnField, string>),
     []);
 
     const columnDefs = useMemo((): ColDef[] =>

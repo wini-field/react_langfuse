@@ -2,15 +2,15 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import { ColDef, ICellRendererParams, GridApi, GridReadyEvent } from 'ag-grid-community';
 import { Plus, Archive, ArchiveRestore, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import commonStyles from './layout/SettingsCommon.module.css'
 import gridStyles from './layout/SettingsGrid.module.css'
-import CustomPagination from './CustomPagination.tsx';
+import CustomPagination from './CustomPagination';
 import ColumnMenu from "../../layouts/ColumnMenu.tsx";
 import Modal from '../../components/Modal/Modal'
 import NewScoreForm from './form/NewScoreForm'
 import { publicKey, secretKey, baseUrl } from '../../lib/langfuse'
+import { fetchScoreConfigsAPI, createScoreConfigAPI, updateScoreConfigStatusAPI } from '../../services/scoreApi'
 
 // Basic Auth를 위한 Base64 인코딩
 const base64Credentials =
@@ -18,66 +18,29 @@ const base64Credentials =
     ? btoa(`${publicKey}:${secretKey}`)
     : '';
 
-
-interface ApiCategory {
-    value: number;
-    label: string;
-}
-
-interface ApiScoreConfig {
-    id: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-    projectId: string;
-    dataType: 'NUMERIC' | 'BOOLEAN' | 'CATEGORICAL';
-    isArchived: boolean;
-    minValue: number | null;
-    maxValue: number | null;
-    categories: ApiCategory[] | null;
-    description: string | null;
-}
-
-interface ApiResponse {
-    data: ApiScoreConfig[];
-    meta: {
-        page: number;
-        limit: number;
-        totalItems: number;
-        totalPages: number;
-    };
-}
-
-interface GridScoreConfig {
-    id: string;
-    configID: string; // 에러 해결을 위해 configID 필드 추가
-    name: string;
-    dataType: 'NUMERIC' | 'BOOLEAN' | 'CATEGORICAL';
-    range: Record<string, string> | string;
-    description: string;
-    projectId: string;
-    createdAt: string;
-    status: 'Active' | 'Archived';
-}
-
-const transformApiToGridData = (apiData: ApiScoreConfig[]): GridScoreConfig[] => {
+const transformApiToGridData = (apiData) => {
     return apiData.map(item => {
-        let range: Record<string, string> | string = '';
+        let range = '';
 
         if (item.dataType === 'NUMERIC') {
-            range = `{"Minimum": "${item.minValue ?? '-∞'}", "Maximum": "${item.maxValue ?? '∞'}"`;
+            // <<< START: 올바른 문자열을 생성하도록 수정 >>>
+            range = `{Minimum: ${item.minValue ?? '-∞'}, Maximum: ${item.maxValue ?? '∞'}}`;
+            // <<< END: 올바른 문자열을 생성하도록 수정 >>>
         } else if (item.dataType === 'CATEGORICAL' && item.categories) {
             range = item.categories.reduce((acc, cat) => {
                 acc[cat.value.toString()] = cat.label;
                 return acc;
-            }, {} as Record<string, string>);
-        } else if (item.dataType === 'BOOLEAN') {
-            range = { '0': 'False', '1': 'True' };
+            }, {});
+        } else if (item.dataType === 'BOOLEAN' && item.categories) {
+             range = item.categories.reduce((acc, cat) => {
+                acc[cat.value.toString()] = cat.label;
+                return acc;
+            }, {});
         }
 
         return {
             id: item.id,
-            configID: item.id, // API의 id를 configID에 매핑
+            configID: item.id,
             name: item.name,
             dataType: item.dataType,
             range: range,
@@ -90,7 +53,7 @@ const transformApiToGridData = (apiData: ApiScoreConfig[]): GridScoreConfig[] =>
 };
 
 // Range Renderer
-const RangeRenderer: React.FC<ICellRendererParams<GridScoreConfig, GridScoreConfig['range']>> = (props) => {
+const RangeRenderer = (props) => {
     const rangeData = props.value;
     let displayValue = '';
     if (typeof rangeData === 'object' && rangeData !== null) {
@@ -102,11 +65,7 @@ const RangeRenderer: React.FC<ICellRendererParams<GridScoreConfig, GridScoreConf
 };
 
 // Actions Renderer
-interface ActionsRendererProps extends ICellRendererParams<GridScoreConfig> {
-    onToggleStatus: (id: string, currentStatus: 'Active' | 'Archived') => void;
-}
-
-const ActionsRenderer: React.FC<ActionsRendererProps> = (props) => {
+const ActionsRenderer = (props) => {
     const { data, onToggleStatus } = props;
 
     // 상태 변경 버튼 클릭 핸들러
@@ -133,7 +92,7 @@ const ActionsRenderer: React.FC<ActionsRendererProps> = (props) => {
     );
 };
 
-const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string, initialHide?: boolean })[] = [
+const COLUMN_DEFINITIONS = [
     { field: 'name', headerName: 'Name', flex: 2, resizable: true, sortable: true },
     { field: 'dataType', headerName: 'Data Type', flex: 3, resizable: true, sortable: true },
     { field: 'range', headerName: 'Range', cellRenderer: RangeRenderer, flex: 10, resizable: true, autoHeight: true },
@@ -144,29 +103,29 @@ const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string, initial
     { field: 'actions', headerName: 'Action', cellRenderer: ActionsRenderer, flex: 2, resizable: false, sortable: false, },
 ]
 
-const Scores: React.FC = () => {
-    const gridRef = useRef<AgGridReact>(null);
-    const [gridApi, setGridApi] = useState<GridApi | null>(null);
+const Scores = () => {
+    const gridRef = useRef(null);
+    const [gridApi, setGridApi] = useState(null);
     const pageSizes = useMemo(() => [10, 20, 30, 40, 50], []);
 
     const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
-    const columnButtonRef = useRef<HTMLDivElement>(null);
+    const columnButtonRef = useRef(null);
 
-    const [rowData, setRowData] = useState<GridScoreConfig[]>([]);
+    const [rowData, setRowData] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [isToggleModalOpen, setIsToggleModalOpen] = useState(false);
-    const [scoreToToggle, setScoreToToggle] = useState<{ id: string; status: 'Active' | 'Archived' } | null>(null);
+    const [scoreToToggle, setScoreToToggle] = useState(null);
 
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState(null);
 
     // 페이지네이션 상태 추가
-    const [paginationMeta, setPaginationMeta] = useState<ApiResponse['meta'] | null>(null);
+    const [paginationMeta, setPaginationMeta] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(10);
 
-    const fetchScoreConfigs = useCallback(async (page: number, limit: number) => {
+    const fetchScoreConfigs = useCallback(async (page, limit) => {
         if (!base64Credentials) {
             setError("Langfuse API 키가 설정되지 않았습니다. .env 파일을 확인해주세요.");
             setIsLoading(false);
@@ -175,19 +134,7 @@ const Scores: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
-            // ✅ 2. import한 baseUrl 사용
-            const response = await fetch(`${baseUrl}/api/public/score-configs?page=${page}&limit=${limit}`, {
-                headers: {
-                    'Authorization': `Basic ${base64Credentials}`
-                }
-            });
-            if (!response.ok) {
-                if (response.status === 401) {
-                    throw new Error('Unauthorized: API 키가 올바른지 확인해주세요.');
-                }
-                throw new Error('Failed to fetch score configs');
-            }
-            const data: ApiResponse = await response.json();
+            const data = await fetchScoreConfigsAPI(page, limit, base64Credentials);
             const gridData = transformApiToGridData(data.data);
             setRowData(gridData);
             setPaginationMeta(data.meta);
@@ -204,7 +151,7 @@ const Scores: React.FC = () => {
     }, [currentPage, limit, fetchScoreConfigs]);
 
     // 상태 변경 요청 핸들러
-    const handleToggleRequest = useCallback((id: string, currentStatus: 'Active' | 'Archived') => {
+    const handleToggleRequest = useCallback((id, currentStatus) => {
         setScoreToToggle({ id, status: currentStatus });
         setIsToggleModalOpen(true);
     }, []);
@@ -214,21 +161,7 @@ const Scores: React.FC = () => {
         if (scoreToToggle !== null) {
             const isArchived = scoreToToggle.status === 'Active';
             try {
-                // ✅ 3. import한 baseUrl 사용
-                const response = await fetch(`${baseUrl}/api/public/score-configs/${scoreToToggle.id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Basic ${base64Credentials}`
-                    },
-                    body: JSON.stringify({ isArchived: isArchived }),
-                });
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        throw new Error('Unauthorized: API 키가 올바른지 확인해주세요.');
-                    }
-                    throw new Error('Failed to update status');
-                }
+                await updateScoreConfigStatusAPI(scoreToToggle.id, isArchived, base64Credentials);
                 fetchScoreConfigs(currentPage, limit);
             } catch (err) {
                 console.error("Failed to toggle status:", err);
@@ -240,8 +173,23 @@ const Scores: React.FC = () => {
         }
     };
 
+   const handleCreateScore = async (formData) => {
+        if (!base64Credentials) {
+            alert("API 키가 설정되지 않았습니다.");
+            return;
+        }
+        try {
+            await createScoreConfigAPI(formData, base64Credentials);
+            setIsModalOpen(false);
+            fetchScoreConfigs(currentPage, limit);
+        } catch (err) {
+            console.error("Failed to create score config:", err);
+            alert(`Error: ${err instanceof Error ? err.message : 'An unknown error occurred'}`);
+        }
+    };
+
     const [columnVisibility, setColumnVisibility] = useState(() =>{
-        const initialVisibility: { [key: string]: boolean } = {};
+        const initialVisibility = {};
         COLUMN_DEFINITIONS.forEach(col => {
             if (col.field) {
                 initialVisibility[col.field] = !col.initialHide;
@@ -250,7 +198,7 @@ const Scores: React.FC = () => {
         return initialVisibility;
     });
 
-    const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
+    const toggleColumnVisibility = (field) => {
         const columnDef = COLUMN_DEFINITIONS.find(c => c.field === field);
         if (columnDef?.lockVisible) {
             return;
@@ -258,11 +206,11 @@ const Scores: React.FC = () => {
          setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
      };
 
-    const toggleAllColumns = (select: boolean) => {
+    const toggleAllColumns = (select) => {
         const newVisibility = { ...columnVisibility };
         COLUMN_DEFINITIONS.forEach(col => {
             if (!col.lockVisible) {
-                newVisibility[col.field as keyof typeof columnVisibility] = select;
+                newVisibility[col.field] = select;
             }
         });
         setColumnVisibility(newVisibility);
@@ -282,13 +230,13 @@ const Scores: React.FC = () => {
                 acc[col.field] = col.headerName;
             }
             return acc;
-        }, {} as Record<string, string>),
+        }, {}),
     []);
 
-    const columnDefs = useMemo((): ColDef[] =>
+    const columnDefs = useMemo(() =>
         COLUMN_DEFINITIONS.map(col => ({
             ...col,
-            hide: !columnVisibility[col.field as keyof typeof columnVisibility],
+            hide: !columnVisibility[col.field],
             cellRendererParams: col.field === 'actions' ? { onToggleStatus: handleToggleRequest } : undefined,
         })),
     [columnVisibility]);
@@ -300,7 +248,7 @@ const Scores: React.FC = () => {
        paginationLast: () => <ChevronsRight size={18} />,
    };
 
-    const onGridReady = useCallback((event: GridReadyEvent) => {
+    const onGridReady = useCallback((event) => {
         setGridApi(event.api);
     }, []);
 
@@ -323,7 +271,7 @@ const Scores: React.FC = () => {
             <h3>Score Configs</h3>
             <p>Score configs define which scores are available for annotation in your project. Please note that all score configs are immutable.</p>
             <div className = { gridStyles.header }>
-                {/* ✅ Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
+                {/* Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
                 <div ref = { columnButtonRef } className = { gridStyles.columnsButtonWrapper } onClick={() => setIsColumnMenuOpen(prev => !prev)}>
                     <button
                         className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }
@@ -365,7 +313,10 @@ const Scores: React.FC = () => {
                 isOpen = { isModalOpen }
                 onClose = { () => setIsModalOpen(false) }
             >
-                <NewScoreForm onClose = { () => setIsModalOpen(false) } />
+                <NewScoreForm
+                    onClose={() => setIsModalOpen(false)}
+                    onSave={handleCreateScore}
+                />
             </Modal>
 
             {/* 상태 변경 확인 모달 */}

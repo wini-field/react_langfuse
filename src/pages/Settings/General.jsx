@@ -17,7 +17,7 @@ const generalSettingsData = {
   }
 };
 
-const General: React.FC = () => {
+const General = () => {
     const [originalProjectName, setOriginalProjectName] = useState(generalSettingsData.projectName);
     const [projectName, setProjectName] = useState(generalSettingsData.projectName);
     const [isSaveDisabled, setIsSaveDisabled] = useState(true);
@@ -45,7 +45,7 @@ const General: React.FC = () => {
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e) => {
         if (isPristine) {
             setIsPristine(false);
         }

@@ -1,12 +1,7 @@
 import React from 'react';
 import styles from './ToggleSwitch.module.css';
 
-interface ToggleSwitchProps {
-    checked: boolean;
-    onChange: (checked: boolean) => void;
-}
-
-const ToggleSwitch = ({ checked, onChange }: ToggleSwitchProps) => {
+const ToggleSwitch = ({ checked, onChange }) => {
     const handleChange = () => {
         onChange(!checked);
     };

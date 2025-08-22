@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import formStyles from './Form.module.css' // 공통 스타일
 import styles from './NewLLMConnectionForm.module.css'; // 전용 스타일
-import ToggleSwitch from "./ToggleSwitch.tsx";
+import ToggleSwitch from "./ToggleSwitch.jsx";
 
 interface LLMConnectionData {
     adapter: string;

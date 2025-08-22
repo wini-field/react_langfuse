@@ -1,10 +1,4 @@
-interface ApiKeyDetails {
-    publicKey: string;
-    secretKey: string | undefined;
-    host: string;
-}
-
-export const getCodeSnippets = ({ publicKey, secretKey, host }: ApiKeyDetails): Record<string, string> => {
+export const getCodeSnippets = ({ publicKey, secretKey, host }) => {
     const sk = secretKey ?? 'YOUR_SECRET_KEY';
     return {
     Python: `pip install langfuse
