@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from './SettingsSidebar.module.css';
 
-const SettingsSidebar: React.FC = () => {
+const SettingsSidebar = () => {
     return (
         <nav className = { styles.nav }>
             <ul>

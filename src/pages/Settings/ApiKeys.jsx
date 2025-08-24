@@ -1,26 +1,26 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Info, Plus, Clipboard, Trash2, Copy, X } from 'lucide-react';
-import { getApiKeys, createApiKey, deleteApiKey, ApiKey } from '../../services/api';
+import { getApiKeys, createApiKey, deleteApiKey } from '../../services/api';
 import commonStyles from "./layout/SettingsCommon.module.css"
 import apiKeyStyles from "./layout/Apikeys.module.css";
 import { getCodeSnippets } from './codeSnippets'
 
-const ApiKeys: React.FC = () => {
-    const { projectId } = useParams<{ projectId: string }>();
+const ApiKeys = () => {
+    const { projectId } = useParams();
 
-    const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-    const [newKeyDetails, setNewKeyDetails] = useState<ApiKey | null>(null);
+    const [apiKeys, setApiKeys] = useState([]);
+    const [newKeyDetails, setNewKeyDetails] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('Python');
     const [isLoading, setIsLoading] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState(null);
 
     // env 파일에서 환경변수 가져오기
     const host = import.meta.env.VITE_LANGFUSE_BASE_URL || "http://localhost:3000";
 
-    const fetchApiKeys = useCallback(async (currentProjectId: string) => {
+    const fetchApiKeys = useCallback(async (currentProjectId) => {
         if (!currentProjectId) return;
         try {
             setError(null);
@@ -56,7 +56,7 @@ const ApiKeys: React.FC = () => {
         });
     }, [newKeyDetails, host]);
 
-    const copyToClipboard = (text: string | null) => {
+    const copyToClipboard = (text) => {
         if (!text) return;
         navigator.clipboard.writeText(text).then(() => {
             alert('복사되었습니다.');
@@ -82,7 +82,7 @@ const ApiKeys: React.FC = () => {
         }
     };
 
-    const handleDeleteKey = async (publicKeyToDelete: string) => {
+    const handleDeleteKey = async (publicKeyToDelete) => {
         if (window.confirm("정말로 이 API 키를 삭제하시겠습니까?")) {
             if (!projectId) return;
             try {

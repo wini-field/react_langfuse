@@ -1,36 +1,6 @@
-import { ScoreFormData } from '../pages/Settings/form/NewScoreForm'
 import { baseUrl } from '../lib/langfuse'
 
-export interface ApiCategory {
-    value: number;
-    label: string;
-}
-
-export interface ApiScoreConfig {
-    id: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-    projectId: string;
-    dataType: 'NUMERIC' | 'BOOLEAN' | 'CATEGORICAL';
-    isArchived: boolean;
-    minValue: number | null;
-    maxValue: number | null;
-    categories: ApiCategory[] | null;
-    description: string | null;
-}
-
-export interface ApiResponse {
-    data: ApiScoreConfig[];
-    meta: {
-        page: number;
-        limit: number;
-        totalItems: number;
-        totalPages: number;
-    };
-}
-
-export const fetchScoreConfigsAPI = async (page: number, limit: number, base64Credentials: string): Promise<ApiResponse> => {
+export const fetchScoreConfigsAPI = async (page, limit, base64Credentials) => {
     const response = await fetch(`${baseUrl}/api/public/score-configs?page=${page}&limit=${limit}`, {
         headers: {
             'Authorization': `Basic ${base64Credentials}`
@@ -45,8 +15,8 @@ export const fetchScoreConfigsAPI = async (page: number, limit: number, base64Cr
     return response.json();
 };
 
-export const createScoreConfigAPI = async (formData: ScoreFormData, base64Credentials: string): Promise<ApiScoreConfig> => {
-    const body: any = {
+export const createScoreConfigAPI = async (formData, base64Credentials) => {
+    const body = {
         name: formData.name,
         dataType: formData.dataType,
         description: formData.description || "",
@@ -92,7 +62,7 @@ export const createScoreConfigAPI = async (formData: ScoreFormData, base64Creden
     return response.json();
 };
 
-export const updateScoreConfigStatusAPI = async (id: string, isArchived: boolean, base64Credentials: string): Promise<Response> => {
+export const updateScoreConfigStatusAPI = async (id, isArchived, base64Credentials) => {
     const response = await fetch(`${baseUrl}/api/public/score-configs/${id}`, {
         method: 'PATCH',
         headers: {

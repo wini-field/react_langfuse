@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import formStyles from './Form.module.css';
 
-interface NewMemberFormProps {
-    onClose: () => void;
-}
-
-const NewMemberForm: React.FC<NewMemberFormProps> = ({ onClose }) => {
+const NewMemberForm = ({ onClose }) => {
     const [email, setEmail] = useState('');
     const [role, setRole] = useState('MEMBER');
 
-    const handleSubmit = (event: React.FormEvent) => {
+    const handleSubmit = (event) => {
         event.preventDefault();
         const formData = { email, role };
         console.log("New Member Invited:", formData);

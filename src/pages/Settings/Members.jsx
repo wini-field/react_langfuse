@@ -2,7 +2,6 @@ import React, {useState, useRef, useCallback, useMemo, useEffect} from 'react'
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
-import {ColDef, GridApi, GridReadyEvent, ICellRendererParams} from 'ag-grid-community';
 import {Plus, Trash2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import commonStyles from './layout/SettingsCommon.module.css'
 import gridStyles from './layout/SettingsGrid.module.css'
@@ -12,37 +11,28 @@ import ColumnMenu from "../../layouts/ColumnMenu";
 import Modal from '../../components/Modal/Modal'
 import NewMemberForm from './form/NewMemberForm'
 
-interface Member {
-    id: string;
-    name: string;
-    email: string;
-    organizationRole: 'Owner' | 'Admin' | 'Member' | 'Viewer' | 'None';
-    projectRole: string;
-    memberSince: string;
-}
-
-const DUMMY_MEMBERS_DATA: Member[] = [
+const DUMMY_MEMBERS_DATA = [
   { id: '1', name: 'Na Youngseok', email: 'youngseok@naver.com', organizationRole: 'Owner', projectRole: 'N/A on plan', memberSince: '2025-08-01' },
   // 페이지네이션 테스트를 위해 데이터 추가
   ...Array.from({ length: 30 }, (_, i) => ({
       id: `${i + 2}`,
       name: `User ${i + 1}`,
       email: `user${i + 1}@example.com`,
-      organizationRole: (['Admin', 'Member'] as const)[i % 2],
+      organizationRole: (['Admin', 'Member'])[i % 2],
       projectRole: 'N/A on plan',
       memberSince: '2025-08-01',
   })),
 ];
 
 // Name
-const NameRenderer: React.FC<ICellRendererParams> = (props) => (
+const NameRenderer = (props) => (
     <div className = { styles.nameCell }>
         <span>{ props.value }</span>
     </div>
 )
 
 // Organization Role
-const OrganizationRoleRenderer: React.FC<ICellRendererParams> = (props) => (
+const OrganizationRoleRenderer = (props) => (
     <div className = { styles.roleCell }>
         <select defaultValue ={ props.value } className = { styles.roleSelect }>
             <option>Owner</option>
@@ -54,7 +44,7 @@ const OrganizationRoleRenderer: React.FC<ICellRendererParams> = (props) => (
     </div>
 )
 
-const ActionsRenderer: React.FC = () => {
+const ActionsRenderer = () => {
     return (
         <div className = { styles.actionRenderer }>
             <button className = { styles.actionButton }>
@@ -64,7 +54,7 @@ const ActionsRenderer: React.FC = () => {
     )
 }
 
-const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string; lockVisible?: boolean, initialHide?: boolean })[] = [
+const COLUMN_DEFINITIONS = [
     { field: 'name', headerName: 'Name', cellRenderer: NameRenderer, flex: 2, resizable: true, sortable: true, lockVisible: true },
     { field: 'email', headerName: 'Email', flex: 3, resizable: true, sortable: true, lockVisible: true },
     { field: 'organizationRole', headerName: 'Organization Role', cellRenderer: OrganizationRoleRenderer, flex: 2, resizable: true, sortable: true, lockVisible: true },
@@ -73,19 +63,19 @@ const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: string; lockVis
     { field: 'actions', headerName: 'Actions', cellRenderer: ActionsRenderer, flex: 1, resizable: false, sortable: false, lockVisible: true },
 ]
 
-const Members: React.FC = () => {
-    const gridRef = useRef<AgGridReact>(null);
-    const [gridApi, setGridApi] = useState<GridApi | null>(null);
+const Members = () => {
+    const gridRef = useRef(null);
+    const [gridApi, setGridApi] = useState(null);
     const pageSizes = useMemo(() => [10, 20, 30, 40, 50], []);
 
     const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
-    const columnButtonRef = useRef<HTMLDivElement>(null);
+    const columnButtonRef = useRef(null);
 
-    const [rowData, setRowData] = useState<Member[]>([]);
+    const [rowData, setRowData] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // 페이지네이션 상태 추가
-    const [paginationMeta, setPaginationMeta] = useState<{ page: number; limit: number; totalItems: number; totalPages: number; } | null>(null);
+    const [paginationMeta, setPaginationMeta] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(pageSizes[0]);
 
@@ -107,7 +97,7 @@ const Members: React.FC = () => {
     }, [currentPage, limit]);
 
     const [columnVisibility, setColumnVisibility] = useState(() =>{
-        const initialVisibility: { [key: string]: boolean } = {};
+        const initialVisibility = {};
         COLUMN_DEFINITIONS.forEach(col => {
             if (col.field) {
                 initialVisibility[col.field] = !col.initialHide;
@@ -116,7 +106,7 @@ const Members: React.FC = () => {
         return initialVisibility;
     });
 
-    const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
+    const toggleColumnVisibility = (field) => {
         const columnDef = COLUMN_DEFINITIONS.find(c => c.field === field);
         if (columnDef?.lockVisible) {
             return;
@@ -124,11 +114,11 @@ const Members: React.FC = () => {
          setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
      };
 
-    const toggleAllColumns = (select: boolean) => {
+    const toggleAllColumns = (select) => {
         const newVisibility = { ...columnVisibility };
         COLUMN_DEFINITIONS.forEach(col => {
             if (!col.lockVisible) {
-                newVisibility[col.field as keyof typeof columnVisibility] = select;
+                newVisibility[col.field] = select;
             }
         });
         setColumnVisibility(newVisibility);
@@ -148,13 +138,13 @@ const Members: React.FC = () => {
                 acc[col.field] = col.headerName;
             }
             return acc;
-        }, {} as Record<string, string>),
+        }, {}),
     []);
 
-    const columnDefs = useMemo((): ColDef[] =>
+    const columnDefs = useMemo(() =>
         COLUMN_DEFINITIONS.map(col => ({
             ...col,
-            hide: !columnVisibility[col.field as keyof typeof columnVisibility],
+            hide: !columnVisibility[col.field],
         })),
     [columnVisibility]);
 
@@ -165,7 +155,7 @@ const Members: React.FC = () => {
         paginationLast: () => <ChevronsRight size={18} />,
     };
 
-    const onGridReady = useCallback((event: GridReadyEvent) => {
+    const onGridReady = useCallback((event) => {
          setGridApi(event.api);
      }, []);
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import SettingsSidebar from '../../layouts/SettingsSidebar.tsx';
+import SettingsSidebar from '../../layouts/SettingsSidebar';
 import styles from './layout/SettingsPage.module.css';
 
 const SettingsPage = () => {
