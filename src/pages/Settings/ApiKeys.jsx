@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { Info, Plus, Clipboard, Trash2, Copy, X } from 'lucide-react';
-import { getApiKeys, createApiKey, deleteApiKey } from '../../services/api';
+import { getApiKeys, createApiKey, deleteApiKey } from '../../api/api';
 import commonStyles from "./layout/SettingsCommon.module.css"
 import apiKeyStyles from "./layout/Apikeys.module.css";
 import { getCodeSnippets } from './codeSnippets'

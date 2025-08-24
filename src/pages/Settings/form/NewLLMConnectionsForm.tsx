@@ -1,12 +1,23 @@
 import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
-import formStyles from './Form.module.css' // 공통 스타일
+import { Plus, Trash2, Eye } from 'lucide-react';
+import formStyles from './Form.module.css'; // 공통 스타일
 import styles from './NewLLMConnectionForm.module.css'; // 전용 스타일
-import ToggleSwitch from "./ToggleSwitch.jsx";
+
+// 데이터 타입 정의
+interface Header {
+    id: string;
+    key: string;
+    value: string;
+}
+
+interface CustomModel {
+    id: string;
+    name: string;
+}
 
 interface LLMConnectionData {
-    adapter: string;
     provider: string;
+    adapter: string;
     apiKey: string;
     baseUrl?: string;
     extraHeaders?: Record<string, string>;
@@ -15,61 +26,43 @@ interface LLMConnectionData {
 }
 
 interface NewLLMConnectionFormProps {
+    onClose: () => void;
     onSave: (connection: LLMConnectionData) => void;
 }
 
-interface ListItem {
-    id: string;
-    [key: string]: string;
-}
-
-const NewLLMConnectionForm = ({ onSave }: NewLLMConnectionFormProps) => {
-    //기본 설정 상태
-    const [adapter, setAdapter] = useState('openai');
+const NewLLMConnectionForm: React.FC<NewLLMConnectionFormProps> = ({ onClose, onSave }) => {
+    // 기본 설정 상태
     const [provider, setProvider] = useState('');
+    const [adapter, setAdapter] = useState('openai');
     const [apiKey, setApiKey] = useState('');
+    const [showApiKey, setShowApiKey] = useState(false);
 
-    //고급 설정 상태
+    // 고급 설정 상태
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [baseUrl, setBaseUrl] = useState('');
-    const [extraHeaders, setExtraHeaders] = useState<ListItem[]>([]);
+    const [extraHeaders, setExtraHeaders] = useState<Header[]>([]);
     const [enableDefaultModels, setEnableDefaultModels] = useState(true);
-    const [customModels, setCustomModels] = useState<ListItem[]>([]);
+    const [customModels, setCustomModels] = useState<CustomModel[]>([]);
 
-    // 동적 리스트 아이템 추가/삭제/수정 핸들러
-    const handleListChange = (
-        list: ListItem[],
-        setList: React.Dispatch<React.SetStateAction<ListItem[]>>,
-        id: string,
-        field: string,
-        value: string
-    ) => {
-        setList(list.map(item => item.id === id ? { ...item, [field]: value } : item));
-    };
+    // --- 핸들러 함수들 ---
 
-    const addListItem = (setList: React.Dispatch<React.SetStateAction<ListItem[]>>, newItem: ListItem) => {
-        setList(prev => [...prev, newItem]);
-    };
-
-    const removeListItem = (list: ListItem[], setList: React.Dispatch<React.SetStateAction<ListItem[]>>, id: string) => {
-        setList(list.filter(item => item.id !== id));
-    };
-
-    const handleSave = () => {
+    const handleSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
         if (!provider || !apiKey) {
             alert('Provider name과 API Key는 필수 항목입니다.');
             return;
         }
+
         const connectionData: LLMConnectionData = {
             adapter,
             provider,
             apiKey,
         };
-        
+
         if (showAdvanced) {
-            connectionData.baseUrl = baseUrl;
+            connectionData.baseUrl = baseUrl || undefined; // 빈 문자열이면 undefined로
             connectionData.enableDefaultModels = enableDefaultModels;
-            
+
             connectionData.extraHeaders = extraHeaders
                 .filter(h => h.key && h.value)
                 .reduce((acc, curr) => {
@@ -83,121 +76,162 @@ const NewLLMConnectionForm = ({ onSave }: NewLLMConnectionFormProps) => {
         }
 
         onSave(connectionData);
-    }
+    };
+
+    // Extra Headers 리스트 핸들러
+    const handleHeaderChange = (id: string, field: 'key' | 'value', value: string) => {
+        setExtraHeaders(extraHeaders.map(item => item.id === id ? { ...item, [field]: value } : item));
+    };
+    const addHeader = () => {
+        setExtraHeaders(prev => [...prev, { id: crypto.randomUUID(), key: '', value: '' }]);
+    };
+    const removeHeader = (id: string) => {
+        setExtraHeaders(extraHeaders.filter(item => item.id !== id));
+    };
+
+    // Custom Models 리스트 핸들러
+    const handleCustomModelChange = (id: string, value: string) => {
+        setCustomModels(customModels.map(item => item.id === id ? { ...item, name: value } : item));
+    };
+    const addCustomModel = () => {
+        setCustomModels(prev => [...prev, { id: crypto.randomUUID(), name: '' }]);
+    };
+    const removeCustomModel = (id: string) => {
+        setCustomModels(customModels.filter(item => item.id !== id));
+    };
 
     return (
-        <div className = { formStyles.formWrapper }>
-            { /* --- 기본 설정 --- */ }
-            <div className = { formStyles.formGroup }>
-                <label htmlFor = "llm-adapter" className = { formStyles.formLabel }>LLM adapter</label>
-                <p className = { formStyles.description }>Schema that is accepted at that provider endpoint.</p>
-                <select id = "llm-adapter" value = { adapter } onChange = { (e) => setAdapter(e.target.value) } className = { styles.select }>
-                    <option value = "openai">openai</option>
-                    <option value = "anthropic">anthropic</option>
-                    <option value = "azure">azure</option>
-                    <option value = "bedrock">bedrock</option>
-                    <option value = "google-vertex-ai">google-vertex-ai</option>
-                    <option value = "google-ai-studio">google-ai-studio</option>
-                    <option value = "custom">custom</option>
-                </select>
-            </div>
-
-            <div className = { formStyles.formGroup }>
-                <label htmlFor = "provider-name" className = { formStyles.formLabel }>Provider name</label>
-                <p className = { formStyles.description }>Key to identify the connection within Langfuse.</p>
-                <input
-                    id = "provider-name"
-                    type = "text"
-                    value = { provider }
-                    onChange = { (e) => setProvider(e.target.value) }
-                    placeholder = "e.g. openai"
-                    className = { formStyles.formInput }
-                />
-            </div>
-
-            <div className = { formStyles.formGroup }>
-                <label htmlFor = "api-key" className = { formStyles.formLabel }>API Key</label>
-                <p className = { formStyles.description }>Your API keys are stored encrypted on our servers.</p>
-                <input
-                    id = "api-key"
-                    type = "password"
-                    value = { apiKey }
-                    onChange = { (e) => setApiKey(e.target.value) }
-                    placeholder = "sk-..."
-                    className = { formStyles.formInput }
-                />
-            </div>
-
-            { /* --- 고급 설정 토글 --- */ }
-            <div className = { styles.advancedToggle } onClick = { () => setShowAdvanced(!showAdvanced) }>
-                Show advanced settings { showAdvanced ? '▲' : '▼' }
-            </div>
-
-            { /* --- 고급 설정 섹션 --- */}
-            { showAdvanced && (
-                <div className = { styles.advancedSection }>
-                    <div className = { styles.divider }></div>
-
-                    { /* API Base URL */ }
-                    <div className = { formStyles.formGroup }>
-                        <label htmlFor = "base-url" className = { formStyles.formLabel }>Base URL (optional)</label>
-                        <p className = { formStyles.description}>
-                            Leave blank to use the default base URL for the given LLM adapter. OpenAI default: https://api.openai.com/v1
-                        </p>
+        <div className={formStyles.formContainer}>
+            <form onSubmit={handleSubmit}>
+                <div className={formStyles.formBody}>
+                    {/* Provider name */}
+                    <div className={formStyles.formGroup}>
+                        <label htmlFor="providerName" className={formStyles.formLabel}>Provider name</label>
+                        <p className={formStyles.description}>Name to identify the key within Langfuse.</p>
                         <input
-                            id = "base-url"
-                            type = "text"
-                            value = { baseUrl }
-                            onChange = { (e) => setBaseUrl(e.target.value) }
-                            placeholder = "https://api.openai.com/v1"
-                            className = { formStyles.formInput }
+                            type="text"
+                            id="providerName"
+                            value={provider}
+                            onChange={(e) => setProvider(e.target.value)}
+                            className={formStyles.formInput}
+                            placeholder="e.g. openai-production"
+                            required
                         />
                     </div>
 
-                    { /* Extra Headers */ }
-                    <div className = { formStyles.formGroup }>
-                        <label className = { formStyles.formLabel }>Extra Headers</label>
-                        <p className = { formStyles.description }>Optional additional HTTP headers to include with requests towards LLM provider. All header values stored encrypted on our servers.</p>
-                        { extraHeaders.map(header => (
-                            <div key = { header.id } className = { styles.listItem }>
-                                <input type = "text" placeholder = "Key" value = { header.key } onChange = { e => handleListChange(extraHeaders, setExtraHeaders, header.id, 'key', e.target.value) } className = { styles.listInput } />
-                                <input type = "text" placeholder = "Value" value = { header.value } onChange = { e => handleListChange(extraHeaders, setExtraHeaders, header.id, 'value', e.target.value) } className = { styles.listInput } />
-                                <button onClick = { () => removeListItem(extraHeaders, setExtraHeaders, header.id) } className = { styles.deleteButton }><X size = { 16 } /></button>
-                            </div>
-                        ))}
-                        <button onClick = { () => addListItem(setExtraHeaders, { id: crypto.randomUUID(), key: '', value: '' })} className = { styles.addButton} ><Plus size = { 16 } /> Add Header</button>
+                    {/* LLM adapter */}
+                    <div className={formStyles.formGroup}>
+                        <label htmlFor="llmAdapter" className={formStyles.formLabel}>LLM adapter</label>
+                        <p className={formStyles.description}>Schema that is accepted at that provider endpoint.</p>
+                        <select
+                            id="llmAdapter"
+                            value={adapter}
+                            onChange={(e) => setAdapter(e.target.value)}
+                            className={formStyles.formSelect}
+                        >
+                            <option value="openai">openai</option>
+                            <option value="anthropic">anthropic</option>
+                            <option value="azure">azure</option>
+                            <option value="bedrock">bedrock</option>
+                            <option value="google-vertex-ai">google-vertex-ai</option>
+                            <option value="google-ai-studio">google-ai-studio</option>
+                            <option value="custom">custom</option>
+                        </select>
                     </div>
 
-                    { /* Enable default models */ }
-                    <div className = { `${ formStyles.formGroup } ${ styles.toggleGroup }` }>
-                        <div>
-                            <label className = { formStyles.formLabel }>Enable default models</label>
-                            <p className = { formStyles.description }>Default models for the selected adapter will be available in Langfuse features.</p>
+                    {/* API Key */}
+                    <div className={formStyles.formGroup}>
+                        <label htmlFor="apiKey" className={formStyles.formLabel}>API Key</label>
+                        <p className={formStyles.description}>Your API keys are stored encrypted in your database.</p>
+                        <div className={styles.inputWithIcon}>
+                            <input
+                                type={showApiKey ? "text" : "password"}
+                                id="apiKey"
+                                value={apiKey}
+                                onChange={(e) => setApiKey(e.target.value)}
+                                className={formStyles.formInput}
+                                required
+                            />
+                            <button type="button" onClick={() => setShowApiKey(!showApiKey)} className={styles.iconButton}>
+                                <Eye size={16} />
+                            </button>
                         </div>
-                        <ToggleSwitch checked = { enableDefaultModels } onChange = { setEnableDefaultModels } />
                     </div>
 
-                    { /* Custom models */ }
-                    <div className = { formStyles.formGroup }>
-                        <label className = { formStyles.formLabel }>Custom models</label>
-                        <p className = { formStyles.description }>Custom model names accepted by given endpoint.</p>
-                        { customModels.map(model => (
-                            <div key = { model.id } className = { styles.listItem }>
-                                <input type = "text" placeholder = "Model name" value = { model.name } onChange = { e => handleListChange(customModels, setCustomModels, model.id, 'name', e.target.value) } className = { styles.listInputFull} />
-                                <button onClick = { () => removeListItem(customModels, setCustomModels, model.id) } className = { styles.deleteButton }><X size = { 16 } /></button>
+                    {/* --- 고급 설정 토글 --- */}
+                    <div className={styles.advancedToggle} onClick={() => setShowAdvanced(!showAdvanced)}>
+                        {showAdvanced ? 'Hide advanced settings ▲' : 'Show advanced settings ▼'}
+                    </div>
+
+                    {/* --- 고급 설정 섹션 --- */}
+                    {showAdvanced && (
+                        <div className={styles.advancedSection}>
+                            {/* API Base URL */}
+                            <div className={formStyles.formGroup}>
+                                <label htmlFor="baseUrl" className={formStyles.formLabel}>API Base URL</label>
+                                <p className={formStyles.description}>Leave blank to use the default base URL for the given LLM adapter. OpenAI default: https://api.openai.com/v1</p>
+                                <input
+                                    type="text"
+                                    id="baseUrl"
+                                    value={baseUrl}
+                                    onChange={(e) => setBaseUrl(e.target.value)}
+                                    className={formStyles.formInput}
+                                    placeholder="https://api.openai.com/v1"
+                                />
                             </div>
-                        ))}
-                        <button onClick = { () => addListItem(setCustomModels, { id: crypto.randomUUID(), name: ''})} className = { styles.addButton }><Plus size = { 16 } /> Add custom model name</button>
-                    </div>
-                </div>
-            )}
 
-            { /* --- Footer --- */}
-            <div className = { formStyles.formFooter }>
-                <button onClick = { handleSave } className = { styles.createButton }>
-                    Create connection
-                </button>
-            </div>
+                            {/* Extra Headers */}
+                            <div className={formStyles.formGroup}>
+                                <label className={formStyles.formLabel}>Extra Headers</label>
+                                <p className={formStyles.description}>Optional additional HTTP headers to include with requests towards LLM provider. All header values stored encrypted in your database.</p>
+                                {extraHeaders.map(header => (
+                                    <div key={header.id} className={styles.listItem}>
+                                        <input type="text" placeholder="Header" value={header.key} onChange={e => handleHeaderChange(header.id, 'key', e.target.value)} className={`${formStyles.formInput} ${styles.listInput}`} />
+                                        <input type="text" placeholder="Value" value={header.value} onChange={e => handleHeaderChange(header.id, 'value', e.target.value)} className={`${formStyles.formInput} ${styles.listInput}`} />
+                                        <button type="button" onClick={() => removeHeader(header.id)} className={styles.deleteButton}><Trash2 size={16} /></button>
+                                    </div>
+                                ))}
+                                <button type="button" onClick={addHeader} className={styles.addButton}><Plus size={16} /> Add Header</button>
+                            </div>
+
+                            {/* Enable default models */}
+                            <div className={`${formStyles.formGroup} ${styles.toggleGroup}`}>
+                                <div>
+                                    <label className={formStyles.formLabel}>Enable default models</label>
+                                    <p className={formStyles.description}>Default models for the selected adapter will be available in Langfuse features.</p>
+                                </div>
+                                <label className={styles.switch}>
+                                    <input
+                                        type="checkbox"
+                                        checked={enableDefaultModels}
+                                        onChange={(e) => setEnableDefaultModels(e.target.checked)}
+                                    />
+                                    <span className={styles.slider}></span>
+                                </label>
+                            </div>
+
+                            {/* Custom models */}
+                            <div className={formStyles.formGroup}>
+                                <label className={formStyles.formLabel}>Custom models</label>
+                                <p className={formStyles.description}>Custom model names accepted by given endpoint.</p>
+                                {customModels.map(model => (
+                                    <div key={model.id} className={styles.listItem}>
+                                        <input type="text" placeholder="Model name" value={model.name} onChange={e => handleCustomModelChange(model.id, e.target.value)} className={`${formStyles.formInput} ${styles.listInputFull}`} />
+                                        <button type="button" onClick={() => removeCustomModel(model.id)} className={styles.deleteButton}><Trash2 size={16} /></button>
+                                    </div>
+                                ))}
+                                <button type="button" onClick={addCustomModel} className={styles.addButton}><Plus size={16} /> Add custom model name</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <footer className={formStyles.formFooter}>
+                    <button type="submit" className={styles.createButton}>
+                        Create connection
+                    </button>
+                </footer>
+            </form>
         </div>
     );
 };

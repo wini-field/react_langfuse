@@ -6,11 +6,11 @@ import { Plus, Archive, ArchiveRestore, ChevronLeft, ChevronRight, ChevronsLeft,
 import commonStyles from './layout/SettingsCommon.module.css'
 import gridStyles from './layout/SettingsGrid.module.css'
 import CustomPagination from './CustomPagination';
-import ColumnMenu from "../../layouts/ColumnMenu.tsx";
+import ColumnMenu from "../../layouts/ColumnMenu";
 import Modal from '../../components/Modal/Modal'
 import NewScoreForm from './form/NewScoreForm'
 import { publicKey, secretKey, baseUrl } from '../../lib/langfuse'
-import { fetchScoreConfigsAPI, createScoreConfigAPI, updateScoreConfigStatusAPI } from '../../services/scoreApi'
+import { fetchScoreConfigsAPI, createScoreConfigAPI, updateScoreConfigStatusAPI } from '../../api/scoreApi'
 
 // Basic Auth를 위한 Base64 인코딩
 const base64Credentials =
