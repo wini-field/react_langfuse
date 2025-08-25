@@ -15,7 +15,8 @@ interface CustomModel {
     name: string;
 }
 
-interface LLMConnectionData {
+// 부모 컴포넌트로 전달할 데이터 타입 export
+export interface LLMConnectionData {
     provider: string;
     adapter: string;
     apiKey: string;
@@ -60,7 +61,7 @@ const NewLLMConnectionForm: React.FC<NewLLMConnectionFormProps> = ({ onClose, on
         };
 
         if (showAdvanced) {
-            connectionData.baseUrl = baseUrl || undefined; // 빈 문자열이면 undefined로
+            connectionData.baseUrl = baseUrl || undefined;
             connectionData.enableDefaultModels = enableDefaultModels;
 
             connectionData.extraHeaders = extraHeaders

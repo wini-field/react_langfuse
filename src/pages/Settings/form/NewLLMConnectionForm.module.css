@@ -1,172 +1,335 @@
-.advancedToggle {
-    color: #a0a0a0;
-    cursor: pointer;
-    font-size: 13px;
-    user-select: none;
-    margin-bottom: 16px;
+/* ====== 컨테이너 변수 ====== */
+.body {
+  --ctrl-h: 36px;
+  --radius: 6px;
 }
 
-.advancedToggle:hover {
-    color: #e0e0e0;
+/* 공통 박스 계산 통일 */
+.input,
+.comboBtn,
+.iconBtn,
+.fullBtn {
+  box-sizing: border-box;
 }
 
-.advancedSection {
-    border-top: 1px solid #444;
-    padding-top: 24px;
-    animation: fadeIn 0.3s ease-out;
+/* ===== 레이아웃/타이포 (px-6 py-4 gap-4) ===== */
+.body {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 24px;
+  gap: 16px;
+  overflow-y: auto;
 }
 
-.listItem {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 8px;
+.group {
+  margin-bottom: 8px;
 }
 
-.listInput {
-    flex: 1;
+.labelSm {
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 600;
+  color: var(--foreground, #e6edf3);
 }
 
-.listInputFull {
-    flex-grow: 1;
+.descSm {
+  font-size: 14px;
+  color: var(--muted-foreground, #A8B3CF);
 }
 
-/* --- <<< START: 버튼 스타일 수정 >>> --- */
-.addButton {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 8px 14px;
-    margin-top: 8px;
-    background-color: #2d3748; /* 어두운 배경색 */
-    color: #e2e8f0; /* 밝은 글자색 */
-    border: 1px solid #4a5568; /* 테두리 */
-    border-radius: 6px; /* 둥근 모서리 */
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: background-color 0.2s ease-in-out;
+/* ===== 인풋 ===== */
+.input {
+  height: var(--ctrl-h);
+  min-width: 56px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(148, 163, 184, .35);
+  padding: 6px 10px;
+  font-size: 14px;
+  background: var(--background, #0b1220);
+  color: var(--foreground, #e6edf3);
+  margin: 0;
+  /* 행 정렬 깨는 여백 방지 */
 }
 
-.addButton:hover {
-    background-color: #4a5568; /* 호버 시 배경색 변경 */
-    color: #fff;
-}
-/* --- <<< END: 버튼 스타일 수정 >>> --- */
-
-.deleteButton {
-    background: none;
-    border: none;
-    color: #a0a0a0;
-    cursor: pointer;
-    padding: 0 5px;
-    display: flex;
-    align-items: center;
+.input::placeholder {
+  color: var(--muted-foreground, #9AA4B2);
 }
 
-.deleteButton:hover {
-    color: #ff5555;
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
 }
 
-.toggleGroup {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+/* 비밀번호 토글 */
+.inputPwd {
+  padding-right: 40px;
 }
 
-.createButton {
-    width: 100%;
-    justify-content: center;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 24px;
-    padding: 10px 14px;
-    background-color: #c2d4e5;
-    color: black;
-    border: 1px solid #555;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-/* --- 추가된 스타일 --- */
-
-/* API Key Input with Icon */
-.inputWithIcon {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.inputWithIcon input {
-    padding-right: 40px;
-}
-
-.iconButton {
-    position: absolute;
-    right: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #020817;
-}
-
-.iconButton:hover {
-    background-color: #1e293b;
-}
-
-/* Toggle Switch */
-.switch {
+.passwordWrap {
   position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 24px;
 }
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
+.eyeBtn {
   position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 0;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #555;
-  transition: .4s;
-  border-radius: 34px;
 }
 
-.slider:before {
+.eyeIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--muted-foreground, #9AA4B2);
+}
+
+/* ===== 콤보박스 ===== */
+.comboWrap {
+  position: relative;
+}
+
+.comboBtn {
+  display: flex;
+  height: var(--ctrl-h);
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(148, 163, 184, .35);
+  background: var(--background, #0b1220);
+  padding: 6px 12px;
+  font-size: 14px;
+  color: var(--muted-foreground, #A8B3CF);
+  /* 검정으로 보이지 않게 */
+  margin: 0;
+  /* 여백 제거 */
+}
+
+.comboText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: inherit;
+}
+
+.comboIcon {
+  width: 16px;
+  height: 16px;
+  opacity: .5;
+  color: var(--foreground, #e6edf3);
+}
+
+.visuallyHidden {
+  position: absolute !important;
+  border: 0 !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+}
+
+/* 콤보 메뉴 */
+.comboMenu {
   position: absolute;
-  content: "";
+  z-index: 50;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  background: var(--background, #0b1220);
+  border: 1px solid rgba(148, 163, 184, .35);
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .35);
+  padding: 4px;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.comboItem {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--foreground, #e6edf3);
+}
+
+.comboItem:hover {
+  background: rgba(148, 163, 184, .12);
+}
+
+.comboItemActive {
+  background: rgba(59, 130, 246, .18);
+}
+
+/* ===== 행(Extra Headers / Custom models) — 일자 보장 ===== */
+.listItem {
+  display: grid;
+  grid-template-columns: 1fr 1fr 36px;
+  /* [Header name][Header value][Trash] */
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.modelRow {
+  display: grid;
+  grid-template-columns: 1fr 36px;
+  /* [Model][Trash] */
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* 행 내부 자식들의 margin 완전 제거(핵심) */
+.listItem>*,
+.modelRow>* {
+  margin: 0 !important;
+}
+
+/* 인풋 폭 */
+.listInput {
+  width: 100%;
+}
+
+/* ===== 삭제 버튼 36×36 ===== */
+.iconBtn {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  line-height: 0;
+  border-radius: var(--radius);
+  border: 1px solid rgba(148, 163, 184, .35);
+  background: var(--background, #0b1220);
+  color: var(--muted-foreground, #A8B3CF);
+  cursor: pointer;
+  margin: 0;
+  /* 여백 제거 */
+}
+
+.iconBtn:hover {
+  background: rgba(148, 163, 184, .12);
+  color: var(--foreground, #e6edf3);
+}
+
+.trashIcon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* ===== “Add …” 풀폭 버튼 ===== */
+.fullBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: var(--ctrl-h);
+  border-radius: var(--radius);
+  border: 1px solid rgba(148, 163, 184, .35);
+  background: rgba(148, 163, 184, .12);
+  color: var(--muted-foreground, #A8B3CF);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+  margin-top: 8px;
+  padding: 0 12px;
+}
+
+.fullBtn:hover {
+  background: rgba(148, 163, 184, .20);
+  color: var(--foreground, #e6edf3);
+}
+
+.btnIcon {
+  margin-right: 6px;
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* ===== 토글 ===== */
+.toggleGroup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.toggleGroup :global(.switch) {
+  width: 36px;
+  height: 20px;
+}
+
+.toggleGroup :global(.slider) {
+  background: rgba(148, 163, 184, .45);
+}
+
+.toggleGroup :global(input:checked + .slider) {
+  background: rgb(99, 102, 241);
+}
+
+.toggleGroup :global(.slider:before) {
   height: 16px;
   width: 16px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
+  left: 2px;
+  bottom: 2px;
+  background: var(--background, #0b1220);
 }
 
-input:checked + .slider {
-  background-color: #4A90E2;
-}
-
-input:checked + .slider:before {
+.toggleGroup :global(input:checked + .slider:before) {
   transform: translateX(16px);
 }
 
+.toggleGroup :global(.slider.round) {
+  border-radius: 9999px;
+}
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+.toggleGroup :global(.slider.round:before) {
+  border-radius: 9999px;
+}
+
+/* ===== 푸터 ===== */
+.footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: var(--background, #0b1220);
+  padding: 24px;
+  border-top: 1px solid rgba(148, 163, 184, .25);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.primaryButton {
+  width: 100%;
+  height: var(--ctrl-h);
+  border-radius: var(--radius);
+  border: 1px solid rgba(99, 102, 241, .6);
+  background: rgb(99, 102, 241);
+  color: var(--primary-foreground, #fff);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+.primaryButton:hover {
+  background: rgba(99, 102, 241, .9);
+}
+
+.primaryButton:disabled {
+  opacity: .6;
+  cursor: not-allowed;
 }
