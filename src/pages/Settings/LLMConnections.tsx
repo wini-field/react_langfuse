@@ -4,14 +4,30 @@ import NewLLMConnectionForm, { LLMConnectionData } from "./form/NewLLMConnection
 import styles from "./layout/SettingsCommon.module.css";
 import llmstyles from './layout/LLMConnections.module.css';
 import { Plus, Pencil, Trash2 } from "lucide-react";
+// ---▼ 인증 정보 가져오기 ▼---
+import { publicKey, secretKey } from '../../lib/langfuse';
+// ---▼ 새로 만든 API 모듈 import ▼---
+import { getLlmConnections, saveLlmConnection, deleteLlmConnection } from '../../api/llmApi';
+import DeleteForm from './form/DeleteForm'
+
+// ---▼ Basic Auth를 위한 Base64 인코딩 ▼---
+const base64Credentials =
+  publicKey && secretKey
+    ? btoa(`${publicKey}:${secretKey}`)
+    : '';
 
 // API 스키마에 맞춰 인터페이스 업데이트
 interface Connection {
     id: string;
     provider: string;
     adapter: string;
-    baseUrl: string | null;
+    baseURL: string | null; // API 스키마에서는 baseURL로 되어있음
     displaySecretKey: string;
+    customModels: string[];
+    withDefaultModels: boolean;
+    extraHeaderKeys: string[];
+    createdAt: string;
+    updatedAt: string;
 }
 
 const LLMConnections = () => {
@@ -22,82 +38,72 @@ const LLMConnections = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // API 호출 함수 (페이지네이션 제거)
+    const [currentPage, setCurrentPage] = useState(1);
+    const [limit, setLimit] = useState(10); // 한 페이지에 10개씩
+
+    // ---▼ 수정할 Connection을 저장할 상태 추가 ▼---
+    const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
+
+    // ---▼ 삭제 확인 모달 상태 추가 ▼---
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [connectionToDelete, setConnectionToDelete] = useState<Connection | null>(null);
+
     const fetchConnections = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
-            // 페이지네이션 파라미터 제거
-            const response = await fetch(`/api/public/llm-connections`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const result = await response.json();
+            // ---▼ API 모듈 함수 호출로 변경 ▼---
+            const result = await getLlmConnections(currentPage, limit, base64Credentials);
             setConnections(result.data);
-            // setPaginationMeta 제거
         } catch (e) {
             console.error("LLM 연결 목록을 가져오는 데 실패했습니다:", e);
             setError('데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.');
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [currentPage, limit]);
 
-    // 컴포넌트 마운트 시 데이터 fetching
     useEffect(() => {
         fetchConnections();
     }, [fetchConnections]);
 
-    // 저장 핸들러: API POST 요청으로 수정
-    const handleSaveConnection = async (newConnectionData: LLMConnectionData) => {
+    // ---▼ 수정 버튼 클릭 시 호출될 함수 ▼---
+    const handleEditConnection = (connection: Connection) => {
+        setEditingConnection(connection);
+        setIsModalOpen(true);
+    };
+
+    // ---▼ 저장/수정 핸들러 통합 ▼---
+    const handleSaveConnection = async (connectionData: LLMConnectionData) => {
         try {
-            const response = await fetch('/api/public/llm-connections', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    provider: newConnectionData.provider,
-                    adapter: newConnectionData.adapter,
-                    secretKey: newConnectionData.apiKey,
-                    baseURL: newConnectionData.baseUrl || null,
-                    withDefaultModels: newConnectionData.enableDefaultModels,
-                    customModels: newConnectionData.customModels,
-                    extraHeaders: newConnectionData.extraHeaders,
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '저장에 실패했습니다.');
-            }
-
+            // ---▼ API 모듈 함수 호출로 변경 ▼---
+            await saveLlmConnection(connectionData, base64Credentials);
             setIsModalOpen(false);
-            fetchConnections(); // 성공 시 목록 새로고침
+            setEditingConnection(null);
+            fetchConnections();
         } catch (e) {
-            console.error("LLM 연결 저장에 실패했습니다:", e);
-            alert(`저장 중 오류가 발생했습니다: ${e instanceof Error ? e.message : String(e)}`);
+            console.error(`LLM 연결 저장/업데이트에 실패했습니다:`, e);
+            alert(`요청 중 오류가 발생했습니다: ${e instanceof Error ? e.message : String(e)}`);
         }
     };
 
-    // 삭제 핸들러
-    const handleDeleteConnection = async (id: string) => {
-        if (!window.confirm('정말로 이 연결을 삭제하시겠습니까?')) {
-            return;
-        }
-
+    const handleDeleteClick = (connection: Connection) => {
+        setConnectionToDelete(connection);
+        setIsDeleteModalOpen(true);
+    };
+    
+    // ---▼ 실제 삭제 로직 ▼---
+    const handleConfirmDelete = async () => {
+        if (!connectionToDelete) return;
         try {
-            const response = await fetch(`/api/public/llm-connections/${id}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || '삭제에 실패했습니다.');
-            }
-
-            fetchConnections(); // 삭제 성공 시 목록 새로고침
+            // ---▼ id 대신 provider를 넘겨주도록 수정 ▼---
+            await deleteLlmConnection(connectionToDelete.provider, base64Credentials);
+            fetchConnections();
         } catch (e) {
-            console.error(`${id} 연결 삭제에 실패했습니다:`, e);
-            alert(`삭제 중 오류가 발생했습니다: ${e instanceof Error ? e.message : String(e)}`);
+             alert(`삭제 중 오류가 발생했습니다: ${e instanceof Error ? e.message : String(e)}`);
+        } finally {
+            setIsDeleteModalOpen(false);
+            setConnectionToDelete(null);
         }
     };
 
@@ -127,11 +133,16 @@ const LLMConnections = () => {
                     <div key = { conn.id } className = { styles.keyRow }>
                         <span>{ conn.provider }</span>
                         <span>{ conn.adapter }</span>
-                        <span>{ conn.baseUrl || 'default '}</span>
+                        <span>{ conn.baseURL || 'default '}</span>
                         <span>{ conn.displaySecretKey }</span>
                         <div className={llmstyles.actions}>
-                            <button title="Edit" disabled><Pencil size={16} />️</button>
-                            <button title="Delete" onClick={() => handleDeleteConnection(conn.id)}><Trash2 size={16} /></button>
+                            {/* ---▼ 수정 버튼 활성화 및 핸들러 연결 ▼--- */}
+                            <button title="Edit" onClick={() => handleEditConnection(conn)}>
+                                <Pencil size={16} />
+                            </button>
+                            <button title="Delete" onClick={() => handleDeleteClick(conn)}>
+                                <Trash2 size={16} />
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -151,6 +162,21 @@ const LLMConnections = () => {
                     onClose={() => setIsModalOpen(false)}
                 />
             </Modal>
+
+            {/* ---▼ 삭제 확인 모달 추가 ▼--- */}
+            <DeleteForm
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                title="Delete LLM Connection"
+                message={
+                    <>
+                        Are you sure you want to delete this connection? This action cannot be undone.
+                    </>
+                }
+                deleteButtonText="Permanently delete"
+                deleteButtonVariant="danger"
+            />
         </div>
     );
 };

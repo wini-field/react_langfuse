@@ -177,7 +177,7 @@ const NewLLMConnectionForm: React.FC<NewLLMConnectionFormProps> = ({ onClose, on
                                     value={baseUrl}
                                     onChange={(e) => setBaseUrl(e.target.value)}
                                     className={formStyles.formInput}
-                                    placeholder="https://api.openai.com/v1"
+                                    placeholder="default" /* GIF에 맞춰 placeholder 수정 */
                                 />
                             </div>
 
