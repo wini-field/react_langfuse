@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Trash2, Plus } from 'lucide-react'
 import commonStyles from '../layout/SettingsCommon.module.css';
-import formStyles from './Form.module.css';
+import formStyles from '../form/Form.module.css';
 
 const NewScoreForm = ({ onClose, onSave }) => {
     const [name, setName] = useState('');

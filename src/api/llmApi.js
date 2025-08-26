@@ -1,7 +1,5 @@
-import { LLMConnectionData } from '../pages/Settings/form/NewLLMConnectionsForm';
-
 // ---▼ 에러를 더 스마트하게 처리하는 헬퍼 함수 ▼---
-const handleApiResponse = async (response: Response) => {
+const handleApiResponse = async (response) => {
     if (!response.ok) {
         const contentType = response.headers.get('content-type');
         // 응답이 JSON 형식이면, JSON 안의 에러 메시지를 사용
@@ -21,7 +19,7 @@ const handleApiResponse = async (response: Response) => {
 };
 
 // GET: LLM Connection 목록 가져오기
-export const getLlmConnections = async (page: number, limit: number, base64Credentials: string) => {
+export const getLlmConnections = async (page, limit, base64Credentials) => {
     const response = await fetch(`/api/public/llm-connections?page=${page}&limit=${limit}`, {
         headers: {
             'Authorization': `Basic ${base64Credentials}`
@@ -34,7 +32,7 @@ export const getLlmConnections = async (page: number, limit: number, base64Crede
 };
 
 // PUT: LLM Connection 생성 또는 수정 (Upsert)
-export const saveLlmConnection = async (connectionData: LLMConnectionData, base64Credentials: string) => {
+export const saveLlmConnection = async (connectionData, base64Credentials) => {
     const response = await fetch('/api/public/llm-connections', {
         method: 'PUT',
         headers: {
@@ -55,7 +53,7 @@ export const saveLlmConnection = async (connectionData: LLMConnectionData, base6
 };
 
 // DELETE: LLM Connection 삭제
-export const deleteLlmConnection = async (provider: string, base64Credentials: string) => {
+export const deleteLlmConnection = async (provider, base64Credentials) => {
     const encodedProvider = encodeURIComponent(provider);
     const response = await fetch(`/api/public/llm-connections/${encodedProvider}`, {
         method: 'DELETE',

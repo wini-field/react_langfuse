@@ -1,37 +1,9 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Eye } from 'lucide-react';
 import formStyles from './Form.module.css'; // 공통 스타일
-import styles from './NewLLMConnectionForm.module.css'; // 전용 스타일
+import styles from '../form/NewLLMConnectionForm.module.css'; // 전용 스타일
 
-// 데이터 타입 정의
-interface Header {
-    id: string;
-    key: string;
-    value: string;
-}
-
-interface CustomModel {
-    id: string;
-    name: string;
-}
-
-// 부모 컴포넌트로 전달할 데이터 타입 export
-export interface LLMConnectionData {
-    provider: string;
-    adapter: string;
-    apiKey: string;
-    baseUrl?: string;
-    extraHeaders?: Record<string, string>;
-    enableDefaultModels?: boolean;
-    customModels?: string[];
-}
-
-interface NewLLMConnectionFormProps {
-    onClose: () => void;
-    onSave: (connection: LLMConnectionData) => void;
-}
-
-const NewLLMConnectionForm: React.FC<NewLLMConnectionFormProps> = ({ onClose, onSave }) => {
+const NewLLMConnectionForm = ({ onClose, onSave }) => {
     // 기본 설정 상태
     const [provider, setProvider] = useState('');
     const [adapter, setAdapter] = useState('openai');
@@ -41,20 +13,20 @@ const NewLLMConnectionForm: React.FC<NewLLMConnectionFormProps> = ({ onClose, on
     // 고급 설정 상태
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [baseUrl, setBaseUrl] = useState('');
-    const [extraHeaders, setExtraHeaders] = useState<Header[]>([]);
+    const [extraHeaders, setExtraHeaders] = useState([]);
     const [enableDefaultModels, setEnableDefaultModels] = useState(true);
-    const [customModels, setCustomModels] = useState<CustomModel[]>([]);
+    const [customModels, setCustomModels] = useState([]);
 
     // --- 핸들러 함수들 ---
 
-    const handleSubmit = (event: React.FormEvent) => {
+    const handleSubmit = (event) => {
         event.preventDefault();
         if (!provider || !apiKey) {
             alert('Provider name과 API Key는 필수 항목입니다.');
             return;
         }
 
-        const connectionData: LLMConnectionData = {
+        const connectionData = {
             adapter,
             provider,
             apiKey,
@@ -69,7 +41,7 @@ const NewLLMConnectionForm: React.FC<NewLLMConnectionFormProps> = ({ onClose, on
                 .reduce((acc, curr) => {
                     acc[curr.key] = curr.value;
                     return acc;
-                }, {} as Record<string, string>);
+                }, {});
 
             connectionData.customModels = customModels
                 .filter(m => m.name)
@@ -80,24 +52,24 @@ const NewLLMConnectionForm: React.FC<NewLLMConnectionFormProps> = ({ onClose, on
     };
 
     // Extra Headers 리스트 핸들러
-    const handleHeaderChange = (id: string, field: 'key' | 'value', value: string) => {
+    const handleHeaderChange = (id, field, value) => {
         setExtraHeaders(extraHeaders.map(item => item.id === id ? { ...item, [field]: value } : item));
     };
     const addHeader = () => {
         setExtraHeaders(prev => [...prev, { id: crypto.randomUUID(), key: '', value: '' }]);
     };
-    const removeHeader = (id: string) => {
+    const removeHeader = (id) => {
         setExtraHeaders(extraHeaders.filter(item => item.id !== id));
     };
 
     // Custom Models 리스트 핸들러
-    const handleCustomModelChange = (id: string, value: string) => {
+    const handleCustomModelChange = (id, value) => {
         setCustomModels(customModels.map(item => item.id === id ? { ...item, name: value } : item));
     };
     const addCustomModel = () => {
         setCustomModels(prev => [...prev, { id: crypto.randomUUID(), name: '' }]);
     };
-    const removeCustomModel = (id: string) => {
+    const removeCustomModel = (id) => {
         setCustomModels(customModels.filter(item => item.id !== id));
     };
 
@@ -127,7 +99,7 @@ const NewLLMConnectionForm: React.FC<NewLLMConnectionFormProps> = ({ onClose, on
                         <select
                             id="llmAdapter"
                             value={adapter}
-                            onChange={(e) => setAdapter(e.target.value)}
+                            onChange={(e) => setAdapter(e.g.et.value)}
                             className={formStyles.formSelect}
                         >
                             <option value="openai">openai</option>

@@ -1,5 +1,4 @@
 import React, {useState, useCallback, useRef, useMemo, useEffect} from 'react'
-import { ColDef, ICellRendererParams, GridReadyEvent, GridApi } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
@@ -17,29 +16,17 @@ import styles from './layout/Models.module.css';
 import CustomPagination from './CustomPagination';
 import ColumnMenu from '../../layouts/ColumnMenu'
 import SidePanel from "../../components/SidePanel/SidePanel";
-import NewModelForm, { ModelData } from './form/NewModelForm'
-
-interface ModelDefinition {
-    modelName: string;
-    matchPattern: string;
-    prices: {
-        inputPrice: number;
-        outputPrice: number;
-    };
-    tokenizer: string;
-    tokenizerConfig: Record<string, string>;
-    lastUsed?: string;
-}
+import NewModelForm from './form/NewModelForm'
 
 // Maintainer 아이콘
-const MaintainerRenderer: React.FC<ICellRendererParams> = () => (
+const MaintainerRenderer = () => (
     <div className = { styles.maintainerCell }>
         <GitCommitHorizontal size = { 16 } color = "#ef444" />
     </div>
 );
 
 // 가격
-const PricesRenderer: React.FC<ICellRendererParams> = (props) => (
+const PricesRenderer = (props) => (
     <div className = { styles.pricesCell }>
         <div><span>input</span> ${ props.data.inputPrice.toFixed(4) }</div>
         <div><span>output</span> ${ props.data.outputPrice.toFixed(4) }</div>
@@ -47,7 +34,7 @@ const PricesRenderer: React.FC<ICellRendererParams> = (props) => (
 )
 
 // Tokenizer 설정
-const TokenizerConfRenderer: React.FC<ICellRendererParams> = ({ data }) => {
+const TokenizerConfRenderer = ({ data }) => {
     const config = data.tokenizerConfig ?? {};
     const entries = Object.entries(config);
 
@@ -63,7 +50,7 @@ const TokenizerConfRenderer: React.FC<ICellRendererParams> = ({ data }) => {
 };
 
 // Actions 버튼
-const ActionsRenderer: React.FC<ICellRendererParams> = (props) => {
+const ActionsRenderer = (props) => {
     return (
         <div className = { styles.cellCenter }>
             <button className = { styles.cloneButton }>Clone</button>
@@ -88,15 +75,11 @@ const DUMMY_MODEL_MODELS = [
     }))
 ];
 
-//컬럼 필드 이름을 상수로 만들어서 타입을 명확하게 합니다.
 const COLUMN_FIELDS = [
     'modelName', 'maintainer', 'matchPattern', 'prices', 'tokenizer', 'tokenizerConfig', 'lastUsed', 'actions'
-] as const;
+];
 
-// 위 상수를 기반으로 컬럼 필드의 타입을 정의합니다.
-type ModelColumnField = typeof COLUMN_FIELDS[number];
-
-const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: ModelColumnField; lockVisible?: boolean, initialHide?: boolean })[] = [
+const COLUMN_DEFINITIONS = [
     { field: 'modelName', headerName: 'Model Name', width: 150, cellStyle: { 'fontWeight': 'bold' }, lockVisible: true },
     { field: 'maintainer', headerName: 'Maintainer', width: 10, cellRenderer: MaintainerRenderer, lockVisible: true },
     { field: 'matchPattern', headerName: 'Match Pattern', width: 150, lockVisible: true },
@@ -107,19 +90,19 @@ const COLUMN_DEFINITIONS: (ColDef & { headerName: string; field: ModelColumnFiel
     { field: 'actions', headerName: 'Actions', width: 100, cellRenderer: ActionsRenderer, sortable: false, resizable: false, lockVisible: true },
 ]
 
-const Models: React.FC = () => {
-    const gridRef = useRef<AgGridReact>(null);
-    const [gridApi, setGridApi] = useState<GridApi | null>(null);
+const Models = () => {
+    const gridRef = useRef(null);
+    const [gridApi, setGridApi] = useState(null);
     const pageSizes = useMemo(() => [10, 20, 30, 40, 50], []);
 
     const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
-    const columnButtonRef = useRef<HTMLDivElement>(null);
+    const columnButtonRef = useRef(null);
 
-    const [rowData, setRowData] = useState<ModelDefinition[]>([]);
+    const [rowData, setRowData] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // 페이지네이션 상태 추가
-    const [paginationMeta, setPaginationMeta] = useState<{ page: number; limit: number; totalItems: number; totalPages: number; } | null>(null);
+    const [paginationMeta, setPaginationMeta] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(pageSizes[0]);
 
@@ -140,8 +123,8 @@ const Models: React.FC = () => {
         });
     }, [currentPage, limit]);
 
-    const handleSaveModel = (newModelData: ModelData) => {
-        const newModel: ModelDefinition = {
+    const handleSaveModel = (newModelData) => {
+        const newModel = {
             modelName: newModelData.modelName,
             matchPattern: newModelData.matchPattern,
             prices: {
@@ -170,7 +153,7 @@ const Models: React.FC = () => {
         setIsModalOpen(false);
     };
 
-    const [columnVisibility, setColumnVisibility] = useState<Record<ModelColumnField, boolean>>({
+    const [columnVisibility, setColumnVisibility] = useState({
         modelName: true,
         maintainer: true,
         matchPattern: true,
@@ -181,7 +164,7 @@ const Models: React.FC = () => {
         actions: true,
     });
 
-    const toggleColumnVisibility = (field: keyof typeof columnVisibility) => {
+    const toggleColumnVisibility = (field) => {
         const columnDef = COLUMN_DEFINITIONS.find(c => c.field === field);
         if (columnDef?.lockVisible) {
             return;
@@ -189,11 +172,11 @@ const Models: React.FC = () => {
          setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
      };
 
-    const toggleAllColumns = (select: boolean) => {
+    const toggleAllColumns = (select) => {
         const newVisibility = { ...columnVisibility };
         COLUMN_DEFINITIONS.forEach(col => {
             if (!col.lockVisible) {
-                newVisibility[col.field as keyof typeof columnVisibility] = select;
+                newVisibility[col.field] = select;
             }
         });
         setColumnVisibility(newVisibility);
@@ -211,13 +194,13 @@ const Models: React.FC = () => {
         COLUMN_DEFINITIONS.reduce((acc, col) => {
             acc[col.field] = col.headerName;
             return acc;
-        }, {} as Record<ModelColumnField, string>),
+        }, {}),
     []);
 
-    const columnDefs = useMemo((): ColDef[] =>
+    const columnDefs = useMemo(() =>
         COLUMN_DEFINITIONS.map(col => ({
             ...col,
-            hide: !columnVisibility[col.field as keyof typeof columnVisibility],
+            hide: !columnVisibility[col.field],
         })),
     [columnVisibility]);
 
@@ -234,7 +217,7 @@ const Models: React.FC = () => {
         paginationLast: () => <ChevronsRight size={18} />,
     };
 
-     const onGridReady = useCallback((event: GridReadyEvent) => {
+     const onGridReady = useCallback((event) => {
          setGridApi(event.api);
      }, []);
 

@@ -1,39 +1,19 @@
 import React from 'react';
 import { CircleMinus , CirclePlus } from 'lucide-react';
 import formStyles from './Form.module.css'; // 공통 스타일
-import styles from './NewModelForm.module.css'; // 전용 스타일
+import styles from '../form/NewModelForm.module.css'; // 전용 스타일
 
-// 부모 컴포넌트로부터 받을 props 타입 정의
-interface NewModelFormProps {
-    onSave: (modelData: ModelData) => void;
-    onCancel: () => void;
-}
-
-// Price 항목의 타입 정의
-interface PriceItem {
-    id: string;
-    usageType: string;
-    price: string;
-}
-
-export interface ModelData {
-    modelName: string;
-    matchPattern: string;
-    prices: Record<string, number>;
-    tokenizer: string;
-}
-
-const NewModelForm = ({ onSave, onCancel }: NewModelFormProps) => {
+const NewModelForm = ({ onSave, onCancel }) => {
     const [modelName, setModelName] = React.useState('');
     const [matchPattern, setMatchPattern] = React.useState('');
-    const [prices, setPrices] = React.useState<PriceItem[]>([
+    const [prices, setPrices] = React.useState([
         {id: crypto.randomUUID(), usageType: 'input', price: '0.00001'},
         {id: crypto.randomUUID(), usageType: 'output', price: '0.00002'},
     ]);
     const [tokenizer, setTokenizer] = React.useState('none');
 
     // Price 리스트 관리 함수들
-    const handlePriceChange = (id: string, field: keyof Omit<PriceItem, 'id'>, value: string) => {
+    const handlePriceChange = (id, field, value) => {
         setPrices(prices.map(p => p.id === id ? {...p, [field]: value} : p));
     };
 
@@ -41,12 +21,12 @@ const NewModelForm = ({ onSave, onCancel }: NewModelFormProps) => {
         setPrices([...prices, {id: crypto.randomUUID(), usageType: '', price: ''}]);
     };
 
-    const removePriceRow = (id: string) => {
+    const removePriceRow = (id) => {
         setPrices(prices.filter(p => p.id !== id));
     };
 
     // 템플릿 버튼 핸들러
-    const prefillTemplate = (template: 'openai' | 'anthropic') => {
+    const prefillTemplate = (template) => {
         if (template === 'openai') {
             setPrices([
                 {id: crypto.randomUUID(), usageType: 'input', price: '0.000005'},

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Modal from '../../components/Modal/Modal'
-import NewLLMConnectionForm, { LLMConnectionData } from "./form/NewLLMConnectionsForm";
+import NewLLMConnectionForm from "./form/NewLLMConnectionsForm";
 import styles from "./layout/SettingsCommon.module.css";
 import llmstyles from './layout/LLMConnections.module.css';
 import { Plus, Pencil, Trash2 } from "lucide-react";
@@ -16,37 +16,23 @@ const base64Credentials =
     ? btoa(`${publicKey}:${secretKey}`)
     : '';
 
-// API 스키마에 맞춰 인터페이스 업데이트
-interface Connection {
-    id: string;
-    provider: string;
-    adapter: string;
-    baseURL: string | null; // API 스키마에서는 baseURL로 되어있음
-    displaySecretKey: string;
-    customModels: string[];
-    withDefaultModels: boolean;
-    extraHeaderKeys: string[];
-    createdAt: string;
-    updatedAt: string;
-}
-
 const LLMConnections = () => {
  // 목업 데이터 대신 빈 배열로 초기화
-    const [connections, setConnections] = useState<Connection[]>([]);
+    const [connections, setConnections] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     // 로딩 및 에러 상태 추가
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState(null);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [limit, setLimit] = useState(10); // 한 페이지에 10개씩
 
     // ---▼ 수정할 Connection을 저장할 상태 추가 ▼---
-    const [editingConnection, setEditingConnection] = useState<Connection | null>(null);
+    const [editingConnection, setEditingConnection] = useState(null);
 
     // ---▼ 삭제 확인 모달 상태 추가 ▼---
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [connectionToDelete, setConnectionToDelete] = useState<Connection | null>(null);
+    const [connectionToDelete, setConnectionToDelete] = useState(null);
 
     const fetchConnections = useCallback(async () => {
         setIsLoading(true);
@@ -68,13 +54,13 @@ const LLMConnections = () => {
     }, [fetchConnections]);
 
     // ---▼ 수정 버튼 클릭 시 호출될 함수 ▼---
-    const handleEditConnection = (connection: Connection) => {
+    const handleEditConnection = (connection) => {
         setEditingConnection(connection);
         setIsModalOpen(true);
     };
 
     // ---▼ 저장/수정 핸들러 통합 ▼---
-    const handleSaveConnection = async (connectionData: LLMConnectionData) => {
+    const handleSaveConnection = async (connectionData) => {
         try {
             // ---▼ API 모듈 함수 호출로 변경 ▼---
             await saveLlmConnection(connectionData, base64Credentials);
@@ -87,7 +73,7 @@ const LLMConnections = () => {
         }
     };
 
-    const handleDeleteClick = (connection: Connection) => {
+    const handleDeleteClick = (connection) => {
         setConnectionToDelete(connection);
         setIsDeleteModalOpen(true);
     };
