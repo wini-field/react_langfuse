@@ -11,12 +11,12 @@ const CustomPagination = ({
                               onLimitChange,
                           }) => {
 
-    const [inputValue, setInputValue] = useState(currentPage.toString());
+    const [inputValue, setInputValue] = useState(String(currentPage ?? 1));
     const [pageSize, setPageSize] = useState(pageSizes[0] || 10);
 
     useEffect(() => {
-        setInputValue(currentPage.toString());
-    }, [currentPage]);
+    setInputValue(String(currentPage ?? 1));
+}, [currentPage]);
 
     const onPageInputChange = (e) => {
         setInputValue(e.target.value);

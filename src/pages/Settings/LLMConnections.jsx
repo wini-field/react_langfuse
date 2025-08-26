@@ -1,23 +1,24 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import Modal from '../../components/Modal/Modal'
 import NewLLMConnectionForm from "./form/NewLLMConnectionsForm";
-import styles from "./layout/SettingsCommon.module.css";
-import llmstyles from './layout/LLMConnections.module.css';
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import UpdateLLMConnectionForm from "./form/UpdateLLMConnectionForm";
+import commonStyles from "./layout/SettingsCommon.module.css";
+import llmStyles from './layout/LLMConnections.module.css';
+import {Plus, Pencil, Trash2} from "lucide-react";
 // ---▼ 인증 정보 가져오기 ▼---
-import { publicKey, secretKey } from '../../lib/langfuse';
+import {publicKey, secretKey} from '../../lib/langfuse';
 // ---▼ 새로 만든 API 모듈 import ▼---
-import { getLlmConnections, saveLlmConnection, deleteLlmConnection } from '../../api/llmApi';
+import {getLlmConnections, saveLlmConnection, deleteLlmConnection} from '../../api/LLMApi.js';
 import DeleteForm from './form/DeleteForm'
 
 // ---▼ Basic Auth를 위한 Base64 인코딩 ▼---
 const base64Credentials =
-  publicKey && secretKey
-    ? btoa(`${publicKey}:${secretKey}`)
-    : '';
+    publicKey && secretKey
+        ? btoa(`${publicKey}:${secretKey}`)
+        : '';
 
 const LLMConnections = () => {
- // 목업 데이터 대신 빈 배열로 초기화
+    // 목업 데이터 대신 빈 배열로 초기화
     const [connections, setConnections] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     // 로딩 및 에러 상태 추가
@@ -73,6 +74,12 @@ const LLMConnections = () => {
         }
     };
 
+    // ---▼ 모달을 닫을 때 editingConnection 상태를 초기화하는 함수 추가 ▼---
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingConnection(null); // 수정 상태 초기화
+    };
+
     const handleDeleteClick = (connection) => {
         setConnectionToDelete(connection);
         setIsDeleteModalOpen(true);
@@ -84,7 +91,7 @@ const LLMConnections = () => {
             await deleteLlmConnection(connectionToDelete.provider, base64Credentials);
             fetchConnections();
         } catch (e) {
-             alert(`삭제 중 오류가 발생했습니다: ${e instanceof Error ? e.message : String(e)}`);
+            alert(`삭제 중 오류가 발생했습니다: ${e instanceof Error ? e.message : String(e)}`);
         } finally {
             setIsDeleteModalOpen(false);
             setConnectionToDelete(null);
@@ -92,59 +99,70 @@ const LLMConnections = () => {
     };
 
     if (isLoading) {
-        return <div className={styles.container}>Loading connections...</div>;
+        return <div className={commonStyles.container}>Loading connections...</div>;
     }
 
     if (error) {
-        return <div className={styles.container} style={{ color: 'red' }}>{error}</div>;
+        return <div className={commonStyles.container} style={{color: 'red'}}>{error}</div>;
     }
 
     return (
-        <div className = { styles.container }>
-            { /* Host Name Section */ }
-            <h3 className = { styles.title }>LLM Connections </h3>
-            <p>Connect your LLM services to enable evaluations and playground features. Your provider will charge based on usage.</p>
+        <div className={commonStyles.container}>
+            { /* Host Name Section */}
+            <h3 className={commonStyles.title}>LLM Connections </h3>
+            <p className={commonStyles.p}>Connect your LLM services to enable evaluations and playground features. Your
+                provider will charge based on usage.</p>
 
-            <div className = { styles.keyList }>
-                <div className = { `${ styles.keyRow } ${ styles.keyHeader }` }>
+            <div className={commonStyles.keyList}>
+                <div className={`${commonStyles.keyRow} ${commonStyles.keyHeader}`}>
                     <span>Provider</span>
                     <span>Adapter</span>
                     <span>Base URL</span>
                     <span>API Key</span>
-                    <span style = {{ textAlign: 'center' }}>Actions</span>
+                    <span style={{textAlign: 'center'}}>Actions</span>
                 </div>
-                { connections.map((conn) => (
-                    <div key = { conn.id } className = { styles.keyRow }>
-                        <span>{ conn.provider }</span>
-                        <span>{ conn.adapter }</span>
-                        <span>{ conn.baseURL || 'default '}</span>
-                        <span>{ conn.displaySecretKey }</span>
-                        <div className={llmstyles.actions}>
+                {connections.map((conn) => (
+                    <div key={conn.id} className={commonStyles.keyRow}>
+                        <span>{conn.provider}</span>
+                        <span>{conn.adapter}</span>
+                        <span>{conn.baseURL || 'default '}</span>
+                        <span>{conn.displaySecretKey}</span>
+                        <div className={llmStyles.actions}>
                             {/* ---▼ 수정 버튼 활성화 및 핸들러 연결 ▼--- */}
                             <button title="Edit" onClick={() => handleEditConnection(conn)}>
-                                <Pencil size={16} />
+                                <Pencil size={16}/>
                             </button>
                             <button title="Delete" onClick={() => handleDeleteClick(conn)}>
-                                <Trash2 size={16} />
+                                <Trash2 size={16}/>
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            <button onClick = { () => setIsModalOpen(true) } className = { styles.createButton }>
-                <Plus size = { 16 } /> Add LLM Connection
+            <button onClick={() => setIsModalOpen(true)} className={commonStyles.createButton}>
+                <Plus size={16}/> Add LLM Connection
             </button>
 
             <Modal
-                title = "New LLM Connection"
-                isOpen = { isModalOpen }
-                onClose = { () => setIsModalOpen(false) }
+                // editingConnection 상태에 따라 동적으로 제목 변경
+                title={editingConnection ? "Update LLM Connection" : "New LLM Connection"}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal} // 새로 만든 닫기 핸들러 연결
             >
-                <NewLLMConnectionForm
-                    onSave={handleSaveConnection}
-                    onClose={() => setIsModalOpen(false)}
-                />
+                {/* editingConnection 상태에 따라 다른 폼을 렌더링 */}
+                {editingConnection ? (
+                    <UpdateLLMConnectionForm
+                        existingConnection={editingConnection} // 기존 데이터 전달
+                        onSave={handleSaveConnection}
+                        onClose={handleCloseModal}
+                    />
+                ) : (
+                    <NewLLMConnectionForm
+                        onSave={handleSaveConnection}
+                        onClose={handleCloseModal}
+                    />
+                )}
             </Modal>
 
             {/* ---▼ 삭제 확인 모달 추가 ▼--- */}

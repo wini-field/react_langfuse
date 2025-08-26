@@ -1,22 +1,22 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import { AgGridReact } from 'ag-grid-react';
+import {AgGridReact} from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-import { Plus, Archive, ArchiveRestore, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import {Plus, Archive, ArchiveRestore, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight} from 'lucide-react';
 import commonStyles from './layout/SettingsCommon.module.css'
 import gridStyles from './layout/SettingsGrid.module.css'
 import CustomPagination from './CustomPagination';
 import ColumnMenu from "../../layouts/ColumnMenu";
 import Modal from '../../components/Modal/Modal'
 import NewScoreForm from './form/NewScoreForm'
-import { publicKey, secretKey, baseUrl } from '../../lib/langfuse'
-import { fetchScoreConfigsAPI, createScoreConfigAPI, updateScoreConfigStatusAPI } from '../../api/scoreApi'
+import {publicKey, secretKey, baseUrl} from '../../lib/langfuse'
+import {fetchScoreConfigsAPI, createScoreConfigAPI, updateScoreConfigStatusAPI} from '../../api/ScoreApi'
 
 // Basic Auth를 위한 Base64 인코딩
 const base64Credentials =
-  publicKey && secretKey
-    ? btoa(`${publicKey}:${secretKey}`)
-    : '';
+    publicKey && secretKey
+        ? btoa(`${publicKey}:${secretKey}`)
+        : '';
 
 const transformApiToGridData = (apiData) => {
     return apiData.map(item => {
@@ -32,7 +32,7 @@ const transformApiToGridData = (apiData) => {
                 return acc;
             }, {});
         } else if (item.dataType === 'BOOLEAN' && item.categories) {
-             range = item.categories.reduce((acc, cat) => {
+            range = item.categories.reduce((acc, cat) => {
                 acc[cat.value.toString()] = cat.label;
                 return acc;
             }, {});
@@ -61,12 +61,13 @@ const RangeRenderer = (props) => {
     } else if (typeof rangeData === 'string') {
         displayValue = rangeData;
     }
-    return <div className={commonStyles.simpleTokenizerCell} style={{ whiteSpace: 'pre-wrap', overflow: 'auto' }}>{displayValue}</div>;
+    return <div className={commonStyles.simpleTokenizerCell}
+                style={{whiteSpace: 'pre-wrap', overflow: 'auto'}}>{displayValue}</div>;
 };
 
 // Actions Renderer
 const ActionsRenderer = (props) => {
-    const { data, onToggleStatus } = props;
+    const {data, onToggleStatus} = props;
 
     // 상태 변경 버튼 클릭 핸들러
     const handleToggleClick = () => {
@@ -80,27 +81,34 @@ const ActionsRenderer = (props) => {
     const tooltip = data?.status === 'Active' ? 'Archive this score' : 'Restore this score';
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%'}}>
             <button
                 onClick={handleToggleClick}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
+                style={{background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8'}}
                 title={tooltip}
             >
-                <Icon size={16} />
+                <Icon size={16}/>
             </button>
         </div>
     );
 };
 
 const COLUMN_DEFINITIONS = [
-    { field: 'name', headerName: 'Name', flex: 2, resizable: true, sortable: true },
-    { field: 'dataType', headerName: 'Data Type', flex: 3, resizable: true, sortable: true },
-    { field: 'range', headerName: 'Range', cellRenderer: RangeRenderer, flex: 10, resizable: true, autoHeight: true },
-    { field: 'description', headerName: 'Description', flex: 5, resizable: true },
-    { field: 'configID', headerName: 'Config ID', flex: 3, resizable: true, initialHide: true },
-    { field: 'createdAt', headerName: 'Created At', flex: 3, resizable: true, initialHide: true },
-    { field: 'status', headerName: 'Status', flex: 2, resizable: true, sortable: true },
-    { field: 'actions', headerName: 'Action', cellRenderer: ActionsRenderer, flex: 2, resizable: false, sortable: false, },
+    {field: 'name', headerName: 'Name', flex: 2, resizable: true, sortable: true},
+    {field: 'dataType', headerName: 'Data Type', flex: 3, resizable: true, sortable: true},
+    {field: 'range', headerName: 'Range', cellRenderer: RangeRenderer, flex: 10, resizable: true, autoHeight: true},
+    {field: 'description', headerName: 'Description', flex: 5, resizable: true},
+    {field: 'configID', headerName: 'Config ID', flex: 3, resizable: true, initialHide: true},
+    {field: 'createdAt', headerName: 'Created At', flex: 3, resizable: true, initialHide: true},
+    {field: 'status', headerName: 'Status', flex: 2, resizable: true, sortable: true},
+    {
+        field: 'actions',
+        headerName: 'Action',
+        cellRenderer: ActionsRenderer,
+        flex: 2,
+        resizable: false,
+        sortable: false,
+    },
 ]
 
 const Scores = () => {
@@ -152,7 +160,7 @@ const Scores = () => {
 
     // 상태 변경 요청 핸들러
     const handleToggleRequest = useCallback((id, currentStatus) => {
-        setScoreToToggle({ id, status: currentStatus });
+        setScoreToToggle({id, status: currentStatus});
         setIsToggleModalOpen(true);
     }, []);
 
@@ -173,7 +181,7 @@ const Scores = () => {
         }
     };
 
-   const handleCreateScore = async (formData) => {
+    const handleCreateScore = async (formData) => {
         if (!base64Credentials) {
             alert("API 키가 설정되지 않았습니다.");
             return;
@@ -188,7 +196,7 @@ const Scores = () => {
         }
     };
 
-    const [columnVisibility, setColumnVisibility] = useState(() =>{
+    const [columnVisibility, setColumnVisibility] = useState(() => {
         const initialVisibility = {};
         COLUMN_DEFINITIONS.forEach(col => {
             if (col.field) {
@@ -203,11 +211,11 @@ const Scores = () => {
         if (columnDef?.lockVisible) {
             return;
         }
-         setColumnVisibility(prev => ({ ...prev, [field]: !prev[field] }));
-     };
+        setColumnVisibility(prev => ({...prev, [field]: !prev[field]}));
+    };
 
     const toggleAllColumns = (select) => {
-        const newVisibility = { ...columnVisibility };
+        const newVisibility = {...columnVisibility};
         COLUMN_DEFINITIONS.forEach(col => {
             if (!col.lockVisible) {
                 newVisibility[col.field] = select;
@@ -221,32 +229,32 @@ const Scores = () => {
     }, [columnVisibility]);
 
     const mandatoryFields = useMemo(() =>
-        COLUMN_DEFINITIONS.filter(c => c.lockVisible).map(c => c.field),
-    []);
+            COLUMN_DEFINITIONS.filter(c => c.lockVisible).map(c => c.field),
+        []);
 
     const columnDisplayNames = useMemo(() =>
-        COLUMN_DEFINITIONS.reduce((acc, col) => {
-            if (col.field) {
-                acc[col.field] = col.headerName;
-            }
-            return acc;
-        }, {}),
-    []);
+            COLUMN_DEFINITIONS.reduce((acc, col) => {
+                if (col.field) {
+                    acc[col.field] = col.headerName;
+                }
+                return acc;
+            }, {}),
+        []);
 
     const columnDefs = useMemo(() =>
-        COLUMN_DEFINITIONS.map(col => ({
-            ...col,
-            hide: !columnVisibility[col.field],
-            cellRendererParams: col.field === 'actions' ? { onToggleStatus: handleToggleRequest } : undefined,
-        })),
-    [columnVisibility]);
+            COLUMN_DEFINITIONS.map(col => ({
+                ...col,
+                hide: !columnVisibility[col.field],
+                cellRendererParams: col.field === 'actions' ? {onToggleStatus: handleToggleRequest} : undefined,
+            })),
+        [columnVisibility]);
 
     const icons = {
-       paginationFirst: () => <ChevronsLeft size={18} />,
-       paginationPrev: () => <ChevronLeft size={18} />,
-       paginationNext: () => <ChevronRight size={18} />,
-       paginationLast: () => <ChevronsRight size={18} />,
-   };
+        paginationFirst: () => <ChevronsLeft size={18}/>,
+        paginationPrev: () => <ChevronLeft size={18}/>,
+        paginationNext: () => <ChevronRight size={18}/>,
+        paginationLast: () => <ChevronsRight size={18}/>,
+    };
 
     const onGridReady = useCallback((event) => {
         setGridApi(event.api);
@@ -254,7 +262,7 @@ const Scores = () => {
 
     // 모달의 동적 컨텐츠
     const modalInfo = useMemo(() => {
-        if (!scoreToToggle) return { title: '', message: '', buttonText: '' };
+        if (!scoreToToggle) return {title: '', message: '', buttonText: ''};
         const isArchiving = scoreToToggle.status === 'Active';
         return {
             title: isArchiving ? 'Archive Score Config' : 'Restore Score Config',
@@ -264,54 +272,59 @@ const Scores = () => {
     }, [scoreToToggle]);
 
     if (isLoading) return <div className={commonStyles.container}>Loading...</div>;
-    if (error) return <div className={commonStyles.container}>Error: {error} <button onClick={() => fetchScoreConfigs(currentPage, limit)}>Retry</button></div>;
+    if (error) return <div className={commonStyles.container}>Error: {error}
+        <button onClick={() => fetchScoreConfigs(currentPage, limit)}>Retry</button>
+    </div>;
 
     return (
-        <div className = { commonStyles.container }>
-            <h3>Score Configs</h3>
-            <p>Score configs define which scores are available for annotation in your project. Please note that all score configs are immutable.</p>
-            <div className = { gridStyles.header }>
+        <div className={commonStyles.container}>
+            <h3 className={commonStyles.title}>Score Configs</h3>
+            <p className={commonStyles.p}>Score configs define which scores are available for annotation in your project. Please note that all
+                score configs are immutable.</p>
+            <div className={gridStyles.header}>
                 {/* Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
-                <div ref = { columnButtonRef } className = { gridStyles.columnsButtonWrapper } onClick={() => setIsColumnMenuOpen(prev => !prev)}>
+                <div ref={columnButtonRef} className={gridStyles.columnsButtonWrapper}
+                     onClick={() => setIsColumnMenuOpen(prev => !prev)}>
                     <button
-                        className = { `${ gridStyles.headerButton } ${ gridStyles.columnsButton }` }
+                        className={`${gridStyles.headerButton} ${gridStyles.columnsButton}`}
                     >
                         <span>Columns</span>
-                        <span className = { gridStyles.count }>{ visibleColumnCount }/{ COLUMN_DEFINITIONS.length }</span>
+                        <span className={gridStyles.count}>{visibleColumnCount}/{COLUMN_DEFINITIONS.length}</span>
                     </button>
                     <ColumnMenu
-                        isOpen = { isColumnMenuOpen }
-                        onClose = { () => setIsColumnMenuOpen(false) }
-                        anchorE1 = { columnButtonRef }
-                        columnVisibility = { columnVisibility }
-                        toggleColumnVisibility = { toggleColumnVisibility }
-                        displayNames = { columnDisplayNames }
-                        mandatoryFields = { mandatoryFields }
-                        onToggleAll = { toggleAllColumns }
+                        isOpen={isColumnMenuOpen}
+                        onClose={() => setIsColumnMenuOpen(false)}
+                        anchorE1={columnButtonRef}
+                        columnVisibility={columnVisibility}
+                        toggleColumnVisibility={toggleColumnVisibility}
+                        displayNames={columnDisplayNames}
+                        mandatoryFields={mandatoryFields}
+                        onToggleAll={toggleAllColumns}
                     />
                 </div>
-                <button onClick = { () => setIsModalOpen(true) } className = { `${ gridStyles.headerButton} ${ gridStyles.addButton }` } >
-                    <Plus size = { 16 } /> Add new score config
+                <button onClick={() => setIsModalOpen(true)}
+                        className={`${gridStyles.headerButton} ${gridStyles.addButton}`}>
+                    <Plus size={16}/> Add new score config
                 </button>
             </div>
 
-            <div className = { `ag-theme-alpine ${gridStyles.gridContainer }` }>
+            <div className={`ag-theme-alpine ${gridStyles.gridContainer}`}>
                 <AgGridReact
-                    ref = { gridRef }
-                    rowData = { rowData }
-                    columnDefs = { columnDefs }
-                    suppressRowClickSelection = { true }
-                    icons = { icons }
-                    rowHeight = { 96 }
-                    onGridReady = { onGridReady }
-                    domLayout = 'autoHeight'
+                    ref={gridRef}
+                    rowData={rowData}
+                    columnDefs={columnDefs}
+                    suppressRowClickSelection={true}
+                    icons={icons}
+                    rowHeight={96}
+                    onGridReady={onGridReady}
+                    domLayout='autoHeight'
                 />
             </div>
 
             <Modal
-                title = "Add new score config"
-                isOpen = { isModalOpen }
-                onClose = { () => setIsModalOpen(false) }
+                title="Add new score config"
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
             >
                 <NewScoreForm
                     onClose={() => setIsModalOpen(false)}
@@ -327,11 +340,12 @@ const Scores = () => {
             >
                 <div>
                     <p>{modalInfo.message}</p>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px' }}>
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '20px'}}>
                         <button onClick={() => setIsToggleModalOpen(false)} className={gridStyles.headerButton}>
                             Cancel
                         </button>
-                        <button onClick={handleConfirmToggle} className={`${gridStyles.headerButton} ${scoreToToggle?.status === 'Active' ? gridStyles.deleteButton : gridStyles.addButton}`}>
+                        <button onClick={handleConfirmToggle}
+                                className={`${gridStyles.headerButton} ${scoreToToggle?.status === 'Active' ? gridStyles.deleteButton : gridStyles.addButton}`}>
                             {modalInfo.buttonText}
                         </button>
                     </div>

@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import commonStyles from "./layout/SettingsCommon.module.css";
 import styles from './layout/General.module.css'
 
 const generalSettingsData = {
-  hostName: 'https://cloud.langfuse.com',
-  projectName: 'wowproject',
-  debugInfo: {
-    project: {
-      name: 'wowproject',
-      id: 'prj-sdn65537829dsad87sdpgf89hz',
-    },
-    org: {
-      name: 'wow',
-      id: 'org-sd8sng8sgsg87sdg8sdg',
+    hostName: 'http://localhost:3000',
+    projectName: 'wowproject',
+    debugInfo: {
+        project: {
+            name: 'wowproject',
+            id: 'prj-sdn65537829dsad87sdpgf89hz',
+        },
+        org: {
+            name: 'wow',
+            id: 'org-sd8sng8sgsg87sdg8sdg',
+        }
     }
-  }
 };
 
 const General = () => {
@@ -28,7 +28,7 @@ const General = () => {
     }, [projectName, originalProjectName]);
 
     const handleSave = () => {
-        alert(`Project name changed to: ${ projectName }`);
+        alert(`Project name changed to: ${projectName}`);
         setOriginalProjectName(projectName);
     }
 
@@ -53,53 +53,55 @@ const General = () => {
     };
 
     return (
-        <div className = { commonStyles.container }>
-            { /* Host Name Section */ }
-            <h3 className = { commonStyles.title }>Host Name</h3>
-            <section className = { commonStyles.section }>
-                <p className = { commonStyles.p }>When connecting to Langfuse, use this hostname / baseurl.</p>
-                <input type = "text" value = { generalSettingsData.hostName } readOnly className={ commonStyles.input } />
+        <div className={commonStyles.container}>
+            { /* Host Name Section */}
+            <h3 className={commonStyles.title}>Host Name</h3>
+            <section className={commonStyles.section}>
+                <p className={commonStyles.p}>When connecting to Langfuse, use this hostname / baseurl.</p>
+                <input type="text" value={generalSettingsData.hostName} readOnly className={commonStyles.input}/>
             </section>
 
-            { /* Project Name Section */ }
-            <h3 className = { commonStyles.title }>Project Name</h3>
-            <section className={ commonStyles.section }>
-                <p className = { commonStyles.p }>Your Project is currently '{ originalProjectName }'.</p>
+            { /* Project Name Section */}
+            <h3 className={commonStyles.title}>Project Name</h3>
+            <section className={commonStyles.section}>
+                <p className={commonStyles.p}>Your Project is currently '{originalProjectName}'.</p>
                 <input
-                    type = "text"
-                    value = { projectName }
-                    onChange = { handleChange }
-                    onFocus = { handleFocus }
-                    onBlur = { handleBlur }
-                    className = { `${ commonStyles.input } ${ isPristine ? styles.inputPristine : ''}` }
+                    type="text"
+                    value={projectName}
+                    onChange={handleChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    className={`${commonStyles.input} ${isPristine ? styles.inputPristine : ''}`}
                 />
-                <button className = { commonStyles.button } onClick = { handleSave } disabled = { isSaveDisabled }>Save</button>
+                <button className={commonStyles.button} onClick={handleSave} disabled={isSaveDisabled}>Save</button>
             </section>
 
-            { /* Debug Information Section */ }
-            <h3 className = { commonStyles.title }>Debug Information</h3>
-            <section className = { commonStyles.section }>
-                <div className = { styles.codeBlock }>
-                    { JSON.stringify(generalSettingsData.debugInfo, null, 2) }
+            { /* Debug Information Section */}
+            <h3 className={commonStyles.title}>Debug Information</h3>
+            <section className={commonStyles.section}>
+                <div className={styles.codeBlock}>
+                    {JSON.stringify(generalSettingsData.debugInfo, null, 2)}
                 </div>
             </section>
 
-            { /* Danger Zone Section */ }
-            <h3 className = { styles.title }>Danger Zone</h3>
-            <section className = { `${ commonStyles.section } ${ styles.dangerZone }` }>
-                <div className = { styles.flexBetween }>
+            { /* Danger Zone Section */}
+            <h3 className={styles.title}>Danger Zone</h3>
+            <section className={`${commonStyles.section} ${styles.dangerZone}`}>
+                <div className={styles.flexBetween}>
                     <div>
                         <h4>Transfer ownership</h4>
-                        <p className = { commonStyles.p }>Transfer this project to another organization where you have the ability to create projects.</p>
+                        <p className={commonStyles.p}>Transfer this project to another organization where you have the
+                            ability to create projects.</p>
                     </div>
-                    <button className = { `${ commonStyles.button } ${ styles.dangerButton }` }>Transfer Project</button>
+                    <button className={`${commonStyles.button} ${styles.dangerButton}`}>Transfer Project</button>
                 </div>
-                <div className = { styles.flexBetween }>
+                <div className={styles.flexBetween}>
                     <div>
                         <h4>Delete this project</h4>
-                        <p className = { commonStyles.p }>Once you delete a project, there is no going back. Please be certain.</p>
+                        <p className={commonStyles.p}>Once you delete a project, there is no going back. Please be
+                            certain.</p>
                     </div>
-                    <button className = { `${ commonStyles.button } ${ styles.dangerButton }` }>Delete Project</button>
+                    <button className={`${commonStyles.button} ${styles.dangerButton}`}>Delete Project</button>
                 </div>
             </section>
         </div>

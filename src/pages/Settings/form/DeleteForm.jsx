@@ -1,6 +1,6 @@
 import React from 'react';
 import Modal from '../../../components/Modal/Modal';
-import styles from '../form/DeleteForm.module.css'; // 전용 스타일 파일
+import styles from '../layout/DeleteForm.module.css'; // 전용 스타일 파일
 
 const DeleteForm = ({
     isOpen,

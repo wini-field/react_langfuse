@@ -161,7 +161,7 @@ const Members = () => {
 
     return (
         <div className = { commonStyles.container }>
-            <h3>Project Members</h3>
+            <h3 className={commonStyles.title}>Project Members</h3>
             <div className = { gridStyles.header }>
                 <div ref = { columnButtonRef } className = { gridStyles.columnsButtonWrapper } onClick={() => setIsColumnMenuOpen(prev => !prev)}>
                     <button

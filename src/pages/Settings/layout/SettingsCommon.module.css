@@ -7,15 +7,15 @@
 
 /* h3 제목 */
 .title {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 600;
-    margin-bottom: 32px;
 }
 
 /* p */
 .p {
     margin: 0 0 16px 0;
     color: #888;
+    font-size: 13px;
 }
 
 /* 기본 섹션 */
