@@ -57,7 +57,6 @@ export const saveLlmConnection = async (connectionData: LLMConnectionData, base6
 // DELETE: LLM Connection 삭제
 export const deleteLlmConnection = async (provider: string, base64Credentials: string) => {
     const encodedProvider = encodeURIComponent(provider);
-    // 이 URL은 Next.js의 rewrites 기능 덕분에 /api/public/llm-connections 로 전달됨
     const response = await fetch(`/api/public/llm-connections/${encodedProvider}`, {
         method: 'DELETE',
         headers: {

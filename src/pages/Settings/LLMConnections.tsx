@@ -91,12 +91,10 @@ const LLMConnections = () => {
         setConnectionToDelete(connection);
         setIsDeleteModalOpen(true);
     };
-    
-    // ---▼ 실제 삭제 로직 ▼---
+
     const handleConfirmDelete = async () => {
         if (!connectionToDelete) return;
         try {
-            // ---▼ id 대신 provider를 넘겨주도록 수정 ▼---
             await deleteLlmConnection(connectionToDelete.provider, base64Credentials);
             fetchConnections();
         } catch (e) {
