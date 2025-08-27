@@ -2,19 +2,12 @@ import React from 'react';
 import { X } from 'lucide-react';
 import styles from './Modal.module.css';
 
-interface ModalProps {
-    children: React.ReactNode;
-    isOpen: boolean;
-    onClose: () => void;
-    title: string;
-}
-
 const Modal  = ({
     children,
     isOpen,
     onClose,
     title,
-}: ModalProps) => {
+}) => {
     if (!isOpen) {
         return null;
     }

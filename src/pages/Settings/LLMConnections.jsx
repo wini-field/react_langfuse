@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import Modal from '../../components/Modal/Modal'
+import Modal from '../../components/Modal/Modal.jsx'
 import NewLLMConnectionForm from "./form/NewLLMConnectionsForm";
 import UpdateLLMConnectionForm from "./form/UpdateLLMConnectionForm";
 import commonStyles from "./layout/SettingsCommon.module.css";

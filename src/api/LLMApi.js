@@ -52,7 +52,7 @@ export const saveLlmConnection = async (connectionData, base64Credentials) => {
     return handleApiResponse(response);
 };
 
-// DELETE: LLM Connection 삭제
+// DELETE: LLM Connection 삭제 (미구현)
 export const deleteLlmConnection = async (provider, base64Credentials) => {
     const encodedProvider = encodeURIComponent(provider);
     const response = await fetch(`/api/public/llm-connections/${encodedProvider}`, {
