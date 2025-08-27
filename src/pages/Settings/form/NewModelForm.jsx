@@ -94,8 +94,8 @@ const NewModelForm = ({ onSave, onCancel }) => {
     };
 
     return (
-        <div className={styles.formWrapper}>
-            <div className={styles.formContnet}>
+        <div className={formStyles.formWrapper}>
+            <div className={styles.formContent}>
                 { /* --- 헤더 --- */}
                 <div className={styles.formHeader}>
                     <h3>Create Model</h3>
