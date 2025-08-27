@@ -95,7 +95,7 @@ const UpdateLLMConnectionForm = ({ existingConnection, onClose, onSave }) => {
 
 
     return (
-        <div className={formStyles.formContainer}>
+        <div className={formStyles.formWrapper}>
             <form onSubmit={handleSubmit}>
                 <div className={formStyles.formBody}>
                     {/* LLM adapter (disabled) */}

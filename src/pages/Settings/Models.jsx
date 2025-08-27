@@ -309,7 +309,6 @@ const Models = () => {
             <div className={gridStyles.header}>
                 <div
                     ref={columnButtonRef}
-                    className={gridStyles.columnsButtonWrapper}
                     onClick={() => setIsColumnMenuOpen(prev => !prev)}
                 >
                     <button className={`${gridStyles.headerButton} ${gridStyles.columnsButton}`}>

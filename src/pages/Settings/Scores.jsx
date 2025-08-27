@@ -283,7 +283,7 @@ const Scores = () => {
                 score configs are immutable.</p>
             <div className={gridStyles.header}>
                 {/* Columns 버튼을 div로 감싸서 position 기준점으로 만듦 */}
-                <div ref={columnButtonRef} className={gridStyles.columnsButtonWrapper}
+                <div ref={columnButtonRef}
                      onClick={() => setIsColumnMenuOpen(prev => !prev)}>
                     <button
                         className={`${gridStyles.headerButton} ${gridStyles.columnsButton}`}
