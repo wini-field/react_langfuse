@@ -71,14 +71,37 @@ export default function Layout({session}: { session: Session | null }) {
     const user = session?.user || session || {}; // session이 없을 경우를 대비해 빈 객체({}) 할당
 
     // 로그아웃 핸들러
-    // --- ▼ [수정] 로그아웃 핸들러 (CORS 에러 해결) ▼ ---
+    // --- ▼ [수정] 로그아웃 핸들러 (HttpOnly 쿠키는 서버에서만 삭제) ▼ ---
+    // CSRF 토큰을 가져오는 로직을 추가
+    useEffect(() => {
+      const fetchCsrfToken = async () => {
+        console.log("CSRF 토큰을 가져오는 중...");
+        try {
+          const res = await fetch('/api/auth/csrf');
+          if (!res.ok) {
+            console.error("CSRF 토큰 가져오기 실패:", res.status, res.statusText);
+            throw new Error("CSRF 토큰을 가져올 수 없습니다.");
+          }
+          const data = await res.json();
+          setCsrfToken(data.csrfToken);
+          console.log("CSRF 토큰 가져오기 성공:", data.csrfToken);
+        } catch (e) {
+          console.error("CSRF 토큰을 가져오는 중 오류 발생:", e);
+        }
+      };
+      // 페이지 로딩 시 CSRF 토큰을 미리 가져옴
+      fetchCsrfToken();
+    }, []);
+
     const handleSignOut = async () => {
         if (!csrfToken) {
-            console.error("CSRF token not available for sign out.");
-            // 토큰이 없어도 로그아웃 시도는 해야 하므로 바로 리디렉션
-            window.location.href = '/login';
+            console.error("CSRF 토큰이 없어 로그아웃 요청을 보낼 수 없습니다.");
+            alert("로그아웃을 처리할 수 없습니다. 페이지를 새로고침 후 다시 시도해 주세요.");
+            window.location.href = '/login'; // 토큰 없으면 일단 로그인 페이지로 보내버림
             return;
         }
+
+        console.log("로그아웃 요청을 서버로 전송합니다...");
         try {
             const res = await fetch('/api/auth/signout', {
                 method: 'POST',
@@ -86,17 +109,22 @@ export default function Layout({session}: { session: Session | null }) {
                 body: new URLSearchParams({csrfToken, json: 'true'}),
             });
 
-            if (!res.ok) {
-                console.error("Sign out failed with status:", res.status);
+            if (res.ok) {
+                console.log("로그아웃 요청 성공! 서버가 쿠키를 삭제했습니다.");
+            } else {
+                const errorData = await res.json().catch(() => ({ message: '알 수 없는 오류' }));
+                console.error("로그아웃 요청 실패:", res.status, res.statusText, errorData);
+                alert(`로그아웃 실패: ${errorData.message}`);
             }
         } catch (error) {
-            console.error("Sign out fetch failed", error);
+            console.error("로그아웃 API 호출 중 오류 발생:", error);
+            alert(`로그아웃 중 네트워크 오류가 발생했습니다. ${error.message}`);
         } finally {
-            // 성공/실패 여부와 관계없이 로그인 페이지로 이동
+            console.log("로그인 페이지로 리디렉션합니다.");
             window.location.href = '/login';
         }
     };
-    // --- ▲ [추가] 사용자 메뉴 팝업 관련 상태 및 로직 ▲ ---
+    // --- ▲ [수정] 로그아웃 핸들러 (HttpOnly 쿠키는 서버에서만 삭제) ▲ ---
 
     const mainMenuSections: MenuSection[] = [
         {
@@ -282,7 +310,7 @@ export default function Layout({session}: { session: Session | null }) {
                         {/* 기존 사용자 정보 (이제 팝업 트리거 역할) */}
                         <div className={styles.userInfo} onClick={() => setIsUserMenuOpen(prev => !prev)}>
                             <div className={styles.userAvatar}>
-                                {user?.name?.charAt(0).toUpperCase() || 'T'}
+                                {user?.name?.charAt(0).toUpperCase()}
                             </div>
                             {!collapsed && (
                                 <>
