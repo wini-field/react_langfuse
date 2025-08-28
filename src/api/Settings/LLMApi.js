@@ -39,7 +39,7 @@ export const saveLlmConnection = async (connectionData, base64Credentials) => {
     const body = {
         provider: connectionData.provider,
         adapter: connectionData.adapter,
-        baseURL: connectionData.baseUrl || null, // 값이 없으면 null로 보냄
+        baseURL: connectionData.baseURL || null, // 값이 없으면 null로 보냄
         withDefaultModels: connectionData.enableDefaultModels,
         customModels: connectionData.customModels,
         extraHeaders: connectionData.extraHeaders,
