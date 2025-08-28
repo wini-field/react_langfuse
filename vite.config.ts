@@ -7,13 +7,27 @@ import viteTsconfigPaths from 'vite-tsconfig-paths'
 // https://vite.dev/config/
 export default defineConfig({
   base: '/',
-  server: {
-    host: '0.0.0.0',
-    port: 5173, // ✅ 여기서 포트를 5173 → 3000으로 변경
+  server:{
+    host:'0.0.0.0',
+    port: 5173,
+    proxy: {
+      '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+      }
+    }
   },
   plugins: [react(), viteTsconfigPaths()],
   resolve: {
-    alias: {
+    // alias: [
+    //   //{ find: /^~/, replacement: '' },
+    //   { find: /^(Components)\//, replacement: path.resolve(__dirname, 'src/Components') + '/' },
+    //   { find: /^(ducks)\//, replacement: path.resolve(__dirname, 'src/ducks') + '/' },
+    //   { find: /^(hocs)\//, replacement: path.resolve(__dirname, 'src/hocs') + '/' },
+    //   { find: /^(Communicator)\//, replacement: path.resolve(__dirname, 'src/Communicator') + '/' },
+    //   // { find: /\.js$/, replacement: '' },
+    // ],
+    alias:{
       Components: path.resolve(__dirname, './src/Components'),
       // ducks: path.resolve(__dirname, './src/ducks'),
       Library: path.resolve(__dirname, './src/Library'),
@@ -23,7 +37,7 @@ export default defineConfig({
     extensions: ['.js', '.jsx', '.ts', '.tsx']
   },
   optimizeDeps: {
-    // noDiscovery: true,
-    // exclude: [...]
+    //noDiscovery: true,
+    //exclude: ['node_modules/.vite/deps/*', '/mnt/d/Experiments/vite-test/react-ts/node_modules/.vite/deps', '/mnt/d/Experiments/vite-test/react-ts/node_modules/.vite/deps/*']
   }
 })
